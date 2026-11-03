@@ -4,152 +4,257 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DK VISAGISMO IA</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
+* { box-sizing:border-box; }
+
 body {
   margin:0;
-  background:#080b0a;
+  padding:20px;
+  background:#080b09;
   color:white;
   font-family:Arial,sans-serif;
-  padding:20px;
 }
-h1 {color:#39ff88;text-align:center}
-h2 {color:#39ff88}
+
+header {
+  text-align:center;
+  padding:25px 10px;
+}
+
+h1 {
+  color:#39ff88;
+  font-size:28px;
+}
+
+.subtitle {
+  color:#aaa;
+}
+
 .card {
   background:#151b18;
-  padding:20px;
+  border:1px solid #29372e;
   border-radius:15px;
-  margin:15px 0;
+  padding:20px;
+  margin:18px auto;
+  max-width:550px;
 }
-input,button {
-  box-sizing:border-box;
+
+h2 {
+  color:#39ff88;
+  font-size:20px;
+}
+
+input {
   width:100%;
   padding:14px;
   margin:8px 0;
+  border:1px solid #39463d;
   border-radius:8px;
-  border:0;
+  background:#080b09;
+  color:white;
+  font-size:16px;
 }
+
 button {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
   background:#39ff88;
   color:#07110b;
+  border:0;
+  border-radius:8px;
   font-weight:bold;
+  font-size:15px;
 }
+
 .client {
-  padding:12px;
+  padding:14px;
   border-bottom:1px solid #39443d;
 }
-.hidden {display:none}
+
+.small {
+  color:#aaa;
+  font-size:13px;
+}
+
+.hidden {
+  display:none;
+}
+
+#message {
+  color:#39ff88;
+  overflow-wrap:anywhere;
+}
 </style>
 </head>
+
 <body>
 
+<header>
 <h1>DK VISAGISMO IA</h1>
-<p style="text-align:center">Tu imagen, nuestro arte.</p>
+<p class="subtitle">Tu imagen, nuestro arte.</p>
+</header>
 
 <div class="card" id="login">
-<h2>Acceso administrador</h2>
-<input id="email" type="email" placeholder="Correo electrónico">
-<input id="password" type="password" placeholder="Contraseña">
-<button onclick="loginUser()">INGRESAR</button>
+<h2>ACCESO ADMINISTRADOR</h2>
+
+<input id="email" type="email"
+placeholder="Correo electrónico">
+
+<input id="password" type="password"
+placeholder="Contraseña">
+
+<button id="loginBtn">INGRESAR</button>
+
 <p id="message"></p>
 </div>
 
 <div id="app" class="hidden">
+
 <div class="card">
-<h2>Registrar cliente</h2>
+<h2>REGISTRAR CLIENTE</h2>
+
 <input id="name" placeholder="Nombre del cliente">
 <input id="phone" placeholder="Teléfono">
-<button onclick="addClient()">GUARDAR CLIENTE</button>
+
+<button id="saveBtn">GUARDAR CLIENTE</button>
+
+<p id="saveMessage"></p>
 </div>
 
 <div class="card">
-<h2>Mis clientes</h2>
-<div id="clients">Cargando...</div>
+<h2>HISTORIAL DE CLIENTES</h2>
+<div id="clients">Cargando clientes...</div>
 </div>
-<button onclick="logout()">CERRAR SESIÓN</button>
+
+<div class="card">
+<button id="logoutBtn">CERRAR SESIÓN</button>
+</div>
+
 </div>
 
 <script>
-const SUPABASE_URL = "https://mzbadavawmsbacvfunso.supabase.co";
-const SUPABASE_KEY = "sb_publishable_a8AgwyUc_wGJKDhilKA8HQ_nOGOC-ce";
+const SUPABASE_URL =
+"https://mzbadavawmsbacvfunso.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_a8AgwyUc_wGJKDhilKA8HQ_nOGOC-ce";
 
 const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
+SUPABASE_URL,
+SUPABASE_KEY
 );
 
+const $ = id => document.getElementById(id);
+
+function showMessage(id, text) {
+  $(id).textContent = text;
+}
+
 async function loginUser() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = $("email").value.trim();
+  const password = $("password").value;
 
-  const {data,error} = await db.auth.signInWithPassword({
-    email,password
-  });
-
-  if(error) {
-    document.getElementById("message").textContent = error.message;
+  if (!email || !password) {
+    showMessage("message","Completa correo y contraseña.");
     return;
   }
 
-  showApp();
+  showMessage("message","Verificando acceso...");
+
+  const {error} = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    showMessage("message","Error: " + error.message);
+    return;
+  }
+
+  await showApp();
 }
 
 async function showApp() {
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden");
   await loadClients();
 }
 
 async function addClient() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+  const name = $("name").value.trim();
+  const phone = $("phone").value.trim();
 
-  if(!name) {
-    alert("Escribe el nombre del cliente");
+  if (!name) {
+    showMessage("saveMessage","Escribe el nombre del cliente.");
     return;
   }
 
-  const {data:userData} = await db.auth.getUser();
+  const {data,error:userError} = await db.auth.getUser();
+
+  if (userError || !data.user) {
+    showMessage("saveMessage","Inicia sesión nuevamente.");
+    return;
+  }
+
+  showMessage("saveMessage","Guardando cliente...");
 
   const {error} = await db.from("clients").insert({
-    name,
-    phone,
-    owner_id:userData.user.id
+    name:name,
+    phone:phone || null,
+    owner_id:data.user.id
   });
 
-  if(error) {
-    alert(error.message);
+  if (error) {
+    showMessage("saveMessage","Error: " + error.message);
     return;
   }
 
-  document.getElementById("name").value="";
-  document.getElementById("phone").value="";
-  alert("Cliente guardado correctamente");
+  $("name").value = "";
+  $("phone").value = "";
+
+  showMessage("saveMessage","¡Cliente guardado correctamente!");
   await loadClients();
 }
 
 async function loadClients() {
-  const {data,error} = await db.from("clients")
-    .select("*")
+  const box = $("clients");
+  box.textContent = "Cargando...";
+
+  const {data,error} = await db
+    .from("clients")
+    .select("id,name,phone,created_at")
     .order("created_at",{ascending:false});
 
-  const box = document.getElementById("clients");
-
-  if(error) {
-    box.textContent=error.message;
+  if (error) {
+    box.textContent = "Error al cargar: " + error.message;
     return;
   }
 
   box.innerHTML = "";
 
+  if (!data.length) {
+    box.textContent = "Todavía no tienes clientes registrados.";
+    return;
+  }
+
   data.forEach(client => {
-    const item=document.createElement("div");
-    item.className="client";
-    item.textContent=client.name + " — " + (client.phone || "Sin teléfono");
+    const item = document.createElement("div");
+    item.className = "client";
+
+    const title = document.createElement("strong");
+    title.textContent = client.name;
+
+    const detail = document.createElement("p");
+    detail.className = "small";
+    detail.textContent = client.phone || "Sin teléfono";
+
+    item.appendChild(title);
+    item.appendChild(detail);
     box.appendChild(item);
   });
-
-  if(data.length===0) box.textContent="Todavía no tienes clientes registrados.";
 }
 
 async function logout() {
@@ -157,8 +262,17 @@ async function logout() {
   location.reload();
 }
 
-db.auth.getSession().then(({data}) => {
-  if(data.session) showApp();
+$("loginBtn").addEventListener("click",loginUser);
+$("saveBtn").addEventListener("click",addClient);
+$("logoutBtn").addEventListener("click",logout);
+
+db.auth.getSession().then(({data,error}) => {
+  if (error) {
+    showMessage("message",error.message);
+    return;
+  }
+
+  if (data.session) showApp();
 });
 </script>
 
