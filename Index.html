@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DK VISAGISMO IA</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body {
+  margin:0;
+  background:#080b0a;
+  color:white;
+  font-family:Arial,sans-serif;
+  padding:20px;
+}
+h1 {color:#39ff88;text-align:center}
+h2 {color:#39ff88}
+.card {
+  background:#151b18;
+  padding:20px;
+  border-radius:15px;
+  margin:15px 0;
+}
+input,button {
+  box-sizing:border-box;
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  border-radius:8px;
+  border:0;
+}
+button {
+  background:#39ff88;
+  color:#07110b;
+  font-weight:bold;
+}
+.client {
+  padding:12px;
+  border-bottom:1px solid #39443d;
+}
+.hidden {display:none}
+</style>
+</head>
+<body>
+
+<h1>DK VISAGISMO IA</h1>
+<p style="text-align:center">Tu imagen, nuestro arte.</p>
+
+<div class="card" id="login">
+<h2>Acceso administrador</h2>
+<input id="email" type="email" placeholder="Correo electrónico">
+<input id="password" type="password" placeholder="Contraseña">
+<button onclick="loginUser()">INGRESAR</button>
+<p id="message"></p>
+</div>
+
+<div id="app" class="hidden">
+<div class="card">
+<h2>Registrar cliente</h2>
+<input id="name" placeholder="Nombre del cliente">
+<input id="phone" placeholder="Teléfono">
+<button onclick="addClient()">GUARDAR CLIENTE</button>
+</div>
+
+<div class="card">
+<h2>Mis clientes</h2>
+<div id="clients">Cargando...</div>
+</div>
+<button onclick="logout()">CERRAR SESIÓN</button>
+</div>
+
+<script>
+const SUPABASE_URL = "https://mzbadavawmsbacvfunso.supabase.co";
+const SUPABASE_KEY = "sb_publishable_a8AgwyUc_wGJKDhilKA8HQ_nOGOC-ce";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function loginUser() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const {data,error} = await db.auth.signInWithPassword({
+    email,password
+  });
+
+  if(error) {
+    document.getElementById("message").textContent = error.message;
+    return;
+  }
+
+  showApp();
+}
+
+async function showApp() {
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  await loadClients();
+}
+
+async function addClient() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+
+  if(!name) {
+    alert("Escribe el nombre del cliente");
+    return;
+  }
+
+  const {data:userData} = await db.auth.getUser();
+
+  const {error} = await db.from("clients").insert({
+    name,
+    phone,
+    owner_id:userData.user.id
+  });
+
+  if(error) {
+    alert(error.message);
+    return;
+  }
+
+  document.getElementById("name").value="";
+  document.getElementById("phone").value="";
+  alert("Cliente guardado correctamente");
+  await loadClients();
+}
+
+async function loadClients() {
+  const {data,error} = await db.from("clients")
+    .select("*")
+    .order("created_at",{ascending:false});
+
+  const box = document.getElementById("clients");
+
+  if(error) {
+    box.textContent=error.message;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  data.forEach(client => {
+    const item=document.createElement("div");
+    item.className="client";
+    item.textContent=client.name + " — " + (client.phone || "Sin teléfono");
+    box.appendChild(item);
+  });
+
+  if(data.length===0) box.textContent="Todavía no tienes clientes registrados.";
+}
+
+async function logout() {
+  await db.auth.signOut();
+  location.reload();
+}
+
+db.auth.getSession().then(({data}) => {
+  if(data.session) showApp();
+});
+</script>
+
+</body>
+</html>
