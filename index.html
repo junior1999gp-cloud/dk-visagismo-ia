@@ -361,7 +361,71 @@ $("photoPreview").removeAttribute("src");
 $("photoPreview").classList.add("hidden");
 });
 
-function getRecommendations(){
+function getRecommendations(){}
+async function generateVisagismoAI() {
+  const photo = $("photo").files[0];
+  const hairstyle = $("style").value;
+
+  if (!photo) {
+    alert("Primero selecciona una fotografía.");
+    return;
+  }
+
+  if (!hairstyle) {
+    alert("Primero selecciona un estilo.");
+    return;
+  }
+
+  $("aiMessage").textContent = "Generando imagen con IA...";
+
+  try {
+    const sessionResult = await db.auth.getSession();
+    const session = sessionResult.data.session;
+
+    if (!session) {
+      throw new Error("Tu sesión ha caducado. Inicia sesión nuevamente.");
+    }
+
+    const imageBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(photo);
+    });
+
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/generar-visagismo`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          imageBase64,
+          mimeType: photo.type,
+          hairstyle
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "No se pudo generar la imagen.");
+    }
+
+    $("aiResult").src =
+      "data:image/png;base64," + result.imageBase64;
+
+    $("aiResult").classList.remove("hidden");
+    $("aiMessage").textContent = "¡Imagen generada correctamente!";
+
+  } catch (error) {
+    $("aiMessage").textContent = "Error: " + error.message;
+  }
+}  
 const face = $("faceShape").value;
 const style = $("style").value;
 
