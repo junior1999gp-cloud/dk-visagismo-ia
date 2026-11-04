@@ -433,6 +433,16 @@ if(!face || !style){
 alert("Selecciona la forma del rostro y el estilo.");
 return;
 }
+  function getRecommendations() {
+  const face = $("faceShape").value;
+  const style = $("style").value;
+
+  if (!face || !style) {
+    alert("Selecciona la forma del rostro y el estilo.");
+    return;
+  }
+
+  const recommendations = {
 
 const recommendations = {
 ovalado:["Quiff texturizado","Crop francés","Slick Back","Mid Fade"],
