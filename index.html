@@ -142,7 +142,26 @@ button:disabled {
 
   <p id="message" class="small"></p>
 </section>
+<!-- CAMBIAR CONTRASEÑA -->
+<section id="resetPassword" class="card hidden">
+  <h2>Cambiar contraseña</h2>
 
+  <input
+    id="newPassword"
+    type="password"
+    placeholder="Nueva contraseña">
+
+  <input
+    id="confirmPassword"
+    type="password"
+    placeholder="Confirmar nueva contraseña">
+
+  <button id="savePasswordBtn">
+    GUARDAR NUEVA CONTRASEÑA
+  </button>
+
+  <p id="resetMessage" class="small"></p>
+</section>
 
 <!-- APLICACIÓN -->
 
@@ -336,6 +355,25 @@ function showMessage(id, message) {
 // ==================================
 
 async function loginUser() {
+  async function forgotPassword() {
+  const email = $("email").value.trim();
+
+  if (!email) {
+    showMessage("message", "Escribe tu correo electrónico.");
+    return;
+  }
+
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://junior1999gp-cloud.github.io/dk-visagismo-ia/"
+  });
+
+  if (error) {
+    showMessage("message", error.message);
+    return;
+  }
+
+  showMessage("message", "Revisa tu Gmail para cambiar la contraseña.");
+}
 
   const email = $("email").value.trim();
   const password = $("password").value;
@@ -931,6 +969,7 @@ function getRecommendations() {
 // ==================================
 
 $("loginBtn").addEventListener("click", loginUser);
+  $("forgotBtn").addEventListener("click", forgotPassword);
 
 $("logoutBtn").addEventListener("click", logout);
 
