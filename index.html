@@ -4,122 +4,287 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DK VISAGISMO IA</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#101010;color:white;font-family:Arial,sans-serif}
-header{background:#080808;text-align:center;padding:22px;border-bottom:2px solid #c9a227}
-h1{color:#d8b54a;margin:0}
-h2{color:#d8b54a}
-main{max-width:850px;margin:auto;padding:16px}
-.card{background:#1d1d1d;padding:18px;border-radius:12px;margin:15px 0;border:1px solid #393939}
-input,select,textarea,button{width:100%;padding:13px;margin:7px 0;border-radius:7px;border:0;font-size:15px}
-input,select,textarea{background:#eee;color:#111}
-button{background:#c9a227;color:#111;font-weight:bold;cursor:pointer}
-.secondary{background:#444;color:white}
-.danger{background:#8e2525;color:white}
-.hidden{display:none}
-.client{background:#292929;padding:12px;border-radius:8px;margin:10px 0}
-.small{font-size:13px;color:#bbb}
-#photoPreview{max-width:100%;max-height:300px;display:block;margin:10px auto;border-radius:10px}
-.result{background:#292929;padding:14px;border-radius:8px;margin-top:12px;line-height:1.6}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #101010;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: #080808;
+  text-align: center;
+  padding: 22px;
+  border-bottom: 2px solid #c9a227;
+}
+
+h1, h2 {
+  color: #d8b54a;
+}
+
+main {
+  max-width: 850px;
+  margin: auto;
+  padding: 16px;
+}
+
+.card {
+  background: #1d1d1d;
+  padding: 18px;
+  border-radius: 12px;
+  margin: 15px 0;
+  border: 1px solid #393939;
+}
+
+input, select, textarea, button {
+  width: 100%;
+  padding: 13px;
+  margin: 7px 0;
+  border-radius: 7px;
+  border: 0;
+  font-size: 15px;
+}
+
+input, select, textarea {
+  background: #eee;
+  color: #111;
+}
+
+button {
+  background: #c9a227;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: .6;
+}
+
+.secondary {
+  background: #444;
+  color: white;
+}
+
+.danger {
+  background: #8e2525;
+  color: white;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.client {
+  background: #292929;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.small {
+  font-size: 13px;
+  color: #bbb;
+}
+
+#photoPreview, #aiResult {
+  max-width: 100%;
+  max-height: 350px;
+  display: block;
+  margin: 10px auto;
+  border-radius: 10px;
+}
+
+.result {
+  background: #292929;
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+  line-height: 1.6;
+}
 </style>
 </head>
 
 <body>
+
 <header>
-<h1>DK VISAGISMO IA</h1>
-<p>BARBER STUDIO · ASESORÍA DE IMAGEN</p>
+  <h1>DK VISAGISMO IA</h1>
+  <p>BARBER STUDIO · ASESORÍA DE IMAGEN</p>
 </header>
 
 <main>
 
+<!-- ACCESO ADMINISTRADOR -->
+
 <section id="login" class="card">
-<h2>Acceso de administrador</h2>
-<input id="email" type="email" placeholder="Correo electrónico">
-<input id="password" type="password" placeholder="Contraseña">
-<button id="loginBtn">INGRESAR</button>
-<p id="message" class="small"></p>
+  <h2>Acceso de administrador</h2>
+
+  <input id="email" type="email"
+  placeholder="Correo electrónico">
+
+  <input id="password" type="password"
+  placeholder="Contraseña">
+
+  <button id="loginBtn" type="button">
+    INGRESAR
+  </button>
+
+  <p id="message" class="small"></p>
 </section>
+
+
+<!-- APLICACIÓN -->
 
 <section id="app" class="hidden">
 
-<div class="card">
-<h2>Panel principal</h2>
-<p>Bienvenido a DK Barber Studio.</p>
-<button id="logoutBtn" class="secondary">Cerrar sesión</button>
-</div>
+  <div class="card">
+    <h2>Panel principal</h2>
+    <p>Bienvenido a DK Barber Studio.</p>
 
-<div class="card">
-<h2>Registrar cliente</h2>
-<input id="name" placeholder="Nombre del cliente">
-<input id="phone" placeholder="Número de celular">
-<button id="saveBtn">Guardar cliente</button>
-<p id="saveMessage" class="small"></p>
-</div>
+    <button id="logoutBtn" class="secondary">
+      Cerrar sesión
+    </button>
+  </div>
 
-<div class="card">
-<h2>Buscar clientes</h2>
-<input id="search" placeholder="Buscar por nombre o teléfono">
-<div id="clients"></div>
-</div>
 
-<div id="serviceSection" class="card hidden">
-<h2>Registrar servicio</h2>
-<p id="selectedClient"></p>
-<input id="serviceName" placeholder="Ejemplo: Fade medio, ondulación, alisado...">
-<textarea id="serviceNotes" placeholder="Detalles o preferencias del cliente"></textarea>
-<button id="serviceBtn">Guardar servicio</button>
-<button id="historyBtn" class="secondary">Ver historial</button>
-<div id="history"></div>
-<p id="serviceMessage" class="small"></p>
-</div>
+  <!-- CLIENTES -->
 
-<div class="card">
-<h2>Visagismo y asesoría de imagen</h2>
-<p class="small">Carga una fotografía para visualizarla temporalmente. No se guarda ni se envía a Supabase.</p>
+  <div class="card">
+    <h2>Registrar cliente</h2>
 
-<input id="photo" type="file" accept="image/*">
-<img id="photoPreview" class="hidden" alt="Vista previa temporal">
+    <input id="name" placeholder="Nombre del cliente">
 
-<button id="clearPhoto" class="secondary">Eliminar fotografía</button>
-<button id="generateAI">
-GENERAR VISAGISMO CON IA
-</button>
+    <input id="phone" placeholder="Número de celular">
 
-<p id="aiMessage" class="small"></p>
+    <button id="saveBtn">Guardar cliente</button>
 
-<img id="aiResult" class="hidden" alt="Resultado del visagismo IA">
-<label>Forma del rostro</label>
-<select id="faceShape">
-<option value="">Selecciona una opción</option>
-<option value="ovalado">Ovalado</option>
-<option value="redondo">Redondo</option>
-<option value="cuadrado">Cuadrado</option>
-<option value="alargado">Alargado</option>
-<option value="triangular">Triangular</option>
-<option value="diamante">Diamante</option>
-</select>
+    <p id="saveMessage" class="small"></p>
+  </div>
 
-<label>Estilo que busca el cliente</label>
-<select id="style">
-<option value="">Selecciona un estilo</option>
-<option value="moderno">Moderno</option>
-<option value="clasico">Clásico</option>
-<option value="juvenil">Juvenil</option>
-<option value="formal">Formal</option>
-<option value="atrevido">Atrevido</option>
-</select>
 
-<button id="analyzeBtn">Obtener recomendaciones</button>
-<div id="recommendations" class="result hidden"></div>
-</div>
+  <!-- BUSCADOR -->
+
+  <div class="card">
+    <h2>Buscar clientes</h2>
+
+    <input id="search"
+    placeholder="Buscar por nombre o teléfono">
+
+    <div id="clients"></div>
+  </div>
+
+
+  <!-- SERVICIOS -->
+
+  <div id="serviceSection" class="card hidden">
+
+    <h2>Registrar servicio</h2>
+
+    <p id="selectedClient"></p>
+
+    <input id="serviceName"
+    placeholder="Ejemplo: Fade medio, ondulación, alisado">
+
+    <textarea id="serviceNotes"
+    placeholder="Detalles o preferencias del cliente"></textarea>
+
+    <button id="serviceBtn">Guardar servicio</button>
+
+    <button id="historyBtn" class="secondary">
+      Ver historial
+    </button>
+
+    <div id="history"></div>
+
+    <p id="serviceMessage" class="small"></p>
+
+  </div>
+
+
+  <!-- VISAGISMO -->
+
+  <div class="card">
+
+    <h2>Visagismo y asesoría de imagen</h2>
+
+    <p class="small">
+      Selecciona una fotografía para comenzar.
+      La vista previa es temporal. No se guarda en Supabase.
+      Al generar la imagen, se envía a la función de IA para procesarla.
+    </p>
+
+    <input id="photo" type="file" accept="image/*">
+
+    <img id="photoPreview" class="hidden"
+    alt="Vista previa">
+
+    <button id="clearPhoto" class="secondary">
+      Eliminar fotografía
+    </button>
+
+    <label>Estilo que busca el cliente</label>
+
+    <select id="style">
+      <option value="">Selecciona un estilo</option>
+      <option value="moderno">Moderno</option>
+      <option value="clasico">Clásico</option>
+      <option value="juvenil">Juvenil</option>
+      <option value="formal">Formal</option>
+      <option value="atrevido">Atrevido</option>
+    </select>
+
+    <button id="generateAI">
+      GENERAR VISAGISMO CON IA
+    </button>
+
+    <p id="aiMessage" class="small"></p>
+
+    <img id="aiResult" class="hidden"
+    alt="Resultado del visagismo IA">
+
+    <hr>
+
+    <h2>Diagnóstico facial</h2>
+
+    <label>Forma del rostro</label>
+
+    <select id="faceShape">
+      <option value="">Selecciona una opción</option>
+      <option value="ovalado">Ovalado</option>
+      <option value="redondo">Redondo</option>
+      <option value="cuadrado">Cuadrado</option>
+      <option value="alargado">Alargado</option>
+      <option value="triangular">Triangular</option>
+      <option value="diamante">Diamante</option>
+    </select>
+
+    <button id="analyzeBtn">
+      Obtener recomendaciones
+    </button>
+
+    <div id="recommendations" class="result hidden"></div>
+
+  </div>
 
 </section>
+
 </main>
 
+
 <script>
-  alert("JAVASCRIPT FUNCIONA");
+
+// ==================================
+// CONFIGURACIÓN SUPABASE
+// ==================================
+
 const SUPABASE_URL =
 "https://mzbadavawmsbacvfunso.supabase.co";
 
@@ -138,271 +303,468 @@ const db = window.supabase.createClient(
   }
 );
 
+
+// ==================================
+// VARIABLES
+// ==================================
+
 const $ = id => document.getElementById(id);
 
 let currentClient = null;
 let allClients = [];
 
-function escapeHTML(value){
-return String(value ?? "").replace(/[&<>"']/g, char => ({
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-}[char]));
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
 }
 
-function showMessage(id,message){
-$(id).textContent = message;
+function showMessage(id, message) {
+  $(id).textContent = message;
 }
 
-async function loginUser(){
-const email = $("email").value.trim();
-const password = $("password").value;
 
-showMessage("message","Ingresando...");
+// ==================================
+// INICIO DE SESIÓN
+// ==================================
 
-const {error} = await db.auth.signInWithPassword({
-email,password
+async function loginUser() {
+
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  if (!email || !password) {
+    showMessage("message",
+      "Escribe tu correo y contraseña.");
+    return;
+  }
+
+  const button = $("loginBtn");
+
+  button.disabled = true;
+  showMessage("message", "Ingresando...");
+
+  try {
+
+    const { error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      showMessage("message",
+        "Error: " + error.message);
+      return;
+    }
+
+    await showApp();
+
+  } catch (error) {
+
+    showMessage("message",
+      "Error de conexión: " + error.message);
+
+  } finally {
+
+    button.disabled = false;
+
+  }
+}
+
+
+// ==================================
+// MOSTRAR APLICACIÓN
+// ==================================
+
+async function showApp() {
+
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden");
+
+  await loadClients();
+}
+
+
+// ==================================
+// CERRAR SESIÓN
+// ==================================
+
+async function logout() {
+
+  await db.auth.signOut();
+
+  currentClient = null;
+  allClients = [];
+
+  $("app").classList.add("hidden");
+  $("login").classList.remove("hidden");
+
+  $("password").value = "";
+  showMessage("message", "Sesión cerrada.");
+}
+
+
+// ==================================
+// CARGAR CLIENTES
+// ==================================
+
+async function loadClients() {
+
+  const { data, error } = await db
+    .from("clients")
+    .select("id,name,phone,created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+
+    showMessage("saveMessage",
+      "Error al cargar clientes: " + error.message);
+
+    return;
+  }
+
+  allClients = data || [];
+
+  renderClients();
+}
+
+
+// ==================================
+// MOSTRAR CLIENTES
+// ==================================
+
+function renderClients() {
+
+  const search = $("search").value.toLowerCase().trim();
+
+  const filtered = allClients.filter(client =>
+    (client.name || "").toLowerCase().includes(search) ||
+    (client.phone || "").toLowerCase().includes(search)
+  );
+
+  $("clients").innerHTML = filtered.map(client => `
+    <div class="client">
+
+      <strong>${escapeHTML(client.name)}</strong>
+
+      <p>${escapeHTML(client.phone || "Sin teléfono")}</p>
+
+      <button onclick="selectClient('${client.id}')">
+        Seleccionar cliente
+      </button>
+
+    </div>
+  `).join("") || "<p>No hay clientes registrados.</p>";
+}
+
+
+// ==================================
+// REGISTRAR CLIENTE
+// ==================================
+
+async function addClient() {
+
+  const name = $("name").value.trim();
+  const phone = $("phone").value.trim();
+
+  if (!name) {
+
+    showMessage("saveMessage",
+      "Escribe el nombre del cliente.");
+
+    return;
+  }
+
+  const { data: userData, error: userError } =
+    await db.auth.getUser();
+
+  if (userError || !userData.user) {
+
+    showMessage("saveMessage",
+      "No se pudo verificar el administrador.");
+
+    return;
+  }
+
+  const { error } = await db.from("clients").insert({
+
+    name,
+    phone,
+    owner_id: userData.user.id
+
+  });
+
+  if (error) {
+
+    showMessage("saveMessage",
+      "Error: " + error.message);
+
+    return;
+  }
+
+  $("name").value = "";
+  $("phone").value = "";
+
+  showMessage("saveMessage",
+    "Cliente registrado correctamente.");
+
+  await loadClients();
+}
+
+
+// ==================================
+// SELECCIONAR CLIENTE
+// ==================================
+
+function selectClient(id) {
+
+  currentClient = allClients.find(
+    client => client.id === id
+  );
+
+  if (!currentClient) return;
+
+  $("serviceSection").classList.remove("hidden");
+
+  $("selectedClient").textContent =
+    "Cliente: " + currentClient.name;
+
+  $("history").innerHTML = "";
+
+  showMessage("serviceMessage", "");
+}
+
+
+// ==================================
+// REGISTRAR SERVICIO
+// ==================================
+
+async function addService() {
+
+  if (!currentClient) {
+
+    showMessage("serviceMessage",
+      "Selecciona un cliente.");
+
+    return;
+  }
+
+  const serviceName = $("serviceName").value.trim();
+
+  if (!serviceName) {
+
+    showMessage("serviceMessage",
+      "Escribe el servicio realizado.");
+
+    return;
+  }
+
+  const { data: userData, error: userError } =
+    await db.auth.getUser();
+
+  if (userError || !userData.user) {
+
+    showMessage("serviceMessage",
+      "No se pudo verificar el administrador.");
+
+    return;
+  }
+
+  const { error } = await db.from("client_services").insert({
+
+    client_id: currentClient.id,
+    owner_id: userData.user.id,
+    service_name: serviceName,
+    notes: $("serviceNotes").value.trim()
+
+  });
+
+  if (error) {
+
+    showMessage("serviceMessage",
+      "Error: " + error.message);
+
+    return;
+  }
+
+  $("serviceName").value = "";
+  $("serviceNotes").value = "";
+
+  showMessage("serviceMessage",
+    "Servicio guardado correctamente.");
+
+  await loadHistory();
+}
+
+
+// ==================================
+// HISTORIAL DE SERVICIOS
+// ==================================
+
+async function loadHistory() {
+
+  if (!currentClient) return;
+
+  const { data, error } = await db
+    .from("client_services")
+    .select("service_name,notes,created_at")
+    .eq("client_id", currentClient.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+
+    $("history").textContent =
+      "Error al cargar historial: " + error.message;
+
+    return;
+  }
+
+  $("history").innerHTML =
+    "<h3>Historial de servicios</h3>" +
+
+    (data || []).map(item => `
+
+      <div class="client">
+
+        <strong>${escapeHTML(item.service_name)}</strong>
+
+        <p>${escapeHTML(item.notes || "")}</p>
+
+        <span class="small">
+          ${new Date(item.created_at).toLocaleDateString("es-PE")}
+        </span>
+
+      </div>
+
+    `).join("") ||
+
+    "<p>Este cliente aún no tiene servicios.</p>";
+}
+
+
+// ==================================
+// PREVISUALIZAR FOTOGRAFÍA
+// ==================================
+
+$("photo").addEventListener("change", event => {
+
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+
+    alert("Selecciona una fotografía válida.");
+
+    event.target.value = "";
+
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = e => {
+
+    $("photoPreview").src = e.target.result;
+
+    $("photoPreview").classList.remove("hidden");
+
+  };
+
+  reader.readAsDataURL(file);
+
 });
 
-if(error){
-console.log("ERROR LOGIN:", error);
-showMessage(
-"message",
-"Error: "+error.message+
-" | Código: "+error.code+
-" | Estado: "+error.status
-);
-return;
-}
 
-showApp();
-}
+// ==================================
+// ELIMINAR FOTOGRAFÍA
+// ==================================
 
-async function showApp(){
-$("login").classList.add("hidden");
-$("app").classList.remove("hidden");
-await loadClients();
-}
+$("clearPhoto").addEventListener("click", () => {
 
-async function loadClients(){
-const {data,error} = await db
-.from("clients")
-.select("id,name,phone,created_at")
-.order("created_at",{ascending:false});
+  $("photo").value = "";
 
-if(error){
-showMessage("saveMessage","Error al cargar clientes: "+error.message);
-return;
-}
+  $("photoPreview").removeAttribute("src");
 
-allClients = data || [];
-renderClients();
-}
+  $("photoPreview").classList.add("hidden");
 
-function renderClients(){
-const search = $("search").value.toLowerCase().trim();
+  $("aiResult").removeAttribute("src");
 
-const filtered = allClients.filter(client =>
-(client.name || "").toLowerCase().includes(search) ||
-(client.phone || "").toLowerCase().includes(search)
-);
+  $("aiResult").classList.add("hidden");
 
-$("clients").innerHTML = filtered.map(client => `
-<div class="client">
-<strong>${escapeHTML(client.name)}</strong>
-<p>${escapeHTML(client.phone || "Sin teléfono")}</p>
-<button onclick="selectClient('${client.id}')">
-Seleccionar cliente
-</button>
-</div>
-`).join("") || "<p>No hay clientes registrados.</p>";
-}
+  showMessage("aiMessage", "");
 
-async function addClient(){
-const name = $("name").value.trim();
-const phone = $("phone").value.trim();
-
-if(!name){
-showMessage("saveMessage","Escribe el nombre del cliente.");
-return;
-}
-
-const {data:userData,error:userError} = await db.auth.getUser();
-
-if(userError || !userData.user){
-showMessage("saveMessage","No se pudo verificar el administrador.");
-return;
-}
-
-const {error} = await db.from("clients").insert({
-name,
-phone,
-owner_id:userData.user.id
 });
 
-if(error){
-showMessage("saveMessage","Error: "+error.message);
-return;
-}
 
-$("name").value = "";
-$("phone").value = "";
+// ==================================
+// GENERAR VISAGISMO CON IA
+// ==================================
 
-showMessage("saveMessage","Cliente registrado correctamente.");
-await loadClients();
-}
-
-async function selectClient(id){
-currentClient = allClients.find(client => client.id === id);
-
-if(!currentClient) return;
-
-$("serviceSection").classList.remove("hidden");
-$("selectedClient").textContent =
-"Cliente: "+currentClient.name;
-
-$("history").innerHTML = "";
-showMessage("serviceMessage","");
-}
-
-async function addService(){
-if(!currentClient){
-showMessage("serviceMessage","Selecciona un cliente.");
-return;
-}
-
-const serviceName = $("serviceName").value.trim();
-
-if(!serviceName){
-showMessage("serviceMessage","Escribe el servicio realizado.");
-return;
-}
-
-const {data:userData,error:userError} = await db.auth.getUser();
-
-if(userError || !userData.user){
-showMessage("serviceMessage","No se pudo verificar el administrador.");
-return;
-}
-
-const {error} = await db.from("client_services").insert({
-client_id:currentClient.id,
-owner_id:userData.user.id,
-service_name:serviceName,
-notes:$("serviceNotes").value.trim()
-});
-
-if(error){
-showMessage("serviceMessage","Error: "+error.message);
-return;
-}
-
-$("serviceName").value = "";
-$("serviceNotes").value = "";
-
-showMessage("serviceMessage","Servicio guardado correctamente.");
-await loadHistory();
-}
-
-async function loadHistory(){
-if(!currentClient) return;
-
-const {data,error} = await db
-.from("client_services")
-.select("service_name,notes,created_at")
-.eq("client_id",currentClient.id)
-.order("created_at",{ascending:false});
-
-if(error){
-$("history").textContent = "Error al cargar historial.";
-return;
-}
-
-$("history").innerHTML = "<h3>Historial de servicios</h3>" +
-(data || []).map(item => `
-<div class="client">
-<strong>${escapeHTML(item.service_name)}</strong>
-<p>${escapeHTML(item.notes || "")}</p>
-<span class="small">${new Date(item.created_at).toLocaleDateString("es-PE")}</span>
-</div>
-`).join("") || "<p>Este cliente aún no tiene servicios.</p>";
-}
-
-function logout(){
-db.auth.signOut().then(() => location.reload());
-}
-
-$("photo").addEventListener("change",event=>{
-const file = event.target.files[0];
-
-if(!file) return;
-
-if(!file.type.startsWith("image/")){
-alert("Selecciona una fotografía válida.");
-event.target.value = "";
-return;
-}
-
-const reader = new FileReader();
-
-reader.onload = e=>{
-$("photoPreview").src = e.target.result;
-$("photoPreview").classList.remove("hidden");
-};
-
-reader.readAsDataURL(file);
-});
-
-$("clearPhoto").addEventListener("click",()=>{
-$("photo").value = "";
-$("photoPreview").removeAttribute("src");
-$("photoPreview").classList.add("hidden");
-});
-
-function getRecommendations(){}
 async function generateVisagismoAI() {
+
   const photo = $("photo").files[0];
+
   const hairstyle = $("style").value;
 
   if (!photo) {
+
     alert("Primero selecciona una fotografía.");
+
     return;
   }
 
   if (!hairstyle) {
+
     alert("Primero selecciona un estilo.");
+
     return;
   }
 
-  $("aiMessage").textContent = "Generando imagen con IA...";
+  $("aiMessage").textContent =
+    "Generando imagen con IA...";
 
   try {
+
     const sessionResult = await db.auth.getSession();
+
     const session = sessionResult.data.session;
 
     if (!session) {
-      throw new Error("Tu sesión ha caducado. Inicia sesión nuevamente.");
+
+      throw new Error(
+        "Tu sesión ha caducado. Inicia sesión nuevamente."
+      );
+
     }
 
     const imageBase64 = await new Promise((resolve, reject) => {
+
       const reader = new FileReader();
+
       reader.onload = () => resolve(reader.result);
+
       reader.onerror = reject;
+
       reader.readAsDataURL(photo);
+
     });
 
     const response = await fetch(
       `${SUPABASE_URL}/functions/v1/generar-visagismo`,
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${session.access_token}`
         },
+
         body: JSON.stringify({
           imageBase64,
           mimeType: photo.type,
@@ -414,86 +776,210 @@ async function generateVisagismoAI() {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.error || "No se pudo generar la imagen.");
+
+      throw new Error(
+        result.error || "No se pudo generar la imagen."
+      );
+
     }
 
     $("aiResult").src =
       "data:image/png;base64," + result.imageBase64;
 
     $("aiResult").classList.remove("hidden");
-    $("aiMessage").textContent = "¡Imagen generada correctamente!";
+
+    $("aiMessage").textContent =
+      "¡Imagen generada correctamente!";
 
   } catch (error) {
-    $("aiMessage").textContent = "Error: " + error.message;
-  }
-}  
 
-  function getRecommendations() {
+    $("aiMessage").textContent =
+      "Error: " + error.message;
+
+  }
+
+}
+
+
+// ==================================
+// RECOMENDACIONES DE VISAGISMO
+// ==================================
+
+function getRecommendations() {
+
   const face = $("faceShape").value;
+
   const style = $("style").value;
 
   if (!face || !style) {
+
     alert("Selecciona la forma del rostro y el estilo.");
+
     return;
   }
 
   const recommendations = {
-ovalado:["Quiff texturizado","Crop francés","Slick Back","Mid Fade"],
-redondo:["Pompadour","Quiff con volumen","Fade alto","Crop texturizado"],
-cuadrado:["Buzz Cut degradado","Crew Cut","Taper Fade","Quiff"],
-alargado:["Crop francés","Fringe texturizado","Fade bajo","Corte en capas"],
-triangular:["Quiff con volumen","Corte en capas","Taper Fade","Texturizado"],
-diamante:["Fringe texturizado","Mullet moderno","Taper Fade","Quiff"]
-};
 
-const extras = {
-moderno:"Mid Fade, Mullet moderno y Quiff texturizado.",
-clasico:"Corte clásico, Side Part y Slick Back.",
-juvenil:"Crop francés, Burst Fade y Texturizado.",
-formal:"Slick Back, Side Part y Taper Fade.",
-atrevido:"Mullet moderno, Mohicano y diseños."
-};
+    ovalado: [
+      "Quiff texturizado",
+      "Crop francés",
+      "Slick Back",
+      "Mid Fade"
+    ],
 
-$("recommendations").innerHTML = `
-<h3>Recomendaciones de visagismo</h3>
-<p><strong>Forma del rostro:</strong> ${escapeHTML(face)}</p>
-<p><strong>Estilo elegido:</strong> ${escapeHTML(style)}</p>
-<p><strong>Cortes recomendados:</strong></p>
-<ul>${recommendations[face].map(item=>`<li>${item}</li>`).join("")}</ul>
-<p><strong>Estilos adicionales:</strong> ${extras[style]}</p>
-<p class="small">Estas son sugerencias orientativas. Confirma el diagnóstico observando las proporciones, el cabello y las preferencias del cliente.</p>
-`;
+    redondo: [
+      "Pompadour",
+      "Quiff con volumen",
+      "Fade alto",
+      "Crop texturizado"
+    ],
 
-$("recommendations").classList.remove("hidden");
+    cuadrado: [
+      "Buzz Cut degradado",
+      "Crew Cut",
+      "Taper Fade",
+      "Quiff"
+    ],
+
+    alargado: [
+      "Crop francés",
+      "Fringe texturizado",
+      "Fade bajo",
+      "Corte en capas"
+    ],
+
+    triangular: [
+      "Quiff con volumen",
+      "Corte en capas",
+      "Taper Fade",
+      "Texturizado"
+    ],
+
+    diamante: [
+      "Fringe texturizado",
+      "Mullet moderno",
+      "Taper Fade",
+      "Quiff"
+    ]
+
+  };
+
+  const extras = {
+
+    moderno:
+      "Mid Fade, Mullet moderno y Quiff texturizado.",
+
+    clasico:
+      "Corte clásico, Side Part y Slick Back.",
+
+    juvenil:
+      "Crop francés, Burst Fade y Texturizado.",
+
+    formal:
+      "Slick Back, Side Part y Taper Fade.",
+
+    atrevido:
+      "Mullet moderno, Mohicano y diseños."
+
+  };
+
+  $("recommendations").innerHTML = `
+
+    <h3>Recomendaciones de visagismo</h3>
+
+    <p>
+      <strong>Forma del rostro:</strong>
+      ${escapeHTML(face)}
+    </p>
+
+    <p>
+      <strong>Estilo elegido:</strong>
+      ${escapeHTML(style)}
+    </p>
+
+    <p><strong>Cortes recomendados:</strong></p>
+
+    <ul>
+      ${recommendations[face].map(item =>
+        `<li>${escapeHTML(item)}</li>`
+      ).join("")}
+    </ul>
+
+    <p>
+      <strong>Estilos adicionales:</strong>
+      ${extras[style]}
+    </p>
+
+    <p class="small">
+      Estas son sugerencias orientativas.
+      Confirma el diagnóstico observando las proporciones,
+      el cabello y las preferencias del cliente.
+    </p>
+
+  `;
+
+  $("recommendations").classList.remove("hidden");
+
 }
 
-document.getElementById("loginBtn").addEventListener("click", async function() {
-  document.getElementById("message").textContent = "Ingresando...";
-  await loginUser();
-});
-  console.log("BOTONES ACTIVADOS");
+
+// ==================================
+// ACTIVAR BOTONES
+// ==================================
+
+$("loginBtn").addEventListener("click", loginUser);
+
+$("logoutBtn").addEventListener("click", logout);
+
+$("saveBtn").addEventListener("click", addClient);
+
+$("search").addEventListener("input", renderClients);
+
+$("serviceBtn").addEventListener("click", addService);
+
+$("historyBtn").addEventListener("click", loadHistory);
+
 $("generateAI").addEventListener("click", generateVisagismoAI);
-$("saveBtn").addEventListener("click",addClient);
-$("logoutBtn").addEventListener("click",logout);
-$("search").addEventListener("input",renderClients);
-$("serviceBtn").addEventListener("click",addService);
-$("historyBtn").addEventListener("click",loadHistory);
-$("analyzeBtn").addEventListener("click",getRecommendations);
 
-db.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    $("login").classList.add("hidden");
-    $("app").classList.remove("hidden");
+$("analyzeBtn").addEventListener("click", getRecommendations);
 
-    setTimeout(() => {
-      loadClients();
-    }, 0);
 
-  } else {
-    $("app").classList.add("hidden");
-    $("login").classList.remove("hidden");
+// ==================================
+// COMPROBAR SESIÓN EXISTENTE
+// ==================================
+
+async function checkSession() {
+
+  try {
+
+    const { data, error } = await db.auth.getSession();
+
+    if (error) throw error;
+
+    if (data.session) {
+
+      await showApp();
+
+    } else {
+
+      $("app").classList.add("hidden");
+
+      $("login").classList.remove("hidden");
+
+    }
+
+  } catch (error) {
+
+    showMessage("message",
+      "Error al comprobar la sesión: " + error.message);
+
   }
-});
+
+}
+
+checkSession();
+
 </script>
+
 </body>
 </html>
