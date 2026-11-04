@@ -353,7 +353,36 @@ function showMessage(id, message) {
 // ==================================
 // INICIO DE SESIÓN
 // ==================================
+async function saveNewPassword() {
+  const password = $("newPassword").value;
+  const confirm = $("confirmPassword").value;
 
+  if (password.length < 6) {
+    showMessage("resetMessage", "La contraseña debe tener mínimo 6 caracteres.");
+    return;
+  }
+
+  if (password !== confirm) {
+    showMessage("resetMessage", "Las contraseñas no coinciden.");
+    return;
+  }
+
+  const { error } = await db.auth.updateUser({
+    password: password
+  });
+
+  if (error) {
+    showMessage("resetMessage", "Error: " + error.message);
+    return;
+  }
+
+  showMessage("resetMessage", "¡Contraseña cambiada correctamente!");
+
+  setTimeout(async () => {
+    await db.auth.signOut();
+    location.href = "https://junior1999gp-cloud.github.io/dk-visagismo-ia/";
+  }, 2000);
+}
 async function loginUser() {
   async function forgotPassword() {
   const email = $("email").value.trim();
