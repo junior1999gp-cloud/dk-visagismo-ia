@@ -427,13 +427,7 @@ async function generateVisagismoAI() {
     $("aiMessage").textContent = "Error: " + error.message;
   }
 }  
-const face = $("faceShape").value;
-const style = $("style").value;
 
-if(!face || !style){
-alert("Selecciona la forma del rostro y el estilo.");
-return;
-}
   function getRecommendations() {
   const face = $("faceShape").value;
   const style = $("style").value;
