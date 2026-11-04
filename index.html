@@ -399,8 +399,15 @@ $("serviceBtn").addEventListener("click",addService);
 $("historyBtn").addEventListener("click",loadHistory);
 $("analyzeBtn").addEventListener("click",getRecommendations);
 
-db.auth.getSession().then(({data})=>{
-if(data.session) showApp();
+db.auth.onAuthStateChange(async (event, session) => {
+  if (session) {
+    $("login").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    await loadClients();
+  } else {
+    $("app").classList.add("hidden");
+    $("login").classList.remove("hidden");
+  }
 });
 </script>
 </body>
