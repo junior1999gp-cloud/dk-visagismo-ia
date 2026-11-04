@@ -473,10 +473,10 @@ $("recommendations").innerHTML = `
 $("recommendations").classList.remove("hidden");
 }
 
-$("loginBtn").onclick = function() {
-  alert("EL BOTÓN SÍ FUNCIONA");
-  loginUser();
-};
+document.getElementById("loginBtn").addEventListener("click", async function() {
+  document.getElementById("message").textContent = "Ingresando...";
+  await loginUser();
+});
   console.log("BOTONES ACTIVADOS");
 $("generateAI").addEventListener("click", generateVisagismoAI);
 $("saveBtn").addEventListener("click",addClient);
