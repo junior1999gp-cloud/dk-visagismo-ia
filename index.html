@@ -465,7 +465,7 @@ $("recommendations").classList.remove("hidden");
 }
 
 $("loginBtn").addEventListener("click",loginUser);
-  $("generateAI").addEventListener("click", generateVisagismoAI);
+$("generateAI").addEventListener("click", generateVisagismoAI);
 $("saveBtn").addEventListener("click",addClient);
 $("logoutBtn").addEventListener("click",logout);
 $("search").addEventListener("input",renderClients);
@@ -473,11 +473,15 @@ $("serviceBtn").addEventListener("click",addService);
 $("historyBtn").addEventListener("click",loadHistory);
 $("analyzeBtn").addEventListener("click",getRecommendations);
 
-db.auth.onAuthStateChange(async (event, session) => {
+db.auth.onAuthStateChange((event, session) => {
   if (session) {
     $("login").classList.add("hidden");
     $("app").classList.remove("hidden");
-    await loadClients();
+
+    setTimeout(() => {
+      loadClients();
+    }, 0);
+
   } else {
     $("app").classList.add("hidden");
     $("login").classList.remove("hidden");
