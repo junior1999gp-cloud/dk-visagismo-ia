@@ -1048,7 +1048,13 @@ async function checkSession() {
   }
 
 }
-
+db.auth.onAuthStateChange((event) => {
+  if (event === "PASSWORD_RECOVERY") {
+    $("login").classList.add("hidden");
+    $("app").classList.add("hidden");
+    $("resetPassword").classList.remove("hidden");
+  }
+});
 checkSession();
 
 </script>
