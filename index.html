@@ -161,7 +161,13 @@ email,password
 });
 
 if(error){
-showMessage("message","Error: "+error.message);
+console.log("ERROR LOGIN:", error);
+showMessage(
+"message",
+"Error: "+error.message+
+" | Código: "+error.code+
+" | Estado: "+error.status
+);
 return;
 }
 
