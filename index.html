@@ -2,138 +2,115 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DK VISAGISMO IA</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-* { box-sizing:border-box; }
-
-body {
-  margin:0;
-  padding:20px;
-  background:#080b09;
-  color:white;
-  font-family:Arial,sans-serif;
-}
-
-header {
-  text-align:center;
-  padding:25px 10px;
-}
-
-h1 {
-  color:#39ff88;
-  font-size:28px;
-}
-
-.subtitle {
-  color:#aaa;
-}
-
-.card {
-  background:#151b18;
-  border:1px solid #29372e;
-  border-radius:15px;
-  padding:20px;
-  margin:18px auto;
-  max-width:550px;
-}
-
-h2 {
-  color:#39ff88;
-  font-size:20px;
-}
-
-input {
-  width:100%;
-  padding:14px;
-  margin:8px 0;
-  border:1px solid #39463d;
-  border-radius:8px;
-  background:#080b09;
-  color:white;
-  font-size:16px;
-}
-
-button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  background:#39ff88;
-  color:#07110b;
-  border:0;
-  border-radius:8px;
-  font-weight:bold;
-  font-size:15px;
-}
-
-.client {
-  padding:14px;
-  border-bottom:1px solid #39443d;
-}
-
-.small {
-  color:#aaa;
-  font-size:13px;
-}
-
-.hidden {
-  display:none;
-}
-
-#message {
-  color:#39ff88;
-  overflow-wrap:anywhere;
-}
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:white;font-family:Arial,sans-serif}
+header{background:#080808;text-align:center;padding:22px;border-bottom:2px solid #c9a227}
+h1{color:#d8b54a;margin:0}
+h2{color:#d8b54a}
+main{max-width:850px;margin:auto;padding:16px}
+.card{background:#1d1d1d;padding:18px;border-radius:12px;margin:15px 0;border:1px solid #393939}
+input,select,textarea,button{width:100%;padding:13px;margin:7px 0;border-radius:7px;border:0;font-size:15px}
+input,select,textarea{background:#eee;color:#111}
+button{background:#c9a227;color:#111;font-weight:bold;cursor:pointer}
+.secondary{background:#444;color:white}
+.danger{background:#8e2525;color:white}
+.hidden{display:none}
+.client{background:#292929;padding:12px;border-radius:8px;margin:10px 0}
+.small{font-size:13px;color:#bbb}
+#photoPreview{max-width:100%;max-height:300px;display:block;margin:10px auto;border-radius:10px}
+.result{background:#292929;padding:14px;border-radius:8px;margin-top:12px;line-height:1.6}
 </style>
 </head>
 
 <body>
-
 <header>
 <h1>DK VISAGISMO IA</h1>
-<p class="subtitle">Tu imagen, nuestro arte.</p>
+<p>BARBER STUDIO · ASESORÍA DE IMAGEN</p>
 </header>
 
-<div class="card" id="login">
-<h2>ACCESO ADMINISTRADOR</h2>
+<main>
 
-<input id="email" type="email"
-placeholder="Correo electrónico">
-
-<input id="password" type="password"
-placeholder="Contraseña">
-
+<section id="login" class="card">
+<h2>Acceso de administrador</h2>
+<input id="email" type="email" placeholder="Correo electrónico">
+<input id="password" type="password" placeholder="Contraseña">
 <button id="loginBtn">INGRESAR</button>
+<p id="message" class="small"></p>
+</section>
 
-<p id="message"></p>
-</div>
-
-<div id="app" class="hidden">
+<section id="app" class="hidden">
 
 <div class="card">
-<h2>REGISTRAR CLIENTE</h2>
+<h2>Panel principal</h2>
+<p>Bienvenido a DK Barber Studio.</p>
+<button id="logoutBtn" class="secondary">Cerrar sesión</button>
+</div>
 
+<div class="card">
+<h2>Registrar cliente</h2>
 <input id="name" placeholder="Nombre del cliente">
-<input id="phone" placeholder="Teléfono">
-
-<button id="saveBtn">GUARDAR CLIENTE</button>
-
-<p id="saveMessage"></p>
+<input id="phone" placeholder="Número de celular">
+<button id="saveBtn">Guardar cliente</button>
+<p id="saveMessage" class="small"></p>
 </div>
 
 <div class="card">
-<h2>HISTORIAL DE CLIENTES</h2>
-<div id="clients">Cargando clientes...</div>
+<h2>Buscar clientes</h2>
+<input id="search" placeholder="Buscar por nombre o teléfono">
+<div id="clients"></div>
+</div>
+
+<div id="serviceSection" class="card hidden">
+<h2>Registrar servicio</h2>
+<p id="selectedClient"></p>
+<input id="serviceName" placeholder="Ejemplo: Fade medio, ondulación, alisado...">
+<textarea id="serviceNotes" placeholder="Detalles o preferencias del cliente"></textarea>
+<button id="serviceBtn">Guardar servicio</button>
+<button id="historyBtn" class="secondary">Ver historial</button>
+<div id="history"></div>
+<p id="serviceMessage" class="small"></p>
 </div>
 
 <div class="card">
-<button id="logoutBtn">CERRAR SESIÓN</button>
+<h2>Visagismo y asesoría de imagen</h2>
+<p class="small">Carga una fotografía para visualizarla temporalmente. No se guarda ni se envía a Supabase.</p>
+
+<input id="photo" type="file" accept="image/*">
+<img id="photoPreview" class="hidden" alt="Vista previa temporal">
+
+<button id="clearPhoto" class="secondary">Eliminar fotografía</button>
+
+<label>Forma del rostro</label>
+<select id="faceShape">
+<option value="">Selecciona una opción</option>
+<option value="ovalado">Ovalado</option>
+<option value="redondo">Redondo</option>
+<option value="cuadrado">Cuadrado</option>
+<option value="alargado">Alargado</option>
+<option value="triangular">Triangular</option>
+<option value="diamante">Diamante</option>
+</select>
+
+<label>Estilo que busca el cliente</label>
+<select id="style">
+<option value="">Selecciona un estilo</option>
+<option value="moderno">Moderno</option>
+<option value="clasico">Clásico</option>
+<option value="juvenil">Juvenil</option>
+<option value="formal">Formal</option>
+<option value="atrevido">Atrevido</option>
+</select>
+
+<button id="analyzeBtn">Obtener recomendaciones</button>
+<div id="recommendations" class="result hidden"></div>
 </div>
 
-</div>
+</section>
+</main>
 
 <script>
 const SUPABASE_URL =
@@ -149,132 +126,272 @@ SUPABASE_KEY
 
 const $ = id => document.getElementById(id);
 
-function showMessage(id, text) {
-  $(id).textContent = text;
+let currentClient = null;
+let allClients = [];
+
+function escapeHTML(value){
+return String(value ?? "").replace(/[&<>"']/g, char => ({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[char]));
 }
 
-async function loginUser() {
-  const email = $("email").value.trim();
-  const password = $("password").value;
-
-  if (!email || !password) {
-    showMessage("message","Completa correo y contraseña.");
-    return;
-  }
-
-  showMessage("message","Verificando acceso...");
-
-  const {error} = await db.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    showMessage("message","Error: " + error.message);
-    return;
-  }
-
-  await showApp();
+function showMessage(id,message){
+$(id).textContent = message;
 }
 
-async function showApp() {
-  $("login").classList.add("hidden");
-  $("app").classList.remove("hidden");
-  await loadClients();
+async function loginUser(){
+const email = $("email").value.trim();
+const password = $("password").value;
+
+showMessage("message","Ingresando...");
+
+const {error} = await db.auth.signInWithPassword({
+email,password
+});
+
+if(error){
+showMessage("message","Error: "+error.message);
+return;
 }
 
-async function addClient() {
-  const name = $("name").value.trim();
-  const phone = $("phone").value.trim();
-
-  if (!name) {
-    showMessage("saveMessage","Escribe el nombre del cliente.");
-    return;
-  }
-
-  const {data,error:userError} = await db.auth.getUser();
-
-  if (userError || !data.user) {
-    showMessage("saveMessage","Inicia sesión nuevamente.");
-    return;
-  }
-
-  showMessage("saveMessage","Guardando cliente...");
-
-  const {error} = await db.from("clients").insert({
-    name:name,
-    phone:phone || null,
-    owner_id:data.user.id
-  });
-
-  if (error) {
-    showMessage("saveMessage","Error: " + error.message);
-    return;
-  }
-
-  $("name").value = "";
-  $("phone").value = "";
-
-  showMessage("saveMessage","¡Cliente guardado correctamente!");
-  await loadClients();
+showApp();
 }
 
-async function loadClients() {
-  const box = $("clients");
-  box.textContent = "Cargando...";
-
-  const {data,error} = await db
-    .from("clients")
-    .select("id,name,phone,created_at")
-    .order("created_at",{ascending:false});
-
-  if (error) {
-    box.textContent = "Error al cargar: " + error.message;
-    return;
-  }
-
-  box.innerHTML = "";
-
-  if (!data.length) {
-    box.textContent = "Todavía no tienes clientes registrados.";
-    return;
-  }
-
-  data.forEach(client => {
-    const item = document.createElement("div");
-    item.className = "client";
-
-    const title = document.createElement("strong");
-    title.textContent = client.name;
-
-    const detail = document.createElement("p");
-    detail.className = "small";
-    detail.textContent = client.phone || "Sin teléfono";
-
-    item.appendChild(title);
-    item.appendChild(detail);
-    box.appendChild(item);
-  });
+async function showApp(){
+$("login").classList.add("hidden");
+$("app").classList.remove("hidden");
+await loadClients();
 }
 
-async function logout() {
-  await db.auth.signOut();
-  location.reload();
+async function loadClients(){
+const {data,error} = await db
+.from("clients")
+.select("id,name,phone,created_at")
+.order("created_at",{ascending:false});
+
+if(error){
+showMessage("saveMessage","Error al cargar clientes: "+error.message);
+return;
+}
+
+allClients = data || [];
+renderClients();
+}
+
+function renderClients(){
+const search = $("search").value.toLowerCase().trim();
+
+const filtered = allClients.filter(client =>
+(client.name || "").toLowerCase().includes(search) ||
+(client.phone || "").toLowerCase().includes(search)
+);
+
+$("clients").innerHTML = filtered.map(client => `
+<div class="client">
+<strong>${escapeHTML(client.name)}</strong>
+<p>${escapeHTML(client.phone || "Sin teléfono")}</p>
+<button onclick="selectClient('${client.id}')">
+Seleccionar cliente
+</button>
+</div>
+`).join("") || "<p>No hay clientes registrados.</p>";
+}
+
+async function addClient(){
+const name = $("name").value.trim();
+const phone = $("phone").value.trim();
+
+if(!name){
+showMessage("saveMessage","Escribe el nombre del cliente.");
+return;
+}
+
+const {data:userData,error:userError} = await db.auth.getUser();
+
+if(userError || !userData.user){
+showMessage("saveMessage","No se pudo verificar el administrador.");
+return;
+}
+
+const {error} = await db.from("clients").insert({
+name,
+phone,
+owner_id:userData.user.id
+});
+
+if(error){
+showMessage("saveMessage","Error: "+error.message);
+return;
+}
+
+$("name").value = "";
+$("phone").value = "";
+
+showMessage("saveMessage","Cliente registrado correctamente.");
+await loadClients();
+}
+
+async function selectClient(id){
+currentClient = allClients.find(client => client.id === id);
+
+if(!currentClient) return;
+
+$("serviceSection").classList.remove("hidden");
+$("selectedClient").textContent =
+"Cliente: "+currentClient.name;
+
+$("history").innerHTML = "";
+showMessage("serviceMessage","");
+}
+
+async function addService(){
+if(!currentClient){
+showMessage("serviceMessage","Selecciona un cliente.");
+return;
+}
+
+const serviceName = $("serviceName").value.trim();
+
+if(!serviceName){
+showMessage("serviceMessage","Escribe el servicio realizado.");
+return;
+}
+
+const {data:userData,error:userError} = await db.auth.getUser();
+
+if(userError || !userData.user){
+showMessage("serviceMessage","No se pudo verificar el administrador.");
+return;
+}
+
+const {error} = await db.from("client_services").insert({
+client_id:currentClient.id,
+owner_id:userData.user.id,
+service_name:serviceName,
+notes:$("serviceNotes").value.trim()
+});
+
+if(error){
+showMessage("serviceMessage","Error: "+error.message);
+return;
+}
+
+$("serviceName").value = "";
+$("serviceNotes").value = "";
+
+showMessage("serviceMessage","Servicio guardado correctamente.");
+await loadHistory();
+}
+
+async function loadHistory(){
+if(!currentClient) return;
+
+const {data,error} = await db
+.from("client_services")
+.select("service_name,notes,created_at")
+.eq("client_id",currentClient.id)
+.order("created_at",{ascending:false});
+
+if(error){
+$("history").textContent = "Error al cargar historial.";
+return;
+}
+
+$("history").innerHTML = "<h3>Historial de servicios</h3>" +
+(data || []).map(item => `
+<div class="client">
+<strong>${escapeHTML(item.service_name)}</strong>
+<p>${escapeHTML(item.notes || "")}</p>
+<span class="small">${new Date(item.created_at).toLocaleDateString("es-PE")}</span>
+</div>
+`).join("") || "<p>Este cliente aún no tiene servicios.</p>";
+}
+
+function logout(){
+db.auth.signOut().then(() => location.reload());
+}
+
+$("photo").addEventListener("change",event=>{
+const file = event.target.files[0];
+
+if(!file) return;
+
+if(!file.type.startsWith("image/")){
+alert("Selecciona una fotografía válida.");
+event.target.value = "";
+return;
+}
+
+const reader = new FileReader();
+
+reader.onload = e=>{
+$("photoPreview").src = e.target.result;
+$("photoPreview").classList.remove("hidden");
+};
+
+reader.readAsDataURL(file);
+});
+
+$("clearPhoto").addEventListener("click",()=>{
+$("photo").value = "";
+$("photoPreview").removeAttribute("src");
+$("photoPreview").classList.add("hidden");
+});
+
+function getRecommendations(){
+const face = $("faceShape").value;
+const style = $("style").value;
+
+if(!face || !style){
+alert("Selecciona la forma del rostro y el estilo.");
+return;
+}
+
+const recommendations = {
+ovalado:["Quiff texturizado","Crop francés","Slick Back","Mid Fade"],
+redondo:["Pompadour","Quiff con volumen","Fade alto","Crop texturizado"],
+cuadrado:["Buzz Cut degradado","Crew Cut","Taper Fade","Quiff"],
+alargado:["Crop francés","Fringe texturizado","Fade bajo","Corte en capas"],
+triangular:["Quiff con volumen","Corte en capas","Taper Fade","Texturizado"],
+diamante:["Fringe texturizado","Mullet moderno","Taper Fade","Quiff"]
+};
+
+const extras = {
+moderno:"Mid Fade, Mullet moderno y Quiff texturizado.",
+clasico:"Corte clásico, Side Part y Slick Back.",
+juvenil:"Crop francés, Burst Fade y Texturizado.",
+formal:"Slick Back, Side Part y Taper Fade.",
+atrevido:"Mullet moderno, Mohicano y diseños."
+};
+
+$("recommendations").innerHTML = `
+<h3>Recomendaciones de visagismo</h3>
+<p><strong>Forma del rostro:</strong> ${escapeHTML(face)}</p>
+<p><strong>Estilo elegido:</strong> ${escapeHTML(style)}</p>
+<p><strong>Cortes recomendados:</strong></p>
+<ul>${recommendations[face].map(item=>`<li>${item}</li>`).join("")}</ul>
+<p><strong>Estilos adicionales:</strong> ${extras[style]}</p>
+<p class="small">Estas son sugerencias orientativas. Confirma el diagnóstico observando las proporciones, el cabello y las preferencias del cliente.</p>
+`;
+
+$("recommendations").classList.remove("hidden");
 }
 
 $("loginBtn").addEventListener("click",loginUser);
 $("saveBtn").addEventListener("click",addClient);
 $("logoutBtn").addEventListener("click",logout);
+$("search").addEventListener("input",renderClients);
+$("serviceBtn").addEventListener("click",addService);
+$("historyBtn").addEventListener("click",loadHistory);
+$("analyzeBtn").addEventListener("click",getRecommendations);
 
-db.auth.getSession().then(({data,error}) => {
-  if (error) {
-    showMessage("message",error.message);
-    return;
-  }
-
-  if (data.session) showApp();
+db.auth.getSession().then(({data})=>{
+if(data.session) showApp();
 });
 </script>
-
 </body>
 </html>
