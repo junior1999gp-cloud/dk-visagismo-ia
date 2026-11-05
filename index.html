@@ -485,7 +485,7 @@ GUARDAR CLIENTE
 
   <h3>CORTES Y ESTILOS</h3>
 
-  <div class="haircut-catalog">
+  <div class="haircut-card" data-haircuts="lacio,ondulado">
 
     <div class="haircut-card">
 
@@ -507,7 +507,7 @@ GUARDAR CLIENTE
 
 </div>
 
-    <div class="haircut-card">
+  <div class="haircut-card" data-haircuts="lacio,ondulado">
 
   <div class="cut-image">
     <img
@@ -527,7 +527,7 @@ GUARDAR CLIENTE
 
 </div>
 
-    <div class="haircut-card">
+    <div class="haircut-card" data-haircuts="lacio,ondulado,rizado,crespo">
 
   <div class="cut-image">
     <img
@@ -547,7 +547,7 @@ GUARDAR CLIENTE
 
 </div>
 
-    <div class="haircut-card">
+    <div class="haircut-card" data-haircuts="lacio,ondulado,rizado,crespo">
 
   <div class="cut-image">
     <img
@@ -567,7 +567,7 @@ GUARDAR CLIENTE
 
 </div>
 
-    <div class="haircut-card">
+    <div class="haircut-card" data-haircuts="lacio,ondulado">
 
   <div class="cut-image">
     <img
@@ -587,7 +587,7 @@ GUARDAR CLIENTE
 
 </div>
 
-    <div class="haircut-card">
+    <div class="haircut-card" data-haircuts="lacio,ondulado">
 
   <div class="cut-image">
     <img
@@ -607,7 +607,7 @@ GUARDAR CLIENTE
 
 </div>
 
-    <div class="haircut-card">
+<div class="haircut-card" data-haircuts="lacio,ondulado,rizado">
 
   <div class="cut-image">
     <img
@@ -627,7 +627,7 @@ GUARDAR CLIENTE
 
 </div>
 
-    <div class="haircut-card">
+    <div class="haircut-card" data-haircuts="lacio,ondulado,rizado,crespo">
 
   <div class="cut-image">
     <img
@@ -1385,6 +1385,8 @@ function getRecommendations() {
 // FUNCIONES DEL CATÁLOGO DK BARBER
 // =================================
 
+// FILTRO DE CORTES POR TIPO DE CABELLO
+
 document.querySelectorAll(".hair-type-btn").forEach(button => {
 
   button.addEventListener("click", function() {
@@ -1400,25 +1402,15 @@ document.querySelectorAll(".hair-type-btn").forEach(button => {
     $("selectedHair").textContent =
       "Tipo de cabello: " + hair.toUpperCase();
 
-  });
+    document.querySelectorAll(".haircut-card").forEach(card => {
 
-});
+      const compatibleHair = card.dataset.haircuts || "";
 
+      const hairTypes = compatibleHair.split(",").map(type => type.trim());
 
-document.querySelectorAll(".select-cut").forEach(button => {
+      card.style.display = hairTypes.includes(hair) ? "" : "none";
 
-  button.addEventListener("click", function() {
-
-    const cut = this.dataset.cut;
-
-    document.querySelectorAll(".select-cut").forEach(btn => {
-      btn.classList.remove("selected");
     });
-
-    this.classList.add("selected");
-
-    $("selectedCut").textContent =
-      "Corte: " + cut;
 
   });
 
