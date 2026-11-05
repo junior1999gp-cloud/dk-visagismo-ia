@@ -383,8 +383,27 @@ async function saveNewPassword() {
     location.href = "https://junior1999gp-cloud.github.io/dk-visagismo-ia/";
   }, 2000);
 }
+async function forgotPassword() {
+  const email = $("email").value.trim();
+
+  if (!email) {
+    showMessage("message", "Escribe tu correo electrónico.");
+    return;
+  }
+
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://junior1999gp-cloud.github.io/dk-visagismo-ia/"
+  });
+
+  if (error) {
+    showMessage("message", error.message);
+    return;
+  }
+
+  showMessage("message", "Revisa tu Gmail para cambiar la contraseña.");
+}
+
 async function loginUser() {
-  async function forgotPassword() {
   const email = $("email").value.trim();
 
   if (!email) {
