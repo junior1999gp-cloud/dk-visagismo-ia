@@ -7,7 +7,60 @@
 <title>DK VISAGISMO IA</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+/* PANEL DE VISAGISMO DK */
 
+.visagism-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 15px;
+  align-items: start;
+}
+
+.client-photo-box {
+  background: #181818;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.client-photo-box img {
+  width: 100%;
+  max-width: 220px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.hair-types,
+.haircut-catalog {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.haircut-card {
+  background: #202020;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+}
+
+.haircut-card img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.haircut-card button {
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .visagism-layout {
+    grid-template-columns: 1fr;
+  }
+}
 <style>
 * {
   box-sizing: border-box;
@@ -331,7 +384,119 @@ GUARDAR CLIENTE
     alt="Fotografía del cliente"
   >
 </div>
+<!-- CATÁLOGO DK BARBER -->
 
+<div class="card" id="dkCatalog">
+
+  <h2>CATÁLOGO PROFESIONAL DK</h2>
+
+  <h3>SELECCIONA EL TIPO DE CABELLO</h3>
+
+  <div class="hair-types">
+
+    <button type="button" class="hair-type-btn" data-hair="lacio">
+      LACIO
+    </button>
+
+    <button type="button" class="hair-type-btn" data-hair="ondulado">
+      ONDULADO
+    </button>
+
+    <button type="button" class="hair-type-btn" data-hair="rizado">
+      RIZADO
+    </button>
+
+    <button type="button" class="hair-type-btn" data-hair="crespo">
+      CRESPO
+    </button>
+
+  </div>
+
+  <h3>CORTES Y ESTILOS</h3>
+
+  <div class="haircut-catalog">
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">QUIFF</div>
+      <h3>Quiff</h3>
+      <p>Volumen y textura superior.</p>
+      <button type="button" class="select-cut" data-cut="Quiff">
+        SELECCIONAR
+      </button>
+    </div>
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">CROP</div>
+      <h3>Crop francés</h3>
+      <p>Flequillo texturizado.</p>
+      <button type="button" class="select-cut" data-cut="Crop francés">
+        SELECCIONAR
+      </button>
+    </div>
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">MID FADE</div>
+      <h3>Mid Fade</h3>
+      <p>Degradado medio.</p>
+      <button type="button" class="select-cut" data-cut="Mid Fade">
+        SELECCIONAR
+      </button>
+    </div>
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">TAPER</div>
+      <h3>Taper Fade</h3>
+      <p>Degradado suave.</p>
+      <button type="button" class="select-cut" data-cut="Taper Fade">
+        SELECCIONAR
+      </button>
+    </div>
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">POMPADOUR</div>
+      <h3>Pompadour</h3>
+      <p>Volumen hacia atrás.</p>
+      <button type="button" class="select-cut" data-cut="Pompadour">
+        SELECCIONAR
+      </button>
+    </div>
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">SLICK BACK</div>
+      <h3>Slick Back</h3>
+      <p>Peinado hacia atrás.</p>
+      <button type="button" class="select-cut" data-cut="Slick Back">
+        SELECCIONAR
+      </button>
+    </div>
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">MULLET</div>
+      <h3>Mullet moderno</h3>
+      <p>Estilo moderno y rebelde.</p>
+      <button type="button" class="select-cut" data-cut="Mullet moderno">
+        SELECCIONAR
+      </button>
+    </div>
+
+    <div class="haircut-card">
+      <div class="cut-placeholder">BUZZ CUT</div>
+      <h3>Buzz Cut</h3>
+      <p>Corte corto uniforme.</p>
+      <button type="button" class="select-cut" data-cut="Buzz Cut">
+        SELECCIONAR
+      </button>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h3>ESTILO SELECCIONADO</h3>
+    <p id="selectedHair">Tipo de cabello: Ninguno</p>
+    <p id="selectedCut">Corte: Ninguno</p>
+  </div>
+
+</div>
 <!-- HISTORIAL DE SERVICIOS -->
 <div class="card">
   <h2>HISTORIAL DEL CLIENTE</h2>
@@ -1052,6 +1217,48 @@ const APP_URL =
 
     container.classList.remove("hidden");
   }
+  // =================================
+// FUNCIONES DEL CATÁLOGO DK BARBER
+// =================================
+
+document.querySelectorAll(".hair-type-btn").forEach(button => {
+
+  button.addEventListener("click", function() {
+
+    const hair = this.dataset.hair;
+
+    document.querySelectorAll(".hair-type-btn").forEach(btn => {
+      btn.classList.remove("selected");
+    });
+
+    this.classList.add("selected");
+
+    $("selectedHair").textContent =
+      "Tipo de cabello: " + hair.toUpperCase();
+
+  });
+
+});
+
+
+document.querySelectorAll(".select-cut").forEach(button => {
+
+  button.addEventListener("click", function() {
+
+    const cut = this.dataset.cut;
+
+    document.querySelectorAll(".select-cut").forEach(btn => {
+      btn.classList.remove("selected");
+    });
+
+    this.classList.add("selected");
+
+    $("selectedCut").textContent =
+      "Corte: " + cut;
+
+  });
+
+});
 
   // ==========================================
   // VISTA PREVIA DE FOTOGRAFÍA
