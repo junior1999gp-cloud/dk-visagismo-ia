@@ -1279,103 +1279,108 @@ const APP_URL =
   // ==========================================
   // RECOMENDACIONES DE VISAGISMO
   // ==========================================
+function getRecommendations() {
 
-  function getRecommendations() {
-    const face = $("faceShape").value;
-    const hair = $("hairType").value;
-    const style = $("style").value;
+  const face = $("faceShape").value;
+  const hair = $("hairType").value;
+  const style = $("style").value;
 
-    if (!face || !hair || !style) {
-      alert(
-        "Selecciona la forma del rostro, tipo de cabello y estilo."
-      );
-      return;
-    }
+  const selectedCut = $("selectedCut").textContent
+    .replace("Corte:", "")
+    .trim();
 
-    const recommendations = {
-      ovalado: [
-        "Quiff texturizado",
-        "Crop francés",
-        "Slick Back",
-        "Mid Fade",
-        "Taper Fade"
-      ],
-
-      redondo: [
-        "Pompadour con volumen",
-        "Quiff alto",
-        "Side Part",
-        "High Fade",
-        "Flequillo corto texturizado"
-      ],
-
-      cuadrado: [
-        "Crew Cut",
-        "Buzz Cut degradado",
-        "Slick Back",
-        "Low Fade",
-        "Crop texturizado"
-      ],
-
-      alargado: [
-        "French Crop",
-        "Fringe con textura",
-        "Side Part bajo",
-        "Low Fade",
-        "Volumen moderado"
-      ],
-
-      triangular: [
-        "Quiff",
-        "Flequillo texturizado",
-        "Taper Fade",
-        "Capas superiores"
-      ],
-
-      diamante: [
-        "Fringe texturizado",
-        "Bro Flow",
-        "Side Part",
-        "Taper Fade",
-        "Quiff suave"
-      ]
-    };
-
-    const result = recommendations[face] || [];
-
-    const container = $("recommendations");
-    container.innerHTML = "";
-
-    const heading = document.createElement("h3");
-    heading.textContent = "RECOMENDACIONES DK";
-
-    const description = document.createElement("p");
-    description.textContent =
-      "Forma del rostro: " + face +
-      " | Cabello: " + hair +
-      " | Estilo: " + style;
-
-    const list = document.createElement("ul");
-
-    result.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      list.appendChild(li);
-    });
-
-    const note = document.createElement("p");
-    note.textContent =
-      "Estas sugerencias son orientativas. " +
-      "Confirma el diagnóstico observando las proporciones, " +
-      "el cabello y las preferencias del cliente.";
-
-    container.appendChild(heading);
-    container.appendChild(description);
-    container.appendChild(list);
-    container.appendChild(note);
-
-    container.classList.remove("hidden");
+  if (!face || !hair || !style) {
+    alert("Selecciona la forma del rostro, tipo de cabello y estilo.");
+    return;
   }
+
+  const recommendations = {
+    ovalado: [
+      "Quiff texturizado",
+      "Crop francés",
+      "Slick Back",
+      "Mid Fade",
+      "Taper Fade"
+    ],
+
+    redondo: [
+      "Pompadour con volumen",
+      "Quiff alto",
+      "Side Part",
+      "High Fade",
+      "Flequillo corto texturizado"
+    ],
+
+    cuadrado: [
+      "Crew Cut",
+      "Buzz Cut degradado",
+      "Slick Back",
+      "Low Fade",
+      "Crop texturizado"
+    ],
+
+    alargado: [
+      "French Crop",
+      "Fringe con textura",
+      "Side Part bajo",
+      "Low Fade",
+      "Volumen moderado"
+    ],
+
+    triangular: [
+      "Quiff",
+      "Flequillo texturizado",
+      "Taper Fade",
+      "Capas superiores"
+    ],
+
+    diamante: [
+      "Fringe texturizado",
+      "Bro Flow",
+      "Side Part",
+      "Taper Fade",
+      "Quiff suave"
+    ]
+  };
+
+  const result = recommendations[face] || [];
+
+  const container = $("recommendations");
+  container.innerHTML = "";
+
+  const heading = document.createElement("h3");
+  heading.textContent = "RECOMENDACIONES DK";
+
+  const description = document.createElement("p");
+
+  description.textContent =
+    "Rostro: " + face +
+    " | Cabello: " + hair +
+    " | Estilo: " + style +
+    " | Corte seleccionado: " +
+    (selectedCut || "Ninguno");
+
+  const list = document.createElement("ul");
+
+  result.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+
+  const note = document.createElement("p");
+
+  note.textContent =
+    "DK VISAGISMO IA: recomendaciones orientativas " +
+    "según las características del cliente y el corte elegido.";
+
+  container.appendChild(heading);
+  container.appendChild(description);
+  container.appendChild(list);
+  container.appendChild(note);
+
+  container.classList.remove("hidden");
+}
   // =================================
 // FUNCIONES DEL CATÁLOGO DK BARBER
 // =================================
