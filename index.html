@@ -3,1448 +3,1060 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#111111">
 <title>DK VISAGISMO IA</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-/* PANEL DE VISAGISMO DK */
-
-.visagism-layout {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 15px;
-  align-items: start;
-}
-
-.client-photo-box {
-  background: #181818;
-  padding: 12px;
-  border-radius: 12px;
-  text-align: center;
-}
-
-.client-photo-box img {
-  width: 100%;
-  max-width: 220px;
-  height: 250px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.hair-types,
-.haircut-catalog {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.haircut-card {
-  background: #202020;
-  border-radius: 12px;
-  padding: 10px;
-  text-align: center;
-}
-
-.haircut-card img {
-  width: 100%;
-  height: 130px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.haircut-card button {
-  margin-top: 8px;
-}
-
-@media (max-width: 600px) {
-  .visagism-layout {
-    grid-template-columns: 1fr;
-  }
-}
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 15px;
-  background: #101010;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-
-header {
-  text-align: center;
-  padding: 20px;
-  background: #080808;
-  border-bottom: 2px solid #d5ad55;
-}
-
-.logo {
-  color: #d5ad55;
-  font-size: 27px;
-  font-weight: bold;
-}
-
-main {
-  max-width: 850px;
-  margin: 20px auto;
-}
-
-.card {
-  background: #1c1c1c;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 18px;
-  border: 1px solid #444;
-}
-
-h2, h3 {
-  color: #d5ad55;
-}
-
-label {
-  display: block;
-  margin-top: 12px;
-  margin-bottom: 6px;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 13px;
-  border-radius: 8px;
-  border: 1px solid #555;
-  background: #111;
-  color: white;
-  font-size: 16px;
-}
-
-button {
-  background: #d5ad55;
-  color: black;
-  border: none;
-  padding: 13px;
-  margin-top: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.secondary {
-  background: #444;
-  color: white;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.message {
-  margin-top: 12px;
-  padding: 10px;
-  border-radius: 7px;
-  font-size: 14px;
-}
-
-.error {
-  background: #542222;
-  color: white;
-}
-
-.success {
-  background: #19452b;
-  color: white;
-}
-
-.small {
-  color: #bbb;
-  font-size: 13px;
-}
-
-.client {
-  padding: 12px;
-  margin-top: 10px;
-  background: #111;
-  border: 1px solid #444;
-  border-radius: 8px;
-}
-
-.recommendation {
-  padding: 12px;
-  margin-top: 8px;
-  background: #111;
-  border-left: 3px solid #d5ad55;
-}
-
-img.preview {
-  max-width: 100%;
-  max-height: 300px;
-  margin-top: 12px;
-  border-radius: 10px;
-}
-/* CATALOGO PROFESIONAL DK */
-
-.haircut-catalog {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.haircut-card {
-  background: #181818;
-  border: 1px solid #d5ad55;
-  border-radius: 12px;
-  padding: 10px;
-  text-align: center;
-}
-
-.haircut-card img,
-.cut-placeholder {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 9px;
-  background: #252525;
-}
-
-.cut-placeholder {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #d5ad55;
-  font-weight: bold;
-}
-
-.haircut-card h3 {
-  color: #d5ad55;
-}
-
-.haircut-card button {
-  width: 100%;
-}
-
-.hair-type-btn.selected,
-.select-cut.selected {
-  background: white;
-  color: black;
-  outline: 2px solid #d5ad55;
-}
-.panel-subtitle {
-  color: #d5ad55;
-  font-size: 13px;
-  font-weight: bold;
-  letter-spacing: 3px;
-  margin: 5px 0 10px;
-}  
-  /* IMAGENES DEL CATALOGO DK */
-
-.cut-image {
-  width: 100%;
-  height: 150px;
-  overflow: hidden;
-  border-radius: 9px;
-  background: #252525;
-  margin-bottom: 10px;
-  position: relative;
-}
-
-.cut-image .haircut-photo {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  margin: 0;
-}
+*{box-sizing:border-box}
+:root{--green:#00e879;--bg:#080d11;--text:#effff7;--muted:#a5c5b6}
+body{margin:0;background:radial-gradient(ellipse at top,#10231e 0,#080d11 58%);color:var(--text);font-family:Arial,sans-serif}
+header{background:#080d11;text-align:center;padding:18px 12px;border-bottom:1px solid #126b49}
+h1,h2,h3{color:var(--green);letter-spacing:.4px}
+header p{color:var(--muted);margin:6px 0}
+main{max-width:900px;margin:auto;padding:12px}
+.card{background:linear-gradient(145deg,#111d21,#0d1519);padding:16px;border:1px solid #174b38;border-radius:13px;margin:13px 0;box-shadow:0 8px 24px #0005}
+input,select,textarea,button{width:100%;padding:12px;margin:7px 0;border-radius:8px;border:1px solid #28513f;font-size:15px}
+input,select,textarea{background:#eaf5ef;color:#102018}
+textarea{min-height:80px}
+button{background:var(--green);color:#04150c;font-weight:800;border:0;cursor:pointer}
+button:disabled{opacity:.55}
+.secondary{background:#23352f;color:#eafff2;border:1px solid #3b6d55}
+.danger{background:#8e2525;color:#fff}
+.hidden{display:none!important}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+.client,.result,.analysis-box{background:#0d1918;padding:13px;border:1px solid #20543d;border-radius:9px;margin:10px 0;line-height:1.55}
+label{display:block;margin-top:10px;color:#8fffc2;font-size:13px;font-weight:bold}
+hr{border:0;border-top:1px solid #244b3a;margin:20px 0}
+.section-kicker{color:var(--green);font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:2px 0 8px}
+.photo-stage{position:relative;width:min(100%,520px);margin:12px auto;background:#020706;border:1px solid #168a55;border-radius:12px;overflow:hidden;min-height:190px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px #00e87918}
+#photoPreview{display:block;width:100%;max-height:560px;object-fit:contain}
+#faceOverlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.photo-empty{padding:42px 15px;text-align:center;color:#80a997}
+.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.metric{background:#0a1513;border:1px solid #20553d;border-radius:8px;padding:10px}
+.metric strong{display:block;color:var(--green);font-size:12px;margin-bottom:5px}
+.metric span{font-size:14px}
+.gold-note{border-left:3px solid var(--green);padding:9px 12px;background:#0b1b15;color:#dfffee;font-size:13px}
+#recommendations ul{padding-left:22px}
+@media(max-width:500px){main{padding:8px}.card{padding:12px}.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
-
 <body>
-
 <header>
-  <div class="logo">DK VISAGISMO IA</div>
-<p class="panel-subtitle">PANEL DE VISAGISMO</p>
-<p>Herramienta profesional de barbería</p>
+  <h1>DK VISAGISMO IA</h1>
+  <p>BARBER STUDIO · ASESORÍA DE IMAGEN</p>
 </header>
-
 <main>
-
-<!-- LOGIN -->
-
 <section id="login" class="card">
-
-<h2>Acceso de administrador</h2>
-
-<form id="loginForm">
-
-<label>Correo electrónico</label>
-<input
-  id="email"
-  type="email"
-  placeholder="Tu correo electrónico"
-  autocomplete="username"
-  required
->
-
-<label>Contraseña</label>
-<input
-  id="password"
-  type="password"
-  placeholder="Tu contraseña"
-  autocomplete="current-password"
-  required
->
-
-<button id="loginBtn" type="submit">
-INGRESAR
-</button>
-
-<button
-  id="forgotBtn"
-  type="button"
-  class="secondary"
->
-RECUPERAR CONTRASEÑA
-</button>
-
-</form>
-
-<div id="loginMessage"></div>
-
+  <h2>Acceso de administrador</h2>
+  <input id="email" type="email" autocomplete="username" placeholder="Correo electrónico">
+  <input id="password" type="password" autocomplete="current-password" placeholder="Contraseña">
+  <button id="loginBtn" type="button">INGRESAR</button>
+  <button id="forgotBtn" type="button" class="secondary">¿OLVIDASTE TU CONTRASEÑA?</button>
+  <p id="message" class="small" aria-live="polite"></p>
 </section>
 
-<!-- RECUPERAR CONTRASEÑA -->
-
-<section id="reset" class="card hidden">
-
-<h2>Nueva contraseña</h2>
-
-<form id="resetForm">
-
-<label>Nueva contraseña</label>
-<input
-  id="newPassword"
-  type="password"
-  minlength="8"
-  required
->
-
-<label>Confirmar contraseña</label>
-<input
-  id="confirmPassword"
-  type="password"
-  minlength="8"
-  required
->
-
-<button type="submit" id="savePasswordBtn">
-GUARDAR CONTRASEÑA
-</button>
-
-</form>
-
-<div id="resetMessage"></div>
-
+<section id="resetPassword" class="card hidden">
+  <h2>Cambiar contraseña</h2>
+  <p class="small">Escribe tu nueva contraseña. Debes haber llegado aquí desde el enlace enviado a tu correo.</p>
+  <input id="newPassword" type="password" autocomplete="new-password" placeholder="Nueva contraseña">
+  <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirmar nueva contraseña">
+  <button id="savePasswordBtn" type="button">GUARDAR NUEVA CONTRASEÑA</button>
+  <p id="resetMessage" class="small" aria-live="polite"></p>
 </section>
-
-<!-- APLICACIÓN -->
-
 <section id="app" class="hidden">
-
-<div class="card">
-
-<h2>Panel principal</h2>
-
-<p id="userLabel" class="small"></p>
-
-<button id="logoutBtn" class="secondary">
-CERRAR SESIÓN
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>Registrar cliente</h2>
-
-<form id="clientForm">
-
-<label>Nombre del cliente</label>
-<input id="clientName" required>
-
-<label>Teléfono</label>
-<input id="clientPhone" type="tel">
-
-<button id="saveClientBtn" type="submit">
-GUARDAR CLIENTE
-</button>
-
-</form>
-
-<div id="clientMessage"></div>
-
-</div>
-
-<div class="card">
-
-<h2>Buscar clientes</h2>
-
-<input
-  id="searchClient"
-  placeholder="Buscar por nombre o teléfono"
->
-
-<div id="clientList"></div>
-
-</div>
-<!-- VISAGISMO -->
-<div class="card">
-  <h2>ANÁLISIS DE VISAGISMO</h2>
-
-  <label for="faceShape">Forma del rostro</label>
-  <select id="faceShape">
-    <option value="">Seleccionar rostro</option>
-    <option value="ovalado">Ovalado</option>
-    <option value="redondo">Redondo</option>
-    <option value="cuadrado">Cuadrado</option>
-    <option value="alargado">Alargado</option>
-    <option value="triangular">Triangular</option>
-    <option value="diamante">Diamante</option>
-  </select>
-
-  <label for="hairType">Tipo de cabello</label>
-  <select id="hairType">
-    <option value="">Seleccionar cabello</option>
-    <option value="lacio">Lacio</option>
-    <option value="ondulado">Ondulado</option>
-    <option value="rizado">Rizado</option>
-    <option value="crespo">Crespo</option>
-  </select>
-
-  <label for="style">Estilo deseado</label>
-  <select id="style">
-    <option value="">Seleccionar estilo</option>
-    <option value="moderno">Moderno</option>
-    <option value="clasico">Clásico</option>
-    <option value="juvenil">Juvenil</option>
-    <option value="formal">Formal</option>
-    <option value="atrevido">Atrevido</option>
-  </select>
-
-  <button type="button" id="recommendBtn">
-    GENERAR RECOMENDACIONES
-  </button>
-
-  <div id="recommendations"></div>
-</div>
-
-<!-- FOTO DEL CLIENTE -->
-<div class="card">
-  <h2>FOTOGRAFÍA DEL CLIENTE</h2>
-  <p class="small">
-    Selecciona una fotografía para visualizarla como referencia.
-  </p>
-
-  <input
-    type="file"
-    id="photoInput"
-    accept="image/*"
-  >
-
-  <img
-    id="photoPreview"
-    class="photo-preview hidden"
-    alt="Fotografía del cliente"
-  >
-</div>
-<!-- CATÁLOGO DK BARBER -->
-
-<div class="card" id="dkCatalog">
-
-  <h2>CATÁLOGO PROFESIONAL DK</h2>
-
-  <h3>SELECCIONA EL TIPO DE CABELLO</h3>
-
-  <div class="hair-types">
-
-    <button type="button" class="hair-type-btn" data-hair="lacio">
-      LACIO
-    </button>
-
-    <button type="button" class="hair-type-btn" data-hair="ondulado">
-      ONDULADO
-    </button>
-
-    <button type="button" class="hair-type-btn" data-hair="rizado">
-      RIZADO
-    </button>
-
-    <button type="button" class="hair-type-btn" data-hair="crespo">
-      CRESPO
-    </button>
-
-  </div>
-
-  <h3>CORTES Y ESTILOS</h3>
-
-  <div class="haircut-card" data-haircuts="lacio,ondulado">
-
-  <div class="cut-image">
-    <img
-      src="./IMG_3240.jpeg"
-      alt="Modelo masculino con corte Quiff"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>QUIFF</h3>
-
-  <p>Volumen frontal elevado y textura superior.</p>
-
-  <button type="button" class="select-cut" data-cut="Quiff">
-    SELECCIONAR
-  </button>
-
-</div>
-
-  <div class="haircut-card" data-haircuts="lacio,ondulado">
-
-  <div class="cut-image">
-    <img
-      src=""
-      alt="Modelo masculino con corte Crop francés"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>CROP FRANCÉS</h3>
-
-  <p>Flequillo frontal corto y texturizado.</p>
-
-  <button type="button" class="select-cut" data-cut="Crop francés">
-    SELECCIONAR
-  </button>
-
-</div>
-
-    <div class="haircut-card" data-haircuts="lacio,ondulado,rizado,crespo">
-
-  <div class="cut-image">
-    <img
-      src=""
-      alt="Modelo masculino con corte Mid Fade"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>MID FADE</h3>
-
-  <p>Degradado medio en los laterales.</p>
-
-  <button type="button" class="select-cut" data-cut="Mid Fade">
-    SELECCIONAR
-  </button>
-
-</div>
-
-    <div class="haircut-card" data-haircuts="lacio,ondulado,rizado,crespo">
-
-  <div class="cut-image">
-    <img
-      src=""
-      alt="Modelo masculino con corte Taper Fade"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>TAPER FADE</h3>
-
-  <p>Degradado progresivo en patillas y nuca.</p>
-
-  <button type="button" class="select-cut" data-cut="Taper Fade">
-    SELECCIONAR
-  </button>
-
-</div>
-
-    <div class="haircut-card" data-haircuts="lacio,ondulado">
-
-  <div class="cut-image">
-    <img
-      src=""
-      alt="Modelo masculino con corte Pompadour"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>POMPADOUR</h3>
-
-  <p>Volumen frontal elevado y peinado hacia atrás.</p>
-
-  <button type="button" class="select-cut" data-cut="Pompadour">
-    SELECCIONAR
-  </button>
-
-</div>
-
-    <div class="haircut-card" data-haircuts="lacio,ondulado">
-
-  <div class="cut-image">
-    <img
-      src=""
-      alt="Modelo masculino con corte Slick Back"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>SLICK BACK</h3>
-
-  <p>Peinado hacia atrás con acabado elegante.</p>
-
-  <button type="button" class="select-cut" data-cut="Slick Back">
-    SELECCIONAR
-  </button>
-
-</div>
-
-<div class="haircut-card" data-haircuts="lacio,ondulado,rizado">
-
-  <div class="cut-image">
-    <img
-      src=""
-      alt="Modelo masculino con corte Mullet moderno"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>MULLET MODERNO</h3>
-
-  <p>Laterales degradados y longitud en la parte posterior.</p>
-
-  <button type="button" class="select-cut" data-cut="Mullet moderno">
-    SELECCIONAR
-  </button>
-
-</div>
-
-    <div class="haircut-card" data-haircuts="lacio,ondulado,rizado,crespo">
-
-  <div class="cut-image">
-    <img
-      src=""
-      alt="Modelo masculino con corte Buzz Cut"
-      class="haircut-photo"
-    >
-  </div>
-
-  <h3>BUZZ CUT</h3>
-
-  <p>Corte muy corto y uniforme con acabado limpio.</p>
-
-  <button type="button" class="select-cut" data-cut="Buzz Cut">
-    SELECCIONAR
-  </button>
-
-</div>
-
+  <div class="card">
+    <h2>Panel principal</h2>
+    <p>Bienvenido a DK Barber Studio.</p>
+    <button id="logoutBtn" type="button" class="secondary">Cerrar sesión</button>
   </div>
 
   <div class="card">
-    <h3>ESTILO SELECCIONADO</h3>
-    <p id="selectedHair">Tipo de cabello: Ninguno</p>
-    <p id="selectedCut">Corte: Ninguno</p>
+    <h2>Registrar cliente</h2>
+    <input id="name" placeholder="Nombre del cliente">
+    <input id="phone" type="tel" placeholder="Número de celular">
+    <button id="saveBtn" type="button">GUARDAR CLIENTE</button>
+    <p id="saveMessage" class="small"></p>
   </div>
 
-</div>
-<!-- HISTORIAL DE SERVICIOS -->
-<div class="card">
-  <h2>HISTORIAL DEL CLIENTE</h2>
+  <div class="card">
+    <h2>Buscar clientes</h2>
+    <input id="search" placeholder="Buscar por nombre o teléfono">
+    <div id="clients"></div>
+  </div>
 
-  <p id="selectedClientLabel" class="small">
-    Selecciona un cliente para registrar sus servicios.
-  </p>
+  <section id="serviceSection" class="card hidden">
+    <h2>Cliente seleccionado</h2>
+    <p id="selectedClient" class="gold-note"></p>
+    <h2>Asesoría de imagen</h2>
 
-  <form id="serviceForm">
-    <label for="serviceName">Servicio realizado</label>
-    <input
-      type="text"
-      id="serviceName"
-      placeholder="Ejemplo: Corte degradado"
-      required
-    >
+    <p class="small">Completa los datos y guarda el diagnóstico en el historial.</p>
 
-    <label for="serviceNotes">Observaciones</label>
-    <textarea
-      id="serviceNotes"
-      placeholder="Detalles del servicio..."
-    ></textarea>
+    <p class="section-kicker">1. TIPO DE CABELLO DEL CLIENTE</p>
+    <label for="hairCurrent">Textura actual</label>
+    <select id="hairCurrent">
+      <option value="">Seleccionar</option>
+      <option>Lacio</option>
+      <option>Ondulado</option>
+      <option>Rizado</option>
+      <option>Crespo</option>
+    </select>
 
-    <button type="submit" id="saveServiceBtn">
-      GUARDAR SERVICIO
+    <p class="section-kicker">2. ESCÁNER BIOMÉTRICO</p>
+    <label for="photoCamera">Tomar fotografía frontal</label>
+    <input id="photoCamera" type="file" accept="image/*" capture="user">
+
+    <label for="photoFile">Subir fotografía desde archivos</label>
+    <input id="photoFile" type="file" accept="image/*">
+
+    <div class="photo-stage">
+      <div id="photoEmpty" class="photo-empty">
+        La fotografía del cliente aparecerá aquí.
+      </div>
+      <img id="photoPreview" class="hidden" alt="Fotografía del cliente">
+      <canvas id="faceOverlay" class="hidden"></canvas>
+    </div>
+
+    <button id="clearPhoto" type="button" class="secondary">
+      ELIMINAR FOTOGRAFÍA
     </button>
 
-    <p id="serviceMessage" class="small"></p>
-  </form>
+    <p class="section-kicker">3. FORMA DEL ROSTRO</p>
+    <label for="faceShape">Confirma la forma del rostro</label>
+    <select id="faceShape">
+      <option value="">Seleccionar</option>
+      <option>Ovalado</option>
+      <option>Redondo</option>
+      <option>Cuadrado</option>
+      <option>Alargado</option>
+      <option>Triangular</option>
+      <option>Diamante</option>
+    </select>
 
-  <div id="serviceList"></div>
-</div>
+    <button id="analyzeFaceBtn" type="button">
+      ANALIZAR ROSTRO
+    </button>
 
+    <p id="faceMessage" class="small"></p>
+
+    <div id="faceAnalysis" class="analysis-box hidden">
+      <h3>LECTURA BIOMÉTRICA FACIAL</h3>
+
+      <p class="small">
+        Guías de referencia: línea de cabello, entrecejo,
+        base de nariz y mentón.
+      </p>
+
+      <div class="metric-grid">
+        <div class="metric">
+          <strong>Relación alto / ancho</strong>
+          <span id="ratioValue">—</span>
+        </div>
+
+        <div class="metric">
+          <strong>Tercio superior</strong>
+          <span id="upperValue">—</span>
+        </div>
+
+        <div class="metric">
+          <strong>Tercio medio</strong>
+          <span id="middleValue">—</span>
+        </div>
+
+        <div class="metric">
+          <strong>Tercio inferior</strong>
+          <span id="lowerValue">—</span>
+        </div>
+
+        <div class="metric">
+          <strong>Anchura facial</strong>
+          <span id="widthValue">—</span>
+        </div>
+
+        <div class="metric">
+          <strong>Referencia de nariz</strong>
+          <span id="noseValue">—</span>
+        </div>
+      </div>
+
+      <p id="faceEstimate" class="gold-note"></p>
+
+      <p class="small">
+        Las proporciones son aproximadas y no representan
+        medidas clínicas exactas.
+      </p>
+    </div>
+
+    <hr>
+
+    <p class="section-kicker">4. OBJETIVO Y RECOMENDACIONES</p>
+
+    <h3>¿QUÉ ESTILO DESEA EL CLIENTE?</h3>
+
+    <label for="hairDesired">Tipo de cabello o acabado deseado</label>
+    <select id="hairDesired">
+      <option value="">Seleccionar</option>
+      <option>Lacio</option>
+      <option>Ondulado</option>
+      <option>Rizado</option>
+      <option>Crespo</option>
+      <option>Con más volumen</option>
+      <option>Más textura</option>
+      <option>Más definido</option>
+      <option>Alisado</option>
+    </select>
+
+    <label for="style">Estilo que busca</label>
+    <select id="style">
+      <option value="">Seleccionar</option>
+      <option value="moderno">Moderno</option>
+      <option value="clasico">Clásico</option>
+      <option value="juvenil">Juvenil</option>
+      <option value="formal">Formal</option>
+      <option value="atrevido">Atrevido</option>
+    </select>
+
+    <label for="desiredCut">Corte que le gustaría</label>
+    <input id="desiredCut" placeholder="Ejemplo: Quiff, Crop francés, Mid Fade...">
+
+    <button id="recommendBtn" type="button">
+      GENERAR RECOMENDACIONES DE CORTE
+    </button>
+
+    <div id="recommendations" class="result hidden"></div>
+
+    <label for="observations">Observaciones del barbero</label>
+    <textarea id="observations"
+      placeholder="Preferencias, remolinos, entradas, densidad..."></textarea>
+
+    <button id="saveConsultationBtn" type="button">
+      GUARDAR ANÁLISIS
+    </button>
+
+    <p id="consultMessage" class="small"></p>
+
+    <button id="historyBtn" type="button" class="secondary">
+      VER HISTORIAL DEL CLIENTE
+    </button>
+
+    <div id="history"></div>
+  </section>
+
+  <div class="card">
+    <h2>DK Barber Studio en Instagram</h2>
+    <p class="small">Coloca el enlace de tu perfil.</p>
+
+    <input id="instagramUrl" type="url"
+      placeholder="https://www.instagram.com/tu_cuenta/">
+
+    <button id="instagramBtn" type="button">
+      ABRIR INSTAGRAM
+    </button>
+
+    <p id="instagramMessage" class="small"></p>
+  </div>
 </section>
 </main>
-
 <script>
-  // ==========================================
-// CONFIGURACIÓN DE SUPABASE
-// ==========================================
+"use strict";
 
-const SUPABASE_URL =
-"https://mzbadavawmsbacvfunso.supabase.co";
-const SUPABASE_KEY =
-"sb_publishable_a8AgwyUc_wGJKDhilKA8HQ_nOGOC-ce";
+const SUPABASE_URL = "https://mzbadavawmsbacvfunso.supabase.co";
 
-const APP_URL =
-"https://junior1999gp-cloud.github.io/dk-visagismo-ia/";
+/* Usa aquí tu clave pública de Supabase */
+const SUPABASE_KEY = "sb_publishable_a8AgwyUc_wGJKDhilKA8HQ_nOGOC-ce";
 
-// ==========================================
-// INICIAR APLICACIÓN
-// ==========================================
+const APP_URL = "https://junior1999gp-cloud.github.io/dk-visagismo-ia/";
 
-(() => {
-  "use strict";
+const $ = id => document.getElementById(id);
 
-  const $ = (id) => document.getElementById(id);
-
-  const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY,
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-      }
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
     }
+  }
+);
+
+let currentClient = null;
+let allClients = [];
+let recoveryMode = false;
+let photoDataUrl = "";
+let faceLandmarker = null;
+let lastAnalysis = null;
+
+function msg(id, text) {
+  const el = $(id);
+  if (el) el.textContent = text;
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
+}
+
+function showOnly(id) {
+  ["login", "resetPassword", "app"].forEach(x =>
+    $(x).classList.add("hidden")
   );
+  $(id).classList.remove("hidden");
+}
 
-  let currentUser = null;
-  let selectedClient = null;
-  let clients = [];
-  let appInitialized = false;
+/* INICIAR SESIÓN */
 
-  document.addEventListener("DOMContentLoaded", initialize);
+async function loginUser() {
+  const email = $("email").value.trim();
+  const password = $("password").value;
 
-  async function initialize() {
-    $("loginForm")?.addEventListener("submit", loginUser);
-    $("forgotBtn")?.addEventListener("click", forgotPassword);
-    $("resetForm")?.addEventListener("submit", saveNewPassword);
-    $("logoutBtn")?.addEventListener("click", logoutUser);
-
-    $("clientForm")?.addEventListener("submit", saveClient);
-    $("searchClient")?.addEventListener("input", searchClients);
-
-    $("serviceForm")?.addEventListener("submit", saveService);
-
-    $("recommendBtn")?.addEventListener(
-      "click",
-      getRecommendations
-    );
-
-    $("photoInput")?.addEventListener(
-      "change",
-      previewPhoto
-    );
-
-    db.auth.onAuthStateChange(async (event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        showReset();
-        return;
-      }
-
-      if (session?.user) {
-        currentUser = session.user;
-
-        if (!appInitialized) {
-          appInitialized = true;
-          await enterApp();
-        }
-      } else {
-        currentUser = null;
-        appInitialized = false;
-        showLogin();
-      }
-    });
-
-    const { data, error } = await db.auth.getSession();
-
-    if (error) {
-      showMessage("loginMessage", error.message);
-      return;
-    }
-
-    if (data.session?.user) {
-      currentUser = data.session.user;
-      appInitialized = true;
-      await enterApp();
-    } else {
-      showLogin();
-    }
-  }
-
-  // ==========================================
-  // MOSTRAR PANTALLAS
-  // ==========================================
-
-  function showLogin() {
-    $("login")?.classList.remove("hidden");
-    $("reset")?.classList.add("hidden");
-    $("app")?.classList.add("hidden");
-  }
-
-  function showReset() {
-    $("login")?.classList.add("hidden");
-    $("reset")?.classList.remove("hidden");
-    $("app")?.classList.add("hidden");
-  }
-
-  function showApp() {
-    $("login")?.classList.add("hidden");
-    $("reset")?.classList.add("hidden");
-    $("app")?.classList.remove("hidden");
-  }
-
-  function showMessage(id, message) {
-    const element = $(id);
-
-    if (element) {
-      element.textContent = message;
-    }
-  }
-
-  // ==========================================
-  // INICIAR SESIÓN
-  // ==========================================
-
-  async function loginUser(event) {
-    event.preventDefault();
-
-    const email = $("email").value.trim();
-    const password = $("password").value;
-
-    if (!email || !password) {
-      showMessage(
-        "loginMessage",
-        "Ingresa tu correo y contraseña."
-      );
-      return;
-    }
-
-    const button = $("loginBtn");
-    button.disabled = true;
-    button.textContent = "INGRESANDO...";
-
-    try {
-      const { data, error } =
-        await db.auth.signInWithPassword({
-          email,
-          password
-        });
-
-      if (error) throw error;
-
-      currentUser = data.user;
-      appInitialized = true;
-
-      await enterApp();
-
-    } catch (error) {
-      showMessage(
-        "loginMessage",
-        "Error de acceso: " + error.message
-      );
-    } finally {
-      button.disabled = false;
-      button.textContent = "INGRESAR";
-    }
-  }
-
-  // ==========================================
-  // RECUPERAR CONTRASEÑA
-  // ==========================================
-
-  async function forgotPassword() {
-    const email = $("email").value.trim();
-
-    if (!email) {
-      showMessage(
-        "loginMessage",
-        "Primero escribe tu correo electrónico."
-      );
-      return;
-    }
-
-    try {
-      const { error } =
-        await db.auth.resetPasswordForEmail(email, {
-          redirectTo: APP_URL
-        });
-
-      if (error) throw error;
-
-      showMessage(
-        "loginMessage",
-        "Revisa tu correo para recuperar tu contraseña."
-      );
-
-    } catch (error) {
-      showMessage(
-        "loginMessage",
-        "Error: " + error.message
-      );
-    }
-  }
-
-  // ==========================================
-  // GUARDAR NUEVA CONTRASEÑA
-  // ==========================================
-
-  async function saveNewPassword(event) {
-    event.preventDefault();
-
-    const password = $("newPassword").value;
-    const confirm = $("confirmPassword").value;
-
-    if (password.length < 6) {
-      showMessage(
-        "resetMessage",
-        "La contraseña debe tener al menos 6 caracteres."
-      );
-      return;
-    }
-
-    if (password !== confirm) {
-      showMessage(
-        "resetMessage",
-        "Las contraseñas no coinciden."
-      );
-      return;
-    }
-
-    try {
-      const { error } = await db.auth.updateUser({
-        password: password
-      });
-
-      if (error) throw error;
-
-      showMessage(
-        "resetMessage",
-        "Contraseña actualizada correctamente."
-      );
-
-      $("resetForm").reset();
-
-      setTimeout(() => {
-        showApp();
-      }, 1500);
-
-    } catch (error) {
-      showMessage(
-        "resetMessage",
-        "Error: " + error.message
-      );
-    }
-  }
-
-  // ==========================================
-  // ENTRAR AL PANEL
-  // ==========================================
-
-  async function enterApp() {
-    const { data, error } = await db.auth.getUser();
-
-    if (error || !data.user) {
-      currentUser = null;
-      appInitialized = false;
-      showLogin();
-      return;
-    }
-
-    currentUser = data.user;
-
-    showApp();
-
-    if ($("userLabel")) {
-      $("userLabel").textContent =
-        currentUser.email || "Administrador";
-    }
-
-    await loadClients();
-  }
-
-  // ==========================================
-  // CERRAR SESIÓN
-  // ==========================================
-
-  async function logoutUser() {
-    const { error } = await db.auth.signOut();
-
-    if (error) {
-      alert("No se pudo cerrar sesión: " + error.message);
-      return;
-    }
-
-    currentUser = null;
-    selectedClient = null;
-    clients = [];
-    appInitialized = false;
-
-    showLogin();
-  }
-
-  // ==========================================
-  // REGISTRAR CLIENTES
-  // ==========================================
-
-  async function saveClient(event) {
-    event.preventDefault();
-
-    if (!currentUser) {
-      alert("Debes iniciar sesión.");
-      return;
-    }
-
-    const name = $("clientName").value.trim();
-    const phone = $("clientPhone").value.trim();
-
-    if (!name) {
-      showMessage(
-        "clientMessage",
-        "Escribe el nombre del cliente."
-      );
-      return;
-    }
-
-    const button = $("saveClientBtn");
-    button.disabled = true;
-
-    try {
-      const { error } = await db
-        .from("clients")
-        .insert({
-          name: name,
-          phone: phone,
-          owner_id: currentUser.id
-        });
-
-      if (error) throw error;
-
-      $("clientForm").reset();
-
-      showMessage(
-        "clientMessage",
-        "Cliente registrado correctamente."
-      );
-
-      await loadClients();
-
-    } catch (error) {
-      showMessage(
-        "clientMessage",
-        "Error: " + error.message
-      );
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  // ==========================================
-  // CARGAR CLIENTES
-  // ==========================================
-
-  async function loadClients() {
-    if (!currentUser) return;
-
-    try {
-      const { data, error } = await db
-        .from("clients")
-        .select("id,name,phone,created_at")
-        .eq("owner_id", currentUser.id)
-        .order("created_at", {
-          ascending: false
-        });
-
-      if (error) throw error;
-
-      clients = data || [];
-      renderClients(clients);
-
-    } catch (error) {
-      showMessage(
-        "clientMessage",
-        "Error al cargar clientes: " + error.message
-      );
-    }
-  }
-
-  // ==========================================
-  // MOSTRAR CLIENTES
-  // ==========================================
-
-  function renderClients(list) {
-    const container = $("clientList");
-
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    if (list.length === 0) {
-      container.textContent = "No hay clientes registrados.";
-      return;
-    }
-
-    list.forEach(client => {
-      const card = document.createElement("div");
-      card.className = "client-item";
-
-      const name = document.createElement("strong");
-      name.textContent = client.name;
-
-      const phone = document.createElement("p");
-      phone.textContent = client.phone || "Sin teléfono";
-
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = "VER HISTORIAL";
-
-      button.addEventListener("click", () => {
-        selectClient(client);
-      });
-
-      card.appendChild(name);
-      card.appendChild(phone);
-      card.appendChild(button);
-
-      container.appendChild(card);
-    });
-  }
-
-  // ==========================================
-  // BUSCAR CLIENTES
-  // ==========================================
-
-  function searchClients() {
-    const search = $("searchClient").value
-      .toLowerCase()
-      .trim();
-
-    const filtered = clients.filter(client =>
-      client.name.toLowerCase().includes(search) ||
-      (client.phone || "").includes(search)
-    );
-
-    renderClients(filtered);
-  }
-
-  // ==========================================
-  // SELECCIONAR CLIENTE
-  // ==========================================
-
-  async function selectClient(client) {
-    selectedClient = client;
-
-    $("selectedClientLabel").textContent =
-      "Cliente seleccionado: " + client.name;
-
-    await loadServices();
-  }
-
-  // ==========================================
-  // GUARDAR SERVICIO
-  // ==========================================
-
-  async function saveService(event) {
-    event.preventDefault();
-
-    if (!currentUser || !selectedClient) {
-      showMessage(
-        "serviceMessage",
-        "Primero selecciona un cliente."
-      );
-      return;
-    }
-
-    const serviceName = $("serviceName").value.trim();
-    const notes = $("serviceNotes").value.trim();
-
-    if (!serviceName) {
-      showMessage(
-        "serviceMessage",
-        "Escribe el servicio realizado."
-      );
-      return;
-    }
-
-    const button = $("saveServiceBtn");
-    button.disabled = true;
-
-    try {
-      const { error } = await db
-        .from("client_services")
-        .insert({
-          client_id: selectedClient.id,
-          owner_id: currentUser.id,
-          service_name: serviceName,
-          notes: notes
-        });
-
-      if (error) throw error;
-
-      $("serviceForm").reset();
-
-      showMessage(
-        "serviceMessage",
-        "Servicio guardado correctamente."
-      );
-
-      await loadServices();
-
-    } catch (error) {
-      showMessage(
-        "serviceMessage",
-        "Error: " + error.message
-      );
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  // ==========================================
-  // CARGAR HISTORIAL
-  // ==========================================
-
-  async function loadServices() {
-    if (!selectedClient || !currentUser) return;
-
-    const container = $("serviceList");
-    container.textContent = "Cargando historial...";
-
-    try {
-      const { data, error } = await db
-        .from("client_services")
-        .select("id,service_name,notes,created_at")
-        .eq("client_id", selectedClient.id)
-        .eq("owner_id", currentUser.id)
-        .order("created_at", {
-          ascending: false
-        });
-
-      if (error) throw error;
-
-      container.innerHTML = "";
-
-      if (!data || data.length === 0) {
-        container.textContent =
-          "Este cliente todavía no tiene servicios registrados.";
-        return;
-      }
-
-      data.forEach(service => {
-        const item = document.createElement("div");
-        item.className = "service-item";
-
-        const title = document.createElement("strong");
-        title.textContent = service.service_name;
-
-        const notes = document.createElement("p");
-        notes.textContent = service.notes || "";
-
-        const date = document.createElement("small");
-        date.textContent = service.created_at
-          ? new Date(service.created_at).toLocaleDateString("es-PE")
-          : "";
-
-        item.appendChild(title);
-        item.appendChild(notes);
-        item.appendChild(date);
-
-        container.appendChild(item);
-      });
-
-    } catch (error) {
-      container.textContent =
-        "Error al cargar historial: " + error.message;
-    }
-  }
-
-  // ==========================================
-  // RECOMENDACIONES DE VISAGISMO
-  // ==========================================
-function getRecommendations() {
-
-  const face = $("faceShape").value;
-  const hair = $("hairType").value;
-  const style = $("style").value;
-
-  const selectedCut = $("selectedCut").textContent
-    .replace("Corte:", "")
-    .trim();
-
-  if (!face || !hair || !style) {
-    alert("Selecciona la forma del rostro, tipo de cabello y estilo.");
+  if (!email || !password) {
+    msg("message", "Escribe tu correo y contraseña.");
     return;
   }
 
-  const recommendations = {
-    ovalado: [
-      "Quiff texturizado",
-      "Crop francés",
-      "Slick Back",
-      "Mid Fade",
-      "Taper Fade"
-    ],
+  $("loginBtn").disabled = true;
+  msg("message", "Ingresando...");
 
-    redondo: [
-      "Pompadour con volumen",
-      "Quiff alto",
-      "Side Part",
-      "High Fade",
-      "Flequillo corto texturizado"
-    ],
+  try {
+    const { data, error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    cuadrado: [
-      "Crew Cut",
-      "Buzz Cut degradado",
-      "Slick Back",
-      "Low Fade",
-      "Crop texturizado"
-    ],
+    if (error) throw error;
 
-    alargado: [
-      "French Crop",
-      "Fringe con textura",
-      "Side Part bajo",
-      "Low Fade",
-      "Volumen moderado"
-    ],
+    if (!data.session) {
+      throw new Error("No se pudo iniciar sesión.");
+    }
 
-    triangular: [
-      "Quiff",
-      "Flequillo texturizado",
-      "Taper Fade",
-      "Capas superiores"
-    ],
+    recoveryMode = false;
+    showOnly("app");
+    await loadClients();
 
-    diamante: [
-      "Fringe texturizado",
-      "Bro Flow",
-      "Side Part",
-      "Taper Fade",
-      "Quiff suave"
-    ]
+  } catch (e) {
+    msg("message", "Error de acceso: " + e.message);
+  } finally {
+    $("loginBtn").disabled = false;
+  }
+}
+
+/* RECUPERAR CONTRASEÑA */
+
+async function forgotPassword() {
+  const email = $("email").value.trim();
+
+  if (!email) {
+    msg("message", "Escribe tu correo electrónico.");
+    return;
+  }
+
+  $("forgotBtn").disabled = true;
+  msg("message", "Enviando enlace...");
+
+  try {
+    const { error } = await db.auth.resetPasswordForEmail(email, {
+      redirectTo: APP_URL
+    });
+
+    if (error) throw error;
+
+    msg("message", "Revisa tu correo y la carpeta de spam.");
+
+  } catch (e) {
+    msg("message", "No se pudo enviar: " + e.message);
+  } finally {
+    $("forgotBtn").disabled = false;
+  }
+}
+
+async function saveNewPassword() {
+  const p = $("newPassword").value;
+  const c = $("confirmPassword").value;
+
+  if (p.length < 6) {
+    msg("resetMessage", "La contraseña debe tener mínimo 6 caracteres.");
+    return;
+  }
+
+  if (p !== c) {
+    msg("resetMessage", "Las contraseñas no coinciden.");
+    return;
+  }
+
+  $("savePasswordBtn").disabled = true;
+
+  try {
+    const { error } = await db.auth.updateUser({
+      password: p
+    });
+
+    if (error) throw error;
+
+    msg("resetMessage", "Contraseña cambiada correctamente.");
+
+    setTimeout(async () => {
+      await db.auth.signOut();
+      recoveryMode = false;
+      showOnly("login");
+    }, 1600);
+
+  } catch (e) {
+    msg("resetMessage", "Error: " + e.message);
+  } finally {
+    $("savePasswordBtn").disabled = false;
+  }
+}
+
+/* CERRAR SESIÓN */
+
+async function logout() {
+  const { error } = await db.auth.signOut();
+
+  if (error) {
+    msg("message", error.message);
+    return;
+  }
+
+  currentClient = null;
+  allClients = [];
+
+  $("clients").innerHTML = "";
+  $("serviceSection").classList.add("hidden");
+
+  showOnly("login");
+  msg("message", "Sesión cerrada.");
+}
+
+/* CLIENTES */
+
+async function loadClients() {
+  msg("saveMessage", "Cargando clientes...");
+
+  try {
+    const { data, error } = await db
+      .from("clients")
+      .select("id,name,phone,created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    allClients = data || [];
+    renderClients();
+
+    msg("saveMessage", "");
+
+  } catch (e) {
+    msg("saveMessage", "Error al cargar clientes: " + e.message);
+  }
+}
+
+function renderClients() {
+  const q = $("search").value.toLowerCase().trim();
+
+  const rows = allClients.filter(c =>
+    (c.name || "").toLowerCase().includes(q) ||
+    (c.phone || "").toLowerCase().includes(q)
+  );
+
+  $("clients").innerHTML = rows.map(c => `
+    <div class="client">
+      <strong>${esc(c.name)}</strong>
+      <p>${esc(c.phone || "Sin teléfono")}</p>
+      <button type="button" data-id="${esc(c.id)}">
+        SELECCIONAR CLIENTE
+      </button>
+    </div>
+  `).join("") || "<p class='small'>No hay clientes registrados.</p>";
+
+  $("clients").querySelectorAll("[data-id]").forEach(b => {
+    b.addEventListener("click", () => selectClient(b.dataset.id));
+  });
+}
+
+async function addClient() {
+  const name = $("name").value.trim();
+  const phone = $("phone").value.trim();
+
+  if (!name) {
+    msg("saveMessage", "Escribe el nombre del cliente.");
+    return;
+  }
+
+  try {
+    const { data, error: userError } = await db.auth.getUser();
+
+    if (userError || !data.user) {
+      throw new Error("No se pudo verificar al administrador.");
+    }
+
+    const { error } = await db.from("clients").insert({
+      name,
+      phone,
+      owner_id: data.user.id
+    });
+
+    if (error) throw error;
+
+    $("name").value = "";
+    $("phone").value = "";
+
+    msg("saveMessage", "Cliente registrado.");
+    await loadClients();
+
+  } catch (e) {
+    msg("saveMessage", "Error: " + e.message);
+  }
+}
+
+/* SELECCIONAR CLIENTE */
+
+function selectClient(id) {
+  currentClient = allClients.find(c => c.id === id);
+
+  if (!currentClient) return;
+
+  $("serviceSection").classList.remove("hidden");
+
+  $("selectedClient").textContent =
+    "Cliente: " + currentClient.name;
+
+  $("history").innerHTML = "";
+
+  resetConsultation();
+
+  $("serviceSection").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function resetConsultation() {
+  [
+    "hairCurrent",
+    "faceShape",
+    "hairDesired",
+    "style"
+  ].forEach(id => $(id).value = "");
+
+  [
+    "desiredCut",
+    "observations"
+  ].forEach(id => $(id).value = "");
+
+  $("recommendations").classList.add("hidden");
+  $("faceAnalysis").classList.add("hidden");
+
+  msg("faceMessage", "");
+  msg("consultMessage", "");
+
+  clearPhoto();
+}
+
+/* FOTOGRAFÍA */
+
+function clearPhoto() {
+  photoDataUrl = "";
+  lastAnalysis = null;
+
+  $("photoCamera").value = "";
+  $("photoFile").value = "";
+
+  $("photoPreview").removeAttribute("src");
+  $("photoPreview").classList.add("hidden");
+
+  $("faceOverlay").classList.add("hidden");
+  $("photoEmpty").classList.remove("hidden");
+  $("faceAnalysis").classList.add("hidden");
+
+  msg("faceMessage", "");
+}
+
+function loadPhoto(file) {
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    msg("faceMessage", "Selecciona una imagen válida.");
+    return;
+  }
+
+  if (file.size > 12 * 1024 * 1024) {
+    msg("faceMessage", "La imagen supera 12 MB. Elige una más ligera.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = e => {
+    photoDataUrl = e.target.result;
+
+    $("photoPreview").src = photoDataUrl;
+    $("photoPreview").classList.remove("hidden");
+
+    $("photoEmpty").classList.add("hidden");
+    $("faceOverlay").classList.add("hidden");
+    $("faceAnalysis").classList.add("hidden");
+
+    lastAnalysis = null;
+
+    msg("faceMessage", "Fotografía cargada. Pulsa ANALIZAR ROSTRO.");
   };
 
-  const result = recommendations[face] || [];
+  reader.onerror = () => {
+    msg("faceMessage", "No se pudo leer la fotografía.");
+  };
 
-  const container = $("recommendations");
-  container.innerHTML = "";
-
-  const heading = document.createElement("h3");
-  heading.textContent = "RECOMENDACIONES DK";
-
-  const description = document.createElement("p");
-
-  description.textContent =
-    "Rostro: " + face +
-    " | Cabello: " + hair +
-    " | Estilo: " + style +
-    " | Corte seleccionado: " +
-    (selectedCut || "Ninguno");
-
-  const list = document.createElement("ul");
-
-  result.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = item;
-    list.appendChild(li);
-  });
-
-  const note = document.createElement("p");
-
-  note.textContent =
-    "DK VISAGISMO IA: recomendaciones orientativas " +
-    "según las características del cliente y el corte elegido.";
-
-  container.appendChild(heading);
-  container.appendChild(description);
-  container.appendChild(list);
-  container.appendChild(note);
-
-  container.classList.remove("hidden");
+  reader.readAsDataURL(file);
 }
-  // =================================
-// FUNCIONES DEL CATÁLOGO DK BARBER
-// =================================
 
-// FILTRO DE CORTES POR TIPO DE CABELLO
-
-document.querySelectorAll(".hair-type-btn").forEach(button => {
-
-  button.addEventListener("click", function() {
-
-    const hair = this.dataset.hair;
-
-    document.querySelectorAll(".hair-type-btn").forEach(btn => {
-      btn.classList.remove("selected");
-    });
-
-    this.classList.add("selected");
-
-    $("selectedHair").textContent =
-      "Tipo de cabello: " + hair.toUpperCase();
-
-    document.querySelectorAll(".haircut-card").forEach(card => {
-
-      const compatibleHair = card.dataset.haircuts || "";
-
-      const hairTypes = compatibleHair.split(",").map(type => type.trim());
-
-      card.style.display = hairTypes.includes(hair) ? "" : "none";
-
-    });
-
-  });
-
+$("photoCamera").addEventListener("change", e => {
+  if (e.target.files[0]) {
+    $("photoFile").value = "";
+    loadPhoto(e.target.files[0]);
+  }
 });
 
-  // ==========================================
-  // VISTA PREVIA DE FOTOGRAFÍA
-  // ==========================================
+$("photoFile").addEventListener("change", e => {
+  if (e.target.files[0]) {
+    $("photoCamera").value = "";
+    loadPhoto(e.target.files[0]);
+  }
+});
 
-  function previewPhoto(event) {
-    const file = event.target.files[0];
-    const preview = $("photoPreview");
+/* MODELO DE ANÁLISIS FACIAL */
 
-    if (!file || !preview) return;
+async function loadFaceModel() {
+  if (faceLandmarker) return faceLandmarker;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Selecciona una imagen válida.");
-      event.target.value = "";
+  msg("faceMessage", "Cargando modelo de análisis facial...");
+
+  const vision = await import(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"
+  );
+
+  const fileset = await vision.FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+  );
+
+  faceLandmarker = await vision.FaceLandmarker.createFromOptions(
+    fileset,
+    {
+      baseOptions: {
+        modelAssetPath:
+          "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+        delegate: "CPU"
+      },
+      runningMode: "IMAGE",
+      numFaces: 1
+    }
+  );
+
+  return faceLandmarker;
+}
+  /* MEDIDAS Y ANÁLISIS FACIAL */
+
+function pct(a,b,total){
+  return total > 0
+    ? Math.round(Math.abs(b-a)/total*100) + "%"
+    : "No disponible";
+}
+
+async function analyzeFace(){
+  if(!photoDataUrl){
+    msg("faceMessage","Primero toma o sube una fotografía.");
+    return;
+  }
+
+  const btn=$("analyzeFaceBtn");
+  btn.disabled=true;
+
+  try{
+    const model=await loadFaceModel();
+    const img=$("photoPreview");
+
+    if(!img.complete || !img.naturalWidth){
+      throw new Error("La fotografía todavía no está lista.");
+    }
+
+    const result=model.detect(img);
+
+    if(!result.faceLandmarks || !result.faceLandmarks.length){
+      throw new Error("No se detectó el rostro. Usa una foto frontal con buena luz.");
+    }
+
+    const pts=result.faceLandmarks[0];
+
+    const point=i=>({
+      x:pts[i].x*img.naturalWidth,
+      y:pts[i].y*img.naturalHeight
+    });
+
+    const top=point(10);
+    const brow=point(168);
+    const noseBase=point(2);
+    const chin=point(152);
+    const left=point(234);
+    const right=point(454);
+    const noseTip=point(1);
+
+    const faceH=Math.max(1,chin.y-top.y);
+    const faceW=Math.max(1,right.x-left.x);
+
+    const upper=Math.abs(brow.y-top.y);
+    const middle=Math.abs(noseBase.y-brow.y);
+    const lower=Math.abs(chin.y-noseBase.y);
+    const sum=upper+middle+lower || 1;
+
+    const ratio=(faceW/faceH).toFixed(2);
+
+    let estimate="Ovalado (estimación orientativa)";
+
+    if(faceW/faceH > .88){
+      estimate="Redondo o ancho (estimación orientativa)";
+    }else if(faceW/faceH < .70){
+      estimate="Alargado (estimación orientativa)";
+    }
+
+    $("ratioValue").textContent=ratio;
+    $("upperValue").textContent=Math.round(upper/sum*100)+"%";
+    $("middleValue").textContent=Math.round(middle/sum*100)+"%";
+    $("lowerValue").textContent=Math.round(lower/sum*100)+"%";
+    $("widthValue").textContent=Math.round(faceW)+" px";
+    $("noseValue").textContent=Math.round(Math.abs(noseTip.y-brow.y))+" px aprox.";
+
+    $("faceEstimate").textContent=
+      "Forma sugerida: "+estimate+
+      ". Confirma el diagnóstico en el selector de rostro.";
+
+    drawOverlay(img,pts);
+
+    lastAnalysis={
+      ratio,
+      upper:Math.round(upper/sum*100),
+      middle:Math.round(middle/sum*100),
+      lower:Math.round(lower/sum*100),
+      width:Math.round(faceW),
+      nose:Math.round(Math.abs(noseTip.y-brow.y)),
+      estimate
+    };
+
+    $("faceAnalysis").classList.remove("hidden");
+
+    msg("faceMessage","Análisis facial completado. Revisa los puntos y confirma el diagnóstico.");
+
+  }catch(e){
+    msg("faceMessage","No se pudo analizar: "+e.message);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+/* DIBUJAR GUÍAS SOBRE EL ROSTRO */
+
+function drawOverlay(img,pts){
+  const canvas=$("faceOverlay");
+  const width=img.clientWidth;
+  const height=img.clientHeight;
+
+  canvas.width=Math.round(width*devicePixelRatio);
+  canvas.height=Math.round(height*devicePixelRatio);
+
+  canvas.style.width=width+"px";
+  canvas.style.height=height+"px";
+
+  const ctx=canvas.getContext("2d");
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+
+  const scale=Math.min(
+    width/img.naturalWidth,
+    height/img.naturalHeight
+  );
+
+  const drawW=img.naturalWidth*scale;
+  const drawH=img.naturalHeight*scale;
+
+  const offX=(width-drawW)/2;
+  const offY=(height-drawH)/2;
+
+  const xy=i=>({
+    x:offX+pts[i].x*drawW,
+    y:offY+pts[i].y*drawH
+  });
+
+  ctx.lineWidth=1.5;
+  ctx.strokeStyle="#00e879";
+  ctx.fillStyle="#ffffff";
+
+  [[10,168],[168,2],[2,152],[234,454],[33,263]].forEach(pair=>{
+    const a=xy(pair[0]);
+    const b=xy(pair[1]);
+
+    ctx.beginPath();
+    ctx.moveTo(a.x,a.y);
+    ctx.lineTo(b.x,b.y);
+    ctx.stroke();
+  });
+
+  const guides=[10,168,2,152];
+
+  ctx.setLineDash([5,4]);
+
+  guides.forEach(i=>{
+    const p=xy(i);
+    ctx.beginPath();
+    ctx.moveTo(0,p.y);
+    ctx.lineTo(width,p.y);
+    ctx.stroke();
+  });
+
+  ctx.setLineDash([]);
+
+  [10,168,2,152,234,454,1,33,263].forEach(i=>{
+    const p=xy(i);
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,3,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  canvas.classList.remove("hidden");
+}
+
+/* RECOMENDACIONES DE CORTE */
+
+function recommend(){
+  const face=$("faceShape").value;
+  const style=$("style").value;
+  const hair=$("hairCurrent").value;
+
+  if(!face || !style || !hair){
+    msg("consultMessage","Selecciona tipo de cabello, forma del rostro y estilo.");
+    return;
+  }
+
+  const map={
+    Ovalado:["Quiff texturizado","Crop francés","Slick Back","Mid Fade"],
+    Redondo:["Pompadour","Quiff con volumen","Fade alto","Crop texturizado"],
+    Cuadrado:["Buzz Cut degradado","Crew Cut","Taper Fade","Quiff"],
+    Alargado:["Crop francés","Fringe texturizado","Fade bajo","Corte en capas"],
+    Triangular:["Quiff con volumen","Corte en capas","Taper Fade","Texturizado"],
+    Diamante:["Fringe texturizado","Mullet moderno","Taper Fade","Quiff"]
+  };
+
+  const extra={
+    moderno:"Mid Fade, Mullet moderno y Quiff texturizado.",
+    clasico:"Corte clásico, Side Part y Slick Back.",
+    juvenil:"Crop francés, Burst Fade y Texturizado.",
+    formal:"Slick Back, Side Part y Taper Fade.",
+    atrevido:"Mullet moderno, Mohicano y diseños."
+  };
+
+  const list=map[face] || [];
+
+  $("recommendations").innerHTML=`
+    <h3>RECOMENDACIONES PARA EL CLIENTE</h3>
+    <p><b>Rostro:</b> ${esc(face)}</p>
+    <p><b>Cabello actual:</b> ${esc(hair)}</p>
+    <p><b>Estilo buscado:</b> ${esc(style)}</p>
+    <p><b>Cortes sugeridos:</b></p>
+    <ul>${list.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+    <p><b>Otras opciones:</b> ${esc(extra[style]||"")}</p>
+    <p><b>Corte que desea:</b> ${esc($("desiredCut").value||"Sin preferencia indicada")}</p>
+  `;
+
+  $("recommendations").classList.remove("hidden");
+  msg("consultMessage","Recomendaciones generadas. Puedes guardar la asesoría.");
+}
+
+/* GUARDAR ASESORÍA */
+
+async function saveConsultation(){
+  if(!currentClient){
+    msg("consultMessage","Primero selecciona un cliente.");
+    return;
+  }
+
+  const hair=$("hairCurrent").value;
+  const face=$("faceShape").value;
+  const style=$("style").value;
+
+  if(!hair || !face || !style){
+    msg("consultMessage","Completa cabello actual, rostro y estilo.");
+    return;
+  }
+
+  const analysis=lastAnalysis
+    ? "Proporciones estimadas: ancho/alto "+lastAnalysis.ratio+
+      "; tercios "+lastAnalysis.upper+"% / "+
+      lastAnalysis.middle+"% / "+lastAnalysis.lower+
+      "%; anchura "+lastAnalysis.width+
+      " px; referencia nariz "+lastAnalysis.nose+
+      " px; sugerencia: "+lastAnalysis.estimate
+    : "Análisis biométrico no realizado.";
+
+  const notes=[
+    "ASESORÍA DK VISAGISMO IA",
+    "Rostro: "+face,
+    "Cabello actual: "+hair,
+    "Cabello deseado: "+$("hairDesired").value,
+    "Estilo: "+style,
+    "Corte deseado: "+$("desiredCut").value,
+    analysis,
+    "Observaciones: "+$("observations").value,
+    "Recomendaciones: "+$("recommendations").innerText
+  ].join("\n");
+
+  const btn=$("saveConsultationBtn");
+  btn.disabled=true;
+
+  try{
+    const {data,error:userError}=await db.auth.getUser();
+
+    if(userError || !data.user){
+      throw new Error("No se pudo verificar la sesión.");
+    }
+
+    const {error}=await db.from("client_services").insert({
+      client_id:currentClient.id,
+      owner_id:data.user.id,
+      service_name:"Asesoría de visagismo",
+      notes:notes
+    });
+
+    if(error) throw error;
+
+    msg("consultMessage","¡Asesoría guardada correctamente!");
+    await loadHistory();
+
+  }catch(e){
+    msg("consultMessage","No se pudo guardar: "+e.message);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+/* HISTORIAL */
+
+async function loadHistory(){
+  if(!currentClient) return;
+
+  try{
+    const {data,error}=await db
+      .from("client_services")
+      .select("service_name,notes,created_at")
+      .eq("client_id",currentClient.id)
+      .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    $("history").innerHTML=
+      "<h3>Historial del cliente</h3>"+
+      ((data||[]).map(x=>`
+        <div class="client">
+          <strong>${esc(x.service_name)}</strong>
+          <p style="white-space:pre-wrap">${esc(x.notes||"")}</p>
+          <span class="small">${new Date(x.created_at).toLocaleString("es-PE")}</span>
+        </div>
+      `).join("") || "<p class='small'>Todavía no hay registros.</p>");
+
+  }catch(e){
+    $("history").textContent="Error al cargar historial: "+e.message;
+  }
+}
+
+/* INSTAGRAM */
+
+function openInstagram(){
+  const value=$("instagramUrl").value.trim();
+
+  if(!value){
+    msg("instagramMessage","Primero pega el enlace de tu perfil de Instagram.");
+    return;
+  }
+
+  try{
+    const url=new URL(value);
+
+    if(url.protocol!=="https:" ||
+       !/(^|\.)instagram\.com$/i.test(url.hostname)){
+      throw new Error();
+    }
+
+    window.open(url.href,"_blank","noopener");
+    msg("instagramMessage","Abriendo Instagram...");
+
+  }catch(e){
+    msg("instagramMessage","Pega un enlace válido de Instagram.");
+  }
+}
+
+/* CONECTAR BOTONES */
+
+function bindEvents(){
+  $("loginBtn").addEventListener("click",loginUser);
+  $("forgotBtn").addEventListener("click",forgotPassword);
+  $("savePasswordBtn").addEventListener("click",saveNewPassword);
+  $("logoutBtn").addEventListener("click",logout);
+  $("saveBtn").addEventListener("click",addClient);
+
+  $("search").addEventListener("input",renderClients);
+  $("clearPhoto").addEventListener("click",clearPhoto);
+  $("analyzeFaceBtn").addEventListener("click",analyzeFace);
+  $("recommendBtn").addEventListener("click",recommend);
+  $("saveConsultationBtn").addEventListener("click",saveConsultation);
+  $("historyBtn").addEventListener("click",loadHistory);
+  $("instagramBtn").addEventListener("click",openInstagram);
+}
+
+/* SESIÓN Y ARRANQUE */
+
+db.auth.onAuthStateChange((event,session)=>{
+  if(event==="PASSWORD_RECOVERY"){
+    recoveryMode=true;
+    showOnly("resetPassword");
+  }else if(session && !recoveryMode){
+    showOnly("app");
+  }else if(!session && !recoveryMode){
+    showOnly("login");
+  }
+});
+
+bindEvents();
+
+async function initializeApp(){
+  try{
+    const {data,error}=await db.auth.getSession();
+
+    if(error) throw error;
+
+    const params=new URLSearchParams(
+      window.location.hash.replace(/^#/,"")
+    );
+
+    if(params.get("type")==="recovery"){
+      recoveryMode=true;
+      showOnly("resetPassword");
       return;
     }
 
-    const reader = new FileReader();
+    if(data.session && !recoveryMode){
+      showOnly("app");
+      await loadClients();
+    }else if(!recoveryMode){
+      showOnly("login");
+    }
 
-    reader.onload = function(e) {
-      preview.src = e.target.result;
-      preview.classList.remove("hidden");
-    };
-
-    reader.readAsDataURL(file);
+  }catch(e){
+    showOnly("login");
+    msg("message","Error al iniciar: "+e.message);
   }
+}
 
-})();
+initializeApp();
 </script>
 </body>
 </html>
