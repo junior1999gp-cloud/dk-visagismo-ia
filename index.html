@@ -676,6 +676,8 @@ async function analyzeFace(){
   btn.disabled=true;
 
   try{
+    msg("faceMessage","Analizando rostro...");
+
     const model=await loadFaceModel();
     const img=$("photoPreview");
 
@@ -683,10 +685,45 @@ async function analyzeFace(){
       throw new Error("La fotografía todavía no está lista.");
     }
 
-    const result=model.detect(img);
+    // PRIMER INTENTO: fotografía original
+    let result=model.detect(img);
+
+    // SEGUNDO INTENTO: mejorar iluminación y contraste
+    if(!result.faceLandmarks || !result.faceLandmarks.length){
+
+      const canvas=document.createElement("canvas");
+      canvas.width=img.naturalWidth;
+      canvas.height=img.naturalHeight;
+
+      const ctx=canvas.getContext("2d");
+
+      ctx.filter="brightness(1.35) contrast(1.20)";
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      ctx.filter="none";
+
+      result=model.detect(canvas);
+    }
+
+    // TERCER INTENTO: iluminación más intensa
+    if(!result.faceLandmarks || !result.faceLandmarks.length){
+
+      const canvas=document.createElement("canvas");
+      canvas.width=img.naturalWidth;
+      canvas.height=img.naturalHeight;
+
+      const ctx=canvas.getContext("2d");
+
+      ctx.filter="brightness(1.60) contrast(1.30)";
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      ctx.filter="none";
+
+      result=model.detect(canvas);
+    }
 
     if(!result.faceLandmarks || !result.faceLandmarks.length){
-      throw new Error("No se detectó el rostro. Usa una foto frontal con buena luz.");
+      throw new Error(
+        "No se detectó el rostro. Intenta una foto frontal, enfocada y sin sombras fuertes."
+      );
     }
 
     const pts=result.faceLandmarks[0];
@@ -727,7 +764,8 @@ async function analyzeFace(){
     $("middleValue").textContent=Math.round(middle/sum*100)+"%";
     $("lowerValue").textContent=Math.round(lower/sum*100)+"%";
     $("widthValue").textContent=Math.round(faceW)+" px";
-    $("noseValue").textContent=Math.round(Math.abs(noseTip.y-brow.y))+" px aprox.";
+    $("noseValue").textContent=
+      Math.round(Math.abs(noseTip.y-brow.y))+" px aprox.";
 
     $("faceEstimate").textContent=
       "Forma sugerida: "+estimate+
@@ -747,7 +785,10 @@ async function analyzeFace(){
 
     $("faceAnalysis").classList.remove("hidden");
 
-    msg("faceMessage","Análisis facial completado. Revisa los puntos y confirma el diagnóstico.");
+    msg(
+      "faceMessage",
+      "Análisis facial completado. Revisa los puntos y confirma el diagnóstico."
+    );
 
   }catch(e){
     msg("faceMessage","No se pudo analizar: "+e.message);
