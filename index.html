@@ -717,6 +717,57 @@ $("photoFile").addEventListener("change", e => {
     loadPhoto(e.target.files[0]);
   }
 });
+  // CARGAR FOTO DE PERFIL Y CRANEO
+
+let profilePhotoDataUrl = "";
+
+function loadProfilePhoto(file) {
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    msg("profileMessage", "Selecciona una imagen válida.");
+    return;
+  }
+
+  if (file.size > 12 * 1024 * 1024) {
+    msg("profileMessage", "La imagen supera 12 MB.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = e => {
+    profilePhotoDataUrl = e.target.result;
+
+    $("profilePreview").src = profilePhotoDataUrl;
+    $("profilePreview").classList.remove("hidden");
+
+    $("profileEmpty").classList.add("hidden");
+    $("profileResults").classList.add("hidden");
+
+    msg("profileMessage", "Foto lateral cargada correctamente.");
+  };
+
+  reader.onerror = () => {
+    msg("profileMessage", "No se pudo leer la fotografía.");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+$("profileCamera").addEventListener("change", e => {
+  if (e.target.files[0]) {
+    $("profileFile").value = "";
+    loadProfilePhoto(e.target.files[0]);
+  }
+});
+
+$("profileFile").addEventListener("change", e => {
+  if (e.target.files[0]) {
+    $("profileCamera").value = "";
+    loadProfilePhoto(e.target.files[0]);
+  }
+});
   /* MODELO DE ANÁLISIS FACIAL */
 
 async function loadFaceModel() {
