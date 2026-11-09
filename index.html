@@ -1049,33 +1049,8 @@ async function loadHistory(){
 
 /* INSTAGRAM */
 
-function openInstagram(){
-  const instagramURL = "https://www.instagram.com/DAVITHEDU21/";
+INSTAGRAM */
 
-  window.open(instagramURL, "_blank");
-}
-  const value=$("instagramUrl").value.trim();
-
-  if(!value){
-    msg("instagramMessage","Primero pega el enlace de tu perfil de Instagram.");
-    return;
-  }
-
-  try{
-    const url=new URL(value);
-
-    if(url.protocol!=="https:" ||
-       !/(^|\.)instagram\.com$/i.test(url.hostname)){
-      throw new Error();
-    }
-
-    window.open(url.href,"_blank","noopener");
-    msg("instagramMessage","Abriendo Instagram...");
-
-  }catch(e){
-    msg("instagramMessage","Pega un enlace válido de Instagram.");
-  }
-}
 
 /* CONECTAR BOTONES */
 
