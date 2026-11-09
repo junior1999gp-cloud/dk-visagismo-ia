@@ -348,7 +348,7 @@ async function loginUser() {
 /* RECUPERAR CONTRASEÑA */
 
 async function forgotPassword() {
-  const email = $("email").value.trim();
+  const email = $("email").value.trim().toLowerCase();
 
   if (!email) {
     msg("message", "Escribe tu correo electrónico.");
@@ -356,7 +356,7 @@ async function forgotPassword() {
   }
 
   $("forgotBtn").disabled = true;
-  msg("message", "Enviando enlace...");
+  msg("message", "Enviando enlace de recuperación...");
 
   try {
     const { error } = await db.auth.resetPasswordForEmail(email, {
@@ -365,45 +365,74 @@ async function forgotPassword() {
 
     if (error) throw error;
 
-    msg("message", "Revisa tu correo y la carpeta de spam.");
+    msg(
+      "message",
+      "Solicitud enviada. Revisa tu correo y la carpeta de spam."
+    );
 
   } catch (e) {
-    msg("message", "No se pudo enviar: " + e.message);
+    msg("message", "Error al recuperar contraseña: " + e.message);
   } finally {
     $("forgotBtn").disabled = false;
   }
 }
 
-async function saveNewPassword() {
-  const p = $("newPassword").value;
-  const c = $("confirmPassword").value;
 
-  if (p.length < 6) {
-    msg("resetMessage", "La contraseña debe tener mínimo 6 caracteres.");
+/* GUARDAR NUEVA CONTRASEÑA */
+
+async function saveNewPassword() {
+  const password = $("newPassword").value;
+  const confirm = $("confirmPassword").value;
+
+  if (password.length < 8) {
+    msg("resetMessage", "Utiliza mínimo 8 caracteres.");
     return;
   }
 
-  if (p !== c) {
+  if (password !== confirm) {
     msg("resetMessage", "Las contraseñas no coinciden.");
     return;
   }
 
   $("savePasswordBtn").disabled = true;
+  msg("resetMessage", "Actualizando contraseña...");
 
   try {
+    const { data: sessionData, error: sessionError } =
+      await db.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    if (!sessionData.session) {
+      throw new Error(
+        "El enlace de recuperación venció o no es válido. Solicita uno nuevo."
+      );
+    }
+
     const { error } = await db.auth.updateUser({
-      password: p
+      password: password
     });
 
     if (error) throw error;
 
-    msg("resetMessage", "Contraseña cambiada correctamente.");
+    msg("resetMessage", "¡Contraseña actualizada correctamente!");
+
+    $("newPassword").value = "";
+    $("confirmPassword").value = "";
 
     setTimeout(async () => {
       await db.auth.signOut();
       recoveryMode = false;
+
+      history.replaceState(
+        null,
+        document.title,
+        window.location.pathname + window.location.search
+      );
+
       showOnly("login");
-    }, 1600);
+      msg("message", "Ingresa con tu nueva contraseña.");
+    }, 1800);
 
   } catch (e) {
     msg("resetMessage", "Error: " + e.message);
@@ -1076,17 +1105,30 @@ function bindEvents(){
 
 /* SESIÓN Y ARRANQUE */
 
-db.auth.onAuthStateChange((event,session)=>{
-  if(event==="PASSWORD_RECOVERY"){
-    recoveryMode=true;
+db.auth.onAuthStateChange((event, session) => {
+
+  if (event === "PASSWORD_RECOVERY") {
+    recoveryMode = true;
     showOnly("resetPassword");
-  }else if(session && !recoveryMode){
+
+    history.replaceState(
+      null,
+      document.title,
+      window.location.pathname + window.location.search
+    );
+
+    return;
+  }
+
+  if (session && !recoveryMode) {
     showOnly("app");
-  }else if(!session && !recoveryMode){
+  }
+
+  if (!session && !recoveryMode) {
     showOnly("login");
   }
-});
 
+});
 bindEvents();
 
 async function initializeApp(){
