@@ -186,6 +186,69 @@ hr{border:0;border-top:1px solid #244b3a;margin:20px 0}
     </div>
 
     <hr>
+    <!-- ESCANER DE PERFIL Y CRANEO -->
+
+<div class="analysis-box" id="profileScanner">
+
+  <h2>ESCÁNER DE PERFIL Y CRÁNEO</h2>
+
+  <p class="small">
+    Análisis complementario de la estructura craneal mediante fotografía lateral.
+  </p>
+
+  <label for="profileCamera">
+    TOMAR FOTO DE PERFIL O COSTADO
+  </label>
+
+  <input
+    id="profileCamera"
+    type="file"
+    accept="image/*"
+    capture="environment"
+  >
+
+  <label for="profileFile">
+    O SUBIR FOTO DESDE ARCHIVOS
+  </label>
+
+  <input
+    id="profileFile"
+    type="file"
+    accept="image/*"
+  >
+
+  <div class="photo-stage">
+
+    <div id="profileEmpty" class="photo-empty">
+      La fotografía lateral aparecerá aquí.
+    </div>
+
+    <img
+      id="profilePreview"
+      class="hidden"
+      alt="Perfil lateral del cliente"
+    >
+
+  </div>
+
+  <button id="clearProfile" type="button" class="secondary">
+    ELIMINAR FOTO DE PERFIL
+  </button>
+
+  <button id="analyzeProfileBtn" type="button">
+    ANALIZAR PERFIL Y CRÁNEO
+  </button>
+
+  <p id="profileMessage" class="small"></p>
+
+  <div id="profileResults" class="result hidden">
+    <h3>RESULTADO DEL ANÁLISIS CRANEAL</h3>
+    <div id="profileDiagnosis"></div>
+  </div>
+
+</div>
+
+<hr>
 
     <p class="section-kicker">4. OBJETIVO Y RECOMENDACIONES</p>
 
