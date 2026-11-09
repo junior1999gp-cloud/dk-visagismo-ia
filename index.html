@@ -137,8 +137,7 @@ hr{border:0;border-top:1px solid #244b3a;margin:20px 0}
     </button>
 
     <p id="faceMessage" class="small"></p>
-
-    <div id="faceAnalysis" class="analysis-box hidden">
+        <div id="faceAnalysis" class="analysis-box hidden">
       <h3>LECTURA BIOMÉTRICA FACIAL</h3>
 
       <p class="small">
@@ -256,12 +255,12 @@ hr{border:0;border-top:1px solid #244b3a;margin:20px 0}
   </div>
 </section>
 </main>
+
 <script>
 "use strict";
 
 const SUPABASE_URL = "https://mzbadavawmsbacvfunso.supabase.co";
 
-/* Usa aquí tu clave pública de Supabase */
 const SUPABASE_KEY = "sb_publishable_a8AgwyUc_wGJKDhilKA8HQ_nOGOC-ce";
 
 const APP_URL = "https://junior1999gp-cloud.github.io/dk-visagismo-ia/";
@@ -412,8 +411,7 @@ async function saveNewPassword() {
     $("savePasswordBtn").disabled = false;
   }
 }
-
-/* CERRAR SESIÓN */
+  /* CERRAR SESIÓN */
 
 async function logout() {
   const { error } = await db.auth.signOut();
@@ -627,8 +625,7 @@ $("photoFile").addEventListener("change", e => {
     loadPhoto(e.target.files[0]);
   }
 });
-
-/* MODELO DE ANÁLISIS FACIAL */
+  /* MODELO DE ANÁLISIS FACIAL */
 
 async function loadFaceModel() {
   if (faceLandmarker) return faceLandmarker;
@@ -658,7 +655,8 @@ async function loadFaceModel() {
 
   return faceLandmarker;
 }
-  /* MEDIDAS Y ANÁLISIS FACIAL */
+
+/* MEDIDAS Y ANÁLISIS FACIAL */
 
 function pct(a,b,total){
   return total > 0
@@ -685,10 +683,8 @@ async function analyzeFace(){
       throw new Error("La fotografía todavía no está lista.");
     }
 
-    // PRIMER INTENTO: fotografía original
     let result=model.detect(img);
 
-    // SEGUNDO INTENTO: mejorar iluminación y contraste
     if(!result.faceLandmarks || !result.faceLandmarks.length){
 
       const canvas=document.createElement("canvas");
@@ -704,7 +700,6 @@ async function analyzeFace(){
       result=model.detect(canvas);
     }
 
-    // TERCER INTENTO: iluminación más intensa
     if(!result.faceLandmarks || !result.faceLandmarks.length){
 
       const canvas=document.createElement("canvas");
@@ -796,8 +791,7 @@ async function analyzeFace(){
     btn.disabled=false;
   }
 }
-
-/* DIBUJAR GUÍAS SOBRE EL ROSTRO */
+  /* DIBUJAR GUÍAS SOBRE EL ROSTRO */
 
 function drawOverlay(img,pts){
   const canvas=$("faceOverlay");
@@ -869,7 +863,6 @@ function drawOverlay(img,pts){
 
 /* RECOMENDACIONES DE CORTE */
 
-```js
 function recommend(){
   const face=$("faceShape").value;
   const style=$("style").value;
@@ -898,7 +891,6 @@ function recommend(){
   };
 
   let servicios="";
-
   const tipo=hair.toLowerCase();
 
   if(tipo.includes("lacio") || tipo.includes("liso")){
@@ -909,18 +901,15 @@ function recommend(){
         <p>Ideal para conseguir rizos definidos, textura y mayor volumen.</p>
         <h4>2. SEMI ONDULACIÓN</h4>
         <p>Ideal para conseguir ondas suaves, movimiento y un acabado natural.</p>
-        <p><b>Consejo DK:</b> Evaluar el largo, la densidad y la resistencia del cabello antes de elegir el procedimiento.
-        </p>
+        <p><b>Consejo DK:</b> Evaluar el largo, la densidad y la resistencia del cabello antes de elegir el procedimiento.</p>
       </div>
     `;
-  }
-  else if(tipo.includes("ondulado")){
+  }else if(tipo.includes("ondulado")){
     servicios=`
       <h3>RECOMENDACIÓN DE TEXTURA</h3>
       <p>Potenciar las ondas naturales, definir la textura y aportar volumen.</p>
     `;
-  }
-  else if(tipo.includes("rizado") || tipo.includes("crespo")){
+  }else if(tipo.includes("rizado") || tipo.includes("crespo")){
     servicios=`
       <h3>RECOMENDACIÓN DE TEXTURA</h3>
       <p>Definir los rizos, controlar el volumen y elegir un corte que respete la textura natural.</p>
@@ -949,7 +938,6 @@ function recommend(){
 
   msg("consultMessage","Recomendaciones generadas. Puedes guardar la asesoría.");
 }
-```
 
 /* GUARDAR ASESORÍA */
 
@@ -1018,7 +1006,7 @@ async function saveConsultation(){
   }
 }
 
-/* HISTORIAL */
+/* HISTORIAL DEL CLIENTE */
 
 async function loadHistory(){
   if(!currentClient) return;
@@ -1049,9 +1037,26 @@ async function loadHistory(){
 
 /* INSTAGRAM */
 
+function openInstagram(){
+  const enteredUrl=$("instagramUrl").value.trim();
+  const destination=enteredUrl || "https://www.instagram.com/DAVITHEDU21/";
 
+  try{
+    const url=new URL(destination);
 
-/* CONECTAR BOTONES */
+    if(url.protocol!=="https:"){
+      throw new Error("El enlace debe comenzar con https://");
+    }
+
+    window.open(url.href,"_blank","noopener,noreferrer");
+    msg("instagramMessage","Abriendo Instagram...");
+
+  }catch(e){
+    msg("instagramMessage","Escribe un enlace válido de Instagram.");
+  }
+}
+
+/* CONECTAR TODOS LOS BOTONES */
 
 function bindEvents(){
   $("loginBtn").addEventListener("click",loginUser);
@@ -1114,6 +1119,7 @@ async function initializeApp(){
 }
 
 initializeApp();
+
 </script>
 </body>
 </html>
