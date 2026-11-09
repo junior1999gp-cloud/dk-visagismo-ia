@@ -869,6 +869,7 @@ function drawOverlay(img,pts){
 
 /* RECOMENDACIONES DE CORTE */
 
+```js
 function recommend(){
   const face=$("faceShape").value;
   const style=$("style").value;
@@ -896,6 +897,36 @@ function recommend(){
     atrevido:"Mullet moderno, Mohicano y diseños."
   };
 
+  let servicios="";
+
+  const tipo=hair.toLowerCase();
+
+  if(tipo.includes("lacio") || tipo.includes("liso")){
+    servicios=`
+      <h3>RECOMENDACIÓN DE TRANSFORMACIÓN</h3>
+      <div class="recommend-box">
+        <h4>1. ONDULACIÓN</h4>
+        <p>Ideal para conseguir rizos definidos, textura y mayor volumen.</p>
+        <h4>2. SEMI ONDULACIÓN</h4>
+        <p>Ideal para conseguir ondas suaves, movimiento y un acabado natural.</p>
+        <p><b>Consejo DK:</b> Evaluar el largo, la densidad y la resistencia del cabello antes de elegir el procedimiento.
+        </p>
+      </div>
+    `;
+  }
+  else if(tipo.includes("ondulado")){
+    servicios=`
+      <h3>RECOMENDACIÓN DE TEXTURA</h3>
+      <p>Potenciar las ondas naturales, definir la textura y aportar volumen.</p>
+    `;
+  }
+  else if(tipo.includes("rizado") || tipo.includes("crespo")){
+    servicios=`
+      <h3>RECOMENDACIÓN DE TEXTURA</h3>
+      <p>Definir los rizos, controlar el volumen y elegir un corte que respete la textura natural.</p>
+    `;
+  }
+
   const list=map[face] || [];
 
   $("recommendations").innerHTML=`
@@ -903,15 +934,22 @@ function recommend(){
     <p><b>Rostro:</b> ${esc(face)}</p>
     <p><b>Cabello actual:</b> ${esc(hair)}</p>
     <p><b>Estilo buscado:</b> ${esc(style)}</p>
+
     <p><b>Cortes sugeridos:</b></p>
     <ul>${list.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+
     <p><b>Otras opciones:</b> ${esc(extra[style]||"")}</p>
+
+    ${servicios}
+
     <p><b>Corte que desea:</b> ${esc($("desiredCut").value||"Sin preferencia indicada")}</p>
   `;
 
   $("recommendations").classList.remove("hidden");
+
   msg("consultMessage","Recomendaciones generadas. Puedes guardar la asesoría.");
 }
+```
 
 /* GUARDAR ASESORÍA */
 
@@ -1012,6 +1050,10 @@ async function loadHistory(){
 /* INSTAGRAM */
 
 function openInstagram(){
+  const instagramURL = "https://www.instagram.com/DAVITHEDU21/";
+
+  window.open(instagramURL, "_blank");
+}
   const value=$("instagramUrl").value.trim();
 
   if(!value){
