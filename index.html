@@ -955,7 +955,7 @@ async function analyzeFace(){
     btn.disabled=false;
   }
 }
-  /* ANALISIS DE PERFIL Y CRANEO CON IA */
+/* ANALISIS GRATUITO DE PERFIL Y CRANEO */
 
 async function analyzeProfile(){
 
@@ -969,53 +969,143 @@ async function analyzeProfile(){
 
   try{
 
-    msg("profileMessage","La inteligencia artificial está analizando el perfil...");
-
+    msg("profileMessage","Analizando el perfil lateral...");
     $("profileResults").classList.add("hidden");
 
-    const mimeType = profilePhotoDataUrl.match(
-      /^data:(image\/[^;]+);base64,/
-    )?.[1] || "image/jpeg";
+    const img = new Image();
 
-    const { data, error } = await db.functions.invoke(
-      "analizar-perfil",
-      {
-        body:{
-          imageBase64: profilePhotoDataUrl,
-          mimeType
-        }
-      }
+    img.src = profilePhotoDataUrl;
+
+    await new Promise((resolve,reject)=>{
+      img.onload=resolve;
+      img.onerror=reject;
+    });
+
+    const canvas=document.createElement("canvas");
+    const ctx=canvas.getContext("2d");
+
+    canvas.width=img.naturalWidth;
+    canvas.height=img.naturalHeight;
+
+    ctx.drawImage(img,0,0);
+
+    const imageData=ctx.getImageData(
+      0,0,canvas.width,canvas.height
     );
 
-    if(error) throw error;
+    const vision = new FaceLandmarker({
+      locateFile: file =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm/${file}`
+    });
 
-    if(!data || !data.success){
-      throw new Error(data?.error || "No se pudo analizar el perfil.");
+    $("profileDiagnosis").textContent =
+      "Fotografía cargada correctamente. Para completar el análisis anatómico lateral necesitamos conectar el detector de puntos faciales de MediaPipe.";
+
+    $("profileDiagnosis").style.whiteSpace="pre-wrap";
+    $("profileResults").classList.remove("hidden");
+
+    msg("profileMessage","Imagen preparada para el análisis gratuito.");
+
+  }catch(e){
+
+    console.error(e);
+    msg("profileMessage","Error al analizar la fotografía: "+e.message);
+
+  }finally{
+
+    btn.disabled=false;
+
+  }
+}
+  /* ANALISIS GRATUITO DE PERFIL Y CRANEO */
+
+async function analyzeProfile(){
+
+  if(!profilePhotoDataUrl){
+    msg("profileMessage","Primero toma o sube una fotografía lateral.");
+    return;
+  }
+
+  const btn=$("analyzeProfileBtn");
+  btn.disabled=true;
+
+  try{
+
+    msg("profileMessage","Analizando perfil lateral...");
+    $("profileResults").classList.add("hidden");
+
+    const model=await loadFaceModel();
+
+    const img=new Image();
+    img.src=profilePhotoDataUrl;
+
+    await new Promise((resolve,reject)=>{
+      img.onload=resolve;
+      img.onerror=reject;
+    });
+
+    let result=model.detect(img);
+
+    if(!result.faceLandmarks || !result.faceLandmarks.length){
+      throw new Error(
+        "No se detectó el rostro. Usa una foto lateral clara, enfocada y con buena iluminación."
+      );
     }
 
-    $("profileDiagnosis").textContent=data.diagnosis;
+    const pts=result.faceLandmarks[0];
+
+    const point=i=>({
+      x:pts[i].x*img.naturalWidth,
+      y:pts[i].y*img.naturalHeight
+    });
+
+    const forehead=point(10);
+    const nose=point(1);
+    const chin=point(152);
+    const cheek=point(234);
+    const jaw=point(172);
+
+    const faceHeight=Math.abs(chin.y-forehead.y);
+    const noseProjection=Math.abs(nose.x-cheek.x);
+    const chinPosition=Math.abs(chin.x-jaw.x);
+
+    const diagnosis =
+`ANÁLISIS LATERAL Y PERFIL
+
+Detección facial: correcta.
+
+Frente:
+Punto superior detectado en la fotografía.
+
+Nariz:
+Proyección aproximada: ${Math.round(noseProjection)} px.
+
+Mentón:
+Referencia lateral: ${Math.round(chinPosition)} px.
+
+Altura facial:
+${Math.round(faceHeight)} px.
+
+RECOMENDACIONES DE BARBERÍA
+
+• Perfil equilibrado: Quiff texturizado o Mid Fade.
+• Para aportar volumen superior: Pompadour o Slick Back.
+• Para un estilo moderno: Taper Fade o Crop texturizado.
+
+IMPORTANTE:
+Este análisis es orientativo. La cámara detecta puntos faciales, pero no mide con precisión el cráneo ni el occipital.`;
+
+    $("profileDiagnosis").textContent=diagnosis;
     $("profileDiagnosis").style.whiteSpace="pre-wrap";
 
     $("profileResults").classList.remove("hidden");
 
-    msg("profileMessage","Análisis de perfil y cráneo completado correctamente.");
+    msg("profileMessage","Análisis lateral completado.");
 
   }catch(e){
 
-    console.error("Error análisis lateral:",e);
-
-    let detalle = e.message;
-
-    if(e.context && typeof e.context.json === "function"){
-      try{
-        const respuesta = await e.context.json();
-        detalle = respuesta.error || respuesta.message || detalle;
-      }catch(err){
-        console.error("No se pudo leer el detalle:",err);
-      }
-    }
-
-    msg("profileMessage","Error al analizar: "+detalle);
+    console.error("Error perfil:",e);
+    msg("profileMessage","No se pudo analizar: "+e.message);
 
   }finally{
 
