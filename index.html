@@ -954,70 +954,7 @@ async function analyzeFace(){
   }finally{
     btn.disabled=false;
   }
-}
-/* ANALISIS GRATUITO DE PERFIL Y CRANEO */
-
-async function analyzeProfile(){
-
-  if(!profilePhotoDataUrl){
-    msg("profileMessage","Primero toma o sube una fotografía lateral.");
-    return;
-  }
-
-  const btn=$("analyzeProfileBtn");
-  btn.disabled=true;
-
-  try{
-
-    msg("profileMessage","Analizando el perfil lateral...");
-    $("profileResults").classList.add("hidden");
-
-    const img = new Image();
-
-    img.src = profilePhotoDataUrl;
-
-    await new Promise((resolve,reject)=>{
-      img.onload=resolve;
-      img.onerror=reject;
-    });
-
-    const canvas=document.createElement("canvas");
-    const ctx=canvas.getContext("2d");
-
-    canvas.width=img.naturalWidth;
-    canvas.height=img.naturalHeight;
-
-    ctx.drawImage(img,0,0);
-
-    const imageData=ctx.getImageData(
-      0,0,canvas.width,canvas.height
-    );
-
-    const vision = new FaceLandmarker({
-      locateFile: file =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm/${file}`
-    });
-
-    $("profileDiagnosis").textContent =
-      "Fotografía cargada correctamente. Para completar el análisis anatómico lateral necesitamos conectar el detector de puntos faciales de MediaPipe.";
-
-    $("profileDiagnosis").style.whiteSpace="pre-wrap";
-    $("profileResults").classList.remove("hidden");
-
-    msg("profileMessage","Imagen preparada para el análisis gratuito.");
-
-  }catch(e){
-
-    console.error(e);
-    msg("profileMessage","Error al analizar la fotografía: "+e.message);
-
-  }finally{
-
-    btn.disabled=false;
-
-  }
-}
-  /* ANALISIS GRATUITO DE PERFIL Y CRANEO */
+}/* ANALISIS GRATUITO DE PERFIL Y CRANEO */
 
 async function analyzeProfile(){
 
@@ -1034,8 +971,10 @@ async function analyzeProfile(){
     msg("profileMessage","Analizando perfil lateral...");
     $("profileResults").classList.add("hidden");
 
+    // Cargar el modelo MediaPipe existente
     const model=await loadFaceModel();
 
+    // Preparar fotografía
     const img=new Image();
     img.src=profilePhotoDataUrl;
 
@@ -1044,7 +983,8 @@ async function analyzeProfile(){
       img.onerror=reject;
     });
 
-    let result=model.detect(img);
+    // Detectar puntos faciales
+    const result=model.detect(img);
 
     if(!result.faceLandmarks || !result.faceLandmarks.length){
       throw new Error(
@@ -1059,52 +999,59 @@ async function analyzeProfile(){
       y:pts[i].y*img.naturalHeight
     });
 
+    // Referencias faciales
     const forehead=point(10);
     const nose=point(1);
     const chin=point(152);
     const cheek=point(234);
     const jaw=point(172);
 
+    // Cálculos orientativos
     const faceHeight=Math.abs(chin.y-forehead.y);
     const noseProjection=Math.abs(nose.x-cheek.x);
     const chinPosition=Math.abs(chin.x-jaw.x);
 
+    // Informe
     const diagnosis =
 `ANÁLISIS LATERAL Y PERFIL
 
-Detección facial: correcta.
+DETECCIÓN FACIAL
+Detección de puntos faciales: correcta.
 
-Frente:
-Punto superior detectado en la fotografía.
+FRENTE
+Referencia superior detectada.
 
-Nariz:
+NARIZ
 Proyección aproximada: ${Math.round(noseProjection)} px.
 
-Mentón:
+MENTÓN
 Referencia lateral: ${Math.round(chinPosition)} px.
 
-Altura facial:
+ALTURA FACIAL
 ${Math.round(faceHeight)} px.
 
 RECOMENDACIONES DE BARBERÍA
 
-• Perfil equilibrado: Quiff texturizado o Mid Fade.
-• Para aportar volumen superior: Pompadour o Slick Back.
-• Para un estilo moderno: Taper Fade o Crop texturizado.
+• Para un perfil equilibrado: Quiff texturizado.
+• Para aportar volumen superior: Pompadour.
+• Para un estilo moderno: Taper Fade.
+• Para un estilo juvenil: Crop texturizado.
 
 IMPORTANTE:
-Este análisis es orientativo. La cámara detecta puntos faciales, pero no mide con precisión el cráneo ni el occipital.`;
+Este análisis es orientativo. Los puntos faciales no permiten medir con precisión el cráneo ni la zona occipital.
+La fotografía debe mostrar claramente el perfil lateral.`;
 
     $("profileDiagnosis").textContent=diagnosis;
     $("profileDiagnosis").style.whiteSpace="pre-wrap";
 
     $("profileResults").classList.remove("hidden");
 
-    msg("profileMessage","Análisis lateral completado.");
+    msg("profileMessage","Análisis lateral completado correctamente.");
 
   }catch(e){
 
     console.error("Error perfil:",e);
+
     msg("profileMessage","No se pudo analizar: "+e.message);
 
   }finally{
