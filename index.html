@@ -666,6 +666,26 @@ function clearPhoto() {
 
   msg("faceMessage", "");
 }
+  /* LIMPIAR FOTO DE PERFIL LATERAL */
+
+function clearProfile(){
+
+  profilePhotoDataUrl = "";
+
+  $("profileCamera").value = "";
+  $("profileFile").value = "";
+
+  $("profilePreview").removeAttribute("src");
+  $("profilePreview").classList.add("hidden");
+
+  $("profileEmpty").classList.remove("hidden");
+  $("profileResults").classList.add("hidden");
+
+  $("profileDiagnosis").innerHTML = "";
+
+  msg("profileMessage","");
+
+}
 
 function loadPhoto(file) {
   if (!file) return;
