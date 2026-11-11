@@ -223,11 +223,12 @@ hr{border:0;border-top:1px solid #244b3a;margin:20px 0}
       La fotografía lateral aparecerá aquí.
     </div>
 
-    <img
-      id="profilePreview"
-      class="hidden"
-      alt="Perfil lateral del cliente"
-    >
+   <img
+  id="profilePreview"
+  class="hidden"
+  alt="Perfil lateral del cliente"
+  style="width:100%; max-width:320px; height:320px; object-fit:contain; display:block; margin:10px auto;"
+>
 
   </div>
 
@@ -1292,6 +1293,8 @@ function bindEvents(){
   $("saveConsultationBtn").addEventListener("click",saveConsultation);
   $("historyBtn").addEventListener("click",loadHistory);
   $("instagramBtn").addEventListener("click",openInstagram);
+  $("clearProfile").addEventListener("click",clearProfile);
+$("analyzeProfileBtn").addEventListener("click",analyzeProfile);
 }
 
 /* SESIÓN Y ARRANQUE */
