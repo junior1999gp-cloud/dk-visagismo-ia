@@ -934,6 +934,63 @@ async function analyzeFace(){
     btn.disabled=false;
   }
 }
+  /* ANALISIS DE PERFIL Y CRANEO CON IA */
+
+async function analyzeProfile(){
+
+  if(!profilePhotoDataUrl){
+    msg("profileMessage","Primero toma o sube una fotografía lateral.");
+    return;
+  }
+
+  const btn=$("analyzeProfileBtn");
+  btn.disabled=true;
+
+  try{
+
+    msg("profileMessage","La inteligencia artificial está analizando el perfil...");
+
+    $("profileResults").classList.add("hidden");
+
+    const mimeType = profilePhotoDataUrl.match(
+      /^data:(image\/[^;]+);base64,/
+    )?.[1] || "image/jpeg";
+
+    const { data, error } = await db.functions.invoke(
+      "analizar-perfil",
+      {
+        body:{
+          imageBase64: profilePhotoDataUrl,
+          mimeType
+        }
+      }
+    );
+
+    if(error) throw error;
+
+    if(!data || !data.success){
+      throw new Error(data?.error || "No se pudo analizar el perfil.");
+    }
+
+    $("profileDiagnosis").textContent=data.diagnosis;
+    $("profileDiagnosis").style.whiteSpace="pre-wrap";
+
+    $("profileResults").classList.remove("hidden");
+
+    msg("profileMessage","Análisis de perfil y cráneo completado correctamente.");
+
+  }catch(e){
+
+    console.error("Error análisis lateral:",e);
+
+    msg("profileMessage","Error al analizar: "+e.message);
+
+  }finally{
+
+    btn.disabled=false;
+
+  }
+}
   /* DIBUJAR GUÍAS SOBRE EL ROSTRO */
 
 function drawOverlay(img,pts){
