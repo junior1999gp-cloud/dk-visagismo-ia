@@ -984,13 +984,45 @@ async function analyzeProfile(){
     });
 
     // Detectar puntos faciales
-    const result=model.detect(img);
+    let result=model.detect(img);
 
-    if(!result.faceLandmarks || !result.faceLandmarks.length){
-      throw new Error(
-        "No se detectó el rostro. Usa una foto lateral clara, enfocada y con buena iluminación."
-      );
-    }
+// Segundo intento: mejorar brillo y contraste
+if(!result.faceLandmarks || !result.faceLandmarks.length){
+
+  const canvas=document.createElement("canvas");
+  canvas.width=img.naturalWidth;
+  canvas.height=img.naturalHeight;
+
+  const ctx=canvas.getContext("2d");
+
+  ctx.filter="brightness(1.35) contrast(1.25) saturate(1.10)";
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  ctx.filter="none";
+
+  result=model.detect(canvas);
+}
+
+// Tercer intento: aumentar iluminación
+if(!result.faceLandmarks || !result.faceLandmarks.length){
+
+  const canvas=document.createElement("canvas");
+  canvas.width=img.naturalWidth;
+  canvas.height=img.naturalHeight;
+
+  const ctx=canvas.getContext("2d");
+
+  ctx.filter="brightness(1.60) contrast(1.35)";
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  ctx.filter="none";
+
+  result=model.detect(canvas);
+}
+
+if(!result.faceLandmarks || !result.faceLandmarks.length){
+  throw new Error(
+    "No se reconoce el perfil. Intenta una fotografía lateral más enfocada y con el rostro completo."
+  );
+}
 
     const pts=result.faceLandmarks[0];
 
