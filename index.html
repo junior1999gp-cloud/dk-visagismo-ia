@@ -1004,7 +1004,18 @@ async function analyzeProfile(){
 
     console.error("Error análisis lateral:",e);
 
-    msg("profileMessage","Error al analizar: "+e.message);
+    let detalle = e.message;
+
+    if(e.context && typeof e.context.json === "function"){
+      try{
+        const respuesta = await e.context.json();
+        detalle = respuesta.error || respuesta.message || detalle;
+      }catch(err){
+        console.error("No se pudo leer el detalle:",err);
+      }
+    }
+
+    msg("profileMessage","Error al analizar: "+detalle);
 
   }finally{
 
