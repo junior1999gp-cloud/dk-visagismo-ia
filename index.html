@@ -1448,21 +1448,34 @@ function openInstagram(){
 /* CONECTAR TODOS LOS BOTONES */
 
 function bindEvents(){
-  $("loginBtn").addEventListener("click",loginUser);
-  $("forgotBtn").addEventListener("click",forgotPassword);
-  $("savePasswordBtn").addEventListener("click",saveNewPassword);
-  $("logoutBtn").addEventListener("click",logout);
-  $("saveBtn").addEventListener("click",addClient);
 
-  $("search").addEventListener("input",renderClients);
-  $("clearPhoto").addEventListener("click",clearPhoto);
-  $("analyzeFaceBtn").addEventListener("click",analyzeFace);
-  $("recommendBtn").addEventListener("click",recommend);
-  $("saveConsultationBtn").addEventListener("click",saveConsultation);
-  $("historyBtn").addEventListener("click",loadHistory);
-  $("instagramBtn").addEventListener("click",openInstagram);
-  $("clearProfile").addEventListener("click",clearProfile);
-$("analyzeProfileBtn").addEventListener("click",analyzeProfile);
+  const connect = (id, event, fn) => {
+    const element = $(id);
+
+    if(element && typeof fn === "function"){
+      element.addEventListener(event, fn);
+    }else{
+      console.warn("No se pudo conectar:", id);
+    }
+  };
+
+  connect("loginBtn","click",loginUser);
+  connect("forgotBtn","click",forgotPassword);
+  connect("savePasswordBtn","click",saveNewPassword);
+  connect("logoutBtn","click",logout);
+  connect("saveBtn","click",addClient);
+
+  connect("search","input",renderClients);
+  connect("clearPhoto","click",clearPhoto);
+  connect("analyzeFaceBtn","click",analyzeFace);
+  connect("recommendBtn","click",recommend);
+  connect("saveConsultationBtn","click",saveConsultation);
+  connect("historyBtn","click",loadHistory);
+  connect("instagramBtn","click",openInstagram);
+
+  connect("clearProfile","click",clearProfile);
+  connect("analyzeProfileBtn","click",analyzeProfile);
+
 }
 
 /* SESIÓN Y ARRANQUE */
