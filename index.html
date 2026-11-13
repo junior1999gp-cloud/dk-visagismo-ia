@@ -5,350 +5,464 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DK VISAGISMO IA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box}
-:root{--green:#00e879;--bg:#080d11;--text:#effff7;--muted:#a5c5b6}
-body{margin:0;background:radial-gradient(ellipse at top,#10231e 0,#080d11 58%);color:var(--text);font-family:Arial,sans-serif}
-header{background:#080d11;text-align:center;padding:18px 12px;border-bottom:1px solid #126b49}
-h1,h2,h3{color:var(--green);letter-spacing:.4px}
-header p{color:var(--muted);margin:6px 0}
+:root{
+--green:#00e879;
+--bg:#080d11;
+--text:#effff7;
+--muted:#a5c5b6;
+}
+body{
+margin:0;
+background:radial-gradient(ellipse at top,#10231e 0,#080d11 58%);
+color:var(--text);
+font-family:Arial,sans-serif;
+}
+header{
+background:#080d11;
+text-align:center;
+padding:18px 12px;
+border-bottom:1px solid #126b49;
+}
+h1,h2,h3{color:var(--green)}
+header p{color:var(--muted)}
 main{max-width:900px;margin:auto;padding:12px}
-.card{background:linear-gradient(145deg,#111d21,#0d1519);padding:16px;border:1px solid #174b38;border-radius:13px;margin:13px 0;box-shadow:0 8px 24px #0005}
-input,select,textarea,button{width:100%;padding:12px;margin:7px 0;border-radius:8px;border:1px solid #28513f;font-size:15px}
-input,select,textarea{background:#eaf5ef;color:#102018}
+.card{
+background:linear-gradient(145deg,#111d21,#0d1519);
+padding:16px;
+border:1px solid #174b38;
+border-radius:13px;
+margin:13px 0;
+}
+input,select,textarea,button{
+width:100%;
+padding:12px;
+margin:7px 0;
+border-radius:8px;
+border:1px solid #28513f;
+font-size:15px;
+}
+input,select,textarea{
+background:#eaf5ef;
+color:#102018;
+}
 textarea{min-height:80px}
-button{background:var(--green);color:#04150c;font-weight:800;border:0;cursor:pointer}
+button{
+background:var(--green);
+color:#04150c;
+font-weight:800;
+border:0;
+cursor:pointer;
+}
 button:disabled{opacity:.55}
-.secondary{background:#23352f;color:#eafff2;border:1px solid #3b6d55}
-.danger{background:#8e2525;color:#fff}
+.secondary{
+background:#23352f;
+color:#eafff2;
+border:1px solid #3b6d55;
+}
+.danger{background:#8e2525;color:white}
 .hidden{display:none!important}
-.small{font-size:12px;color:var(--muted);line-height:1.5}
-.client,.result,.analysis-box{background:#0d1918;padding:13px;border:1px solid #20543d;border-radius:9px;margin:10px 0;line-height:1.55}
-label{display:block;margin-top:10px;color:#8fffc2;font-size:13px;font-weight:bold}
+.small{
+font-size:12px;
+color:var(--muted);
+line-height:1.5;
+}
+.client,.result,.analysis-box{
+background:#0d1918;
+padding:13px;
+border:1px solid #20543d;
+border-radius:9px;
+margin:10px 0;
+line-height:1.55;
+}
+label{
+display:block;
+margin-top:10px;
+color:#8fffc2;
+font-size:13px;
+font-weight:bold;
+}
 hr{border:0;border-top:1px solid #244b3a;margin:20px 0}
-.section-kicker{color:var(--green);font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:2px 0 8px}
-.photo-stage{position:relative;width:min(100%,520px);margin:12px auto;background:#020706;border:1px solid #168a55;border-radius:12px;overflow:hidden;min-height:190px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px #00e87918}
-#photoPreview{display:block;width:100%;max-height:560px;object-fit:contain}
-#faceOverlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.photo-empty{padding:42px 15px;text-align:center;color:#80a997}
-.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.metric{background:#0a1513;border:1px solid #20553d;border-radius:8px;padding:10px}
-.metric strong{display:block;color:var(--green);font-size:12px;margin-bottom:5px}
+.section-kicker{
+color:var(--green);
+font-size:12px;
+font-weight:800;
+letter-spacing:1px;
+margin:2px 0 8px;
+}
+.photo-stage{
+position:relative;
+width:min(100%,520px);
+margin:12px auto;
+background:#020706;
+border:1px solid #168a55;
+border-radius:12px;
+overflow:hidden;
+min-height:190px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+#photoPreview{
+display:block;
+width:100%;
+max-height:560px;
+object-fit:contain;
+}
+#faceOverlay{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+pointer-events:none;
+}
+.photo-empty{
+padding:42px 15px;
+text-align:center;
+color:#80a997;
+}
+.metric-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:8px;
+}
+.metric{
+background:#0a1513;
+border:1px solid #20553d;
+border-radius:8px;
+padding:10px;
+}
+.metric strong{
+display:block;
+color:var(--green);
+font-size:12px;
+margin-bottom:5px;
+}
 .metric span{font-size:14px}
-.gold-note{border-left:3px solid var(--green);padding:9px 12px;background:#0b1b15;color:#dfffee;font-size:13px}
-#recommendations ul{padding-left:22px}
-@media(max-width:500px){main{padding:8px}.card{padding:12px}.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gold-note{
+border-left:3px solid var(--green);
+padding:9px 12px;
+background:#0b1b15;
+color:#dfffee;
+font-size:13px;
+}
+@media(max-width:500px){
+main{padding:8px}
+.card{padding:12px}
+.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 </style>
 </head>
+
 <body>
+
 <header>
-  <h1>DK VISAGISMO IA</h1>
-  <p>BARBER STUDIO · ASESORÍA DE IMAGEN</p>
+<h1>DK VISAGISMO IA</h1>
+<p>BARBER STUDIO · ASESORÍA DE IMAGEN</p>
 </header>
+
 <main>
+
 <section id="login" class="card">
-  <h2>Acceso de administrador</h2>
-  <input id="email" type="email" autocomplete="username" placeholder="Correo electrónico">
-  <input id="password" type="password" autocomplete="current-password" placeholder="Contraseña">
-  <button id="loginBtn" type="button">INGRESAR</button>
-  <button id="forgotBtn" type="button" class="secondary">¿OLVIDASTE TU CONTRASEÑA?</button>
-  <p id="message" class="small" aria-live="polite"></p>
+<h2>Acceso de administrador</h2>
+<input id="email" type="email" placeholder="Correo electrónico">
+<input id="password" type="password" placeholder="Contraseña">
+<button id="loginBtn" type="button">INGRESAR</button>
+<button id="forgotBtn" type="button" class="secondary">
+¿OLVIDASTE TU CONTRASEÑA?
+</button>
+<p id="message" class="small"></p>
 </section>
 
 <section id="resetPassword" class="card hidden">
-  <h2>Cambiar contraseña</h2>
-  <p class="small">Escribe tu nueva contraseña. Debes haber llegado aquí desde el enlace enviado a tu correo.</p>
-  <input id="newPassword" type="password" autocomplete="new-password" placeholder="Nueva contraseña">
-  <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirmar nueva contraseña">
-  <button id="savePasswordBtn" type="button">GUARDAR NUEVA CONTRASEÑA</button>
-  <p id="resetMessage" class="small" aria-live="polite"></p>
+<h2>Cambiar contraseña</h2>
+<p class="small">Escribe tu nueva contraseña.</p>
+<input id="newPassword" type="password" placeholder="Nueva contraseña">
+<input id="confirmPassword" type="password" placeholder="Confirmar contraseña">
+<button id="savePasswordBtn" type="button">
+GUARDAR NUEVA CONTRASEÑA
+</button>
+<p id="resetMessage" class="small"></p>
 </section>
+
 <section id="app" class="hidden">
-  <div class="card">
-    <h2>Panel principal</h2>
-    <p>Bienvenido a DK Barber Studio.</p>
-    <button id="logoutBtn" type="button" class="secondary">Cerrar sesión</button>
-  </div>
 
-  <div class="card">
-    <h2>Registrar cliente</h2>
-    <input id="name" placeholder="Nombre del cliente">
-    <input id="phone" type="tel" placeholder="Número de celular">
-    <button id="saveBtn" type="button">GUARDAR CLIENTE</button>
-    <p id="saveMessage" class="small"></p>
-  </div>
+<div class="card">
+<h2>Panel principal</h2>
+<p>Bienvenido a DK Barber Studio.</p>
+<button id="logoutBtn" type="button" class="secondary">
+CERRAR SESIÓN
+</button>
+</div>
 
-  <div class="card">
-    <h2>Buscar clientes</h2>
-    <input id="search" placeholder="Buscar por nombre o teléfono">
-    <div id="clients"></div>
-  </div>
+<div class="card">
+<h2>Registrar cliente</h2>
+<input id="name" placeholder="Nombre del cliente">
+<input id="phone" type="tel" placeholder="Número de celular">
+<button id="saveBtn" type="button">GUARDAR CLIENTE</button>
+<p id="saveMessage" class="small"></p>
+</div>
 
-  <section id="serviceSection" class="card hidden">
-    <h2>Cliente seleccionado</h2>
-    <p id="selectedClient" class="gold-note"></p>
-    <h2>Asesoría de imagen</h2>
+<div class="card">
+<h2>Buscar clientes</h2>
+<input id="search" placeholder="Buscar por nombre o teléfono">
+<div id="clients"></div>
+</div>
+<section id="serviceSection" class="card hidden">
 
-    <p class="small">Completa los datos y guarda el diagnóstico en el historial.</p>
+<h2>Cliente seleccionado</h2>
+<p id="selectedClient" class="gold-note"></p>
 
-    <p class="section-kicker">1. TIPO DE CABELLO DEL CLIENTE</p>
-    <label for="hairCurrent">Textura actual</label>
-    <select id="hairCurrent">
-      <option value="">Seleccionar</option>
-      <option>Lacio</option>
-      <option>Ondulado</option>
-      <option>Rizado</option>
-      <option>Crespo</option>
-    </select>
+<h2>ASESORÍA DE IMAGEN</h2>
+<p class="small">Análisis personalizado para el cliente.</p>
 
-    <p class="section-kicker">2. ESCÁNER BIOMÉTRICO</p>
-    <label for="photoCamera">Tomar fotografía frontal</label>
-    <input id="photoCamera" type="file" accept="image/*" capture="user">
+<p class="section-kicker">1. TIPO DE CABELLO</p>
 
-    <label for="photoFile">Subir fotografía desde archivos</label>
-    <input id="photoFile" type="file" accept="image/*">
+<label for="hairCurrent">Textura actual</label>
+<select id="hairCurrent">
+<option value="">Seleccionar</option>
+<option>Lacio</option>
+<option>Ondulado</option>
+<option>Rizado</option>
+<option>Crespo</option>
+</select>
 
-    <div class="photo-stage">
-      <div id="photoEmpty" class="photo-empty">
-        La fotografía del cliente aparecerá aquí.
-      </div>
-      <img id="photoPreview" class="hidden" alt="Fotografía del cliente">
-      <canvas id="faceOverlay" class="hidden"></canvas>
-    </div>
+<p class="section-kicker">2. ESCÁNER BIOMÉTRICO FRONTAL</p>
 
-    <button id="clearPhoto" type="button" class="secondary">
-      ELIMINAR FOTOGRAFÍA
-    </button>
+<label for="photoCamera">Tomar fotografía frontal</label>
+<input id="photoCamera" type="file" accept="image/*" capture="user">
 
-    <p class="section-kicker">3. FORMA DEL ROSTRO</p>
-    <label for="faceShape">Confirma la forma del rostro</label>
-    <select id="faceShape">
-      <option value="">Seleccionar</option>
-      <option>Ovalado</option>
-      <option>Redondo</option>
-      <option>Cuadrado</option>
-      <option>Alargado</option>
-      <option>Triangular</option>
-      <option>Diamante</option>
-    </select>
+<label for="photoFile">Subir fotografía desde archivos</label>
+<input id="photoFile" type="file" accept="image/*">
 
-    <button id="analyzeFaceBtn" type="button">
-      ANALIZAR ROSTRO
-    </button>
+<div class="photo-stage">
+<div id="photoEmpty" class="photo-empty">
+La fotografía frontal aparecerá aquí.
+</div>
+<img id="photoPreview" class="hidden" alt="Rostro del cliente">
+<canvas id="faceOverlay" class="hidden"></canvas>
+</div>
 
-    <p id="faceMessage" class="small"></p>
-        <div id="faceAnalysis" class="analysis-box hidden">
-      <h3>LECTURA BIOMÉTRICA FACIAL</h3>
+<button id="clearPhoto" type="button" class="secondary">
+ELIMINAR FOTOGRAFÍA
+</button>
 
-      <p class="small">
-        Guías de referencia: línea de cabello, entrecejo,
-        base de nariz y mentón.
-      </p>
+<p class="section-kicker">3. FORMA DEL ROSTRO</p>
 
-      <div class="metric-grid">
-        <div class="metric">
-          <strong>Relación alto / ancho</strong>
-          <span id="ratioValue">—</span>
-        </div>
+<label for="faceShape">Forma del rostro</label>
+<select id="faceShape">
+<option value="">Seleccionar</option>
+<option>Ovalado</option>
+<option>Redondo</option>
+<option>Cuadrado</option>
+<option>Alargado</option>
+<option>Triangular</option>
+<option>Diamante</option>
+</select>
 
-        <div class="metric">
-          <strong>Tercio superior</strong>
-          <span id="upperValue">—</span>
-        </div>
+<button id="analyzeFaceBtn" type="button">
+ANALIZAR ROSTRO
+</button>
 
-        <div class="metric">
-          <strong>Tercio medio</strong>
-          <span id="middleValue">—</span>
-        </div>
+<p id="faceMessage" class="small"></p>
 
-        <div class="metric">
-          <strong>Tercio inferior</strong>
-          <span id="lowerValue">—</span>
-        </div>
+<div id="faceAnalysis" class="analysis-box hidden">
+<h3>LECTURA BIOMÉTRICA FACIAL</h3>
 
-        <div class="metric">
-          <strong>Anchura facial</strong>
-          <span id="widthValue">—</span>
-        </div>
+<div class="metric-grid">
+<div class="metric">
+<strong>Relación alto/ancho</strong>
+<span id="ratioValue">—</span>
+</div>
+<div class="metric">
+<strong>Tercio superior</strong>
+<span id="upperValue">—</span>
+</div>
+<div class="metric">
+<strong>Tercio medio</strong>
+<span id="middleValue">—</span>
+</div>
+<div class="metric">
+<strong>Tercio inferior</strong>
+<span id="lowerValue">—</span>
+</div>
+<div class="metric">
+<strong>Anchura facial</strong>
+<span id="widthValue">—</span>
+</div>
+<div class="metric">
+<strong>Referencia de nariz</strong>
+<span id="noseValue">—</span>
+</div>
+</div>
 
-        <div class="metric">
-          <strong>Referencia de nariz</strong>
-          <span id="noseValue">—</span>
-        </div>
-      </div>
-
-      <p id="faceEstimate" class="gold-note"></p>
-
-      <p class="small">
-        Las proporciones son aproximadas y no representan
-        medidas clínicas exactas.
-      </p>
-    </div>
-
-    <hr>
-    <!-- ESCANER BIOMETRICO DE PERFIL Y CRANEO -->
-
-<div class="analysis-box" id="profileScanner">
-
-  <h2>ESCÁNER BIOMÉTRICO LATERAL</h2>
-
-  <p class="small">
-    Análisis visual de perfil, estructura facial y proporciones craneales.
-  </p>
-
-  <label for="profileCamera">
-    TOMAR FOTO DE PERFIL O COSTADO
-  </label>
-
-  <input
-    id="profileCamera"
-    type="file"
-    accept="image/*"
-    capture="environment"
-  >
-
-  <label for="profileFile">
-    O SUBIR FOTO DESDE ARCHIVOS
-  </label>
-
-  <input
-    id="profileFile"
-    type="file"
-    accept="image/*"
-  >
-
-  <!-- VISOR BIOMETRICO -->
-
-  <div class="photo-stage"
-       style="position:relative; max-width:340px; margin:15px auto;">
-
-    <div id="profileEmpty" class="photo-empty">
-      La fotografía lateral aparecerá aquí.
-    </div>
-
-    <div id="profileVisual"
-         class="hidden"
-         style="position:relative; width:100%;">
-
-      <img
-        id="profilePreview"
-        alt="Perfil lateral del cliente"
-        style="width:100%; height:320px; object-fit:contain; display:block;"
-      >
-
-      <canvas
-        id="profileOverlay"
-        style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;"
-      ></canvas>
-
-    </div>
-
-  </div>
-
-  <button id="clearProfile" type="button" class="secondary">
-    ELIMINAR FOTO DE PERFIL
-  </button>
-
-  <button id="analyzeProfileBtn" type="button">
-    INICIAR ESCÁNER BIOMÉTRICO
-  </button>
-
-  <p id="profileMessage" class="small"></p>
-
-  <!-- RESULTADOS -->
-
-  <div id="profileResults" class="result hidden">
-
-    <h3>DIAGNÓSTICO DE PERFIL Y CRÁNEO</h3>
-
-    <div id="profileDiagnosis"
-         style="white-space:pre-wrap;">
-    </div>
-
-  </div>
-
+<p id="faceEstimate" class="gold-note"></p>
+<p class="small">
+Las proporciones son aproximadas y sirven como orientación estética.
+</p>
 </div>
 
 <hr>
-    <p class="section-kicker">4. OBJETIVO Y RECOMENDACIONES</p>
 
-    <h3>¿QUÉ ESTILO DESEA EL CLIENTE?</h3>
+<p class="section-kicker">4. ESCÁNER LATERAL Y CRÁNEO</p>
 
-    <label for="hairDesired">Tipo de cabello o acabado deseado</label>
-    <select id="hairDesired">
-      <option value="">Seleccionar</option>
-      <option>Lacio</option>
-      <option>Ondulado</option>
-      <option>Rizado</option>
-      <option>Crespo</option>
-      <option>Con más volumen</option>
-      <option>Más textura</option>
-      <option>Más definido</option>
-      <option>Alisado</option>
-    </select>
+<div id="profileScanner" class="analysis-box">
+<h3>ESCÁNER BIOMÉTRICO LATERAL</h3>
 
-    <label for="style">Estilo que busca</label>
-    <select id="style">
-      <option value="">Seleccionar</option>
-      <option value="moderno">Moderno</option>
-      <option value="clasico">Clásico</option>
-      <option value="juvenil">Juvenil</option>
-      <option value="formal">Formal</option>
-      <option value="atrevido">Atrevido</option>
-    </select>
+<p class="small">
+Toma una fotografía de perfil o sube una imagen del costado de la cabeza.
+</p>
 
-    <label for="desiredCut">Corte que le gustaría</label>
-    <input id="desiredCut" placeholder="Ejemplo: Quiff, Crop francés, Mid Fade...">
+<label for="profileCamera">Tomar fotografía lateral</label>
+<input id="profileCamera" type="file" accept="image/*" capture="environment">
 
-    <button id="recommendBtn" type="button">
-      GENERAR RECOMENDACIONES DE CORTE
-    </button>
+<label for="profileFile">Subir fotografía lateral</label>
+<input id="profileFile" type="file" accept="image/*">
 
-    <div id="recommendations" class="result hidden"></div>
+<label for="profileDirection">Dirección del rostro</label>
+<select id="profileDirection">
+<option value="left">Rostro mirando hacia la izquierda</option>
+<option value="right">Rostro mirando hacia la derecha</option>
+</select>
 
-    <label for="observations">Observaciones del barbero</label>
-    <textarea id="observations"
-      placeholder="Preferencias, remolinos, entradas, densidad..."></textarea>
+<div class="photo-stage" style="max-width:360px">
+<div id="profileEmpty" class="photo-empty">
+La fotografía lateral aparecerá aquí.
+</div>
 
-    <button id="saveConsultationBtn" type="button">
-      GUARDAR ANÁLISIS
-    </button>
+<div id="profileVisual" class="hidden" style="position:relative;width:100%">
+<img id="profilePreview" alt="Perfil lateral"
+style="width:100%;height:320px;object-fit:contain;display:block">
+<canvas id="profileOverlay"
+style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+</canvas>
+</div>
+</div>
 
-    <p id="consultMessage" class="small"></p>
+<button id="clearProfile" type="button" class="secondary">
+ELIMINAR FOTO LATERAL
+</button>
 
-    <button id="historyBtn" type="button" class="secondary">
-      VER HISTORIAL DEL CLIENTE
-    </button>
+<button id="analyzeProfileBtn" type="button">
+MOSTRAR GUÍAS DE PERFIL Y CRÁNEO
+</button>
 
-    <div id="history"></div>
-  </section>
+<p id="profileMessage" class="small"></p>
 
-  <div class="card">
-    <h2>DK Barber Studio en Instagram</h2>
-    <p class="small">Coloca el enlace de tu perfil.</p>
+<div id="profileResults" class="result hidden">
+<h3>REFERENCIAS DE PERFIL</h3>
+<div id="profileDiagnosis"></div>
+</div>
 
-    <input id="instagramUrl" type="url"
-      placeholder="https://www.instagram.com/tu_cuenta/">
+<p class="small">
+Las líneas verdes son guías visuales aproximadas. La zona occipital
+no se mide ni se detecta como estructura ósea exacta mediante esta guía.
+</p>
+</div>
+<hr>
 
-    <button id="instagramBtn" type="button">
-      ABRIR INSTAGRAM
-    </button>
+<p class="section-kicker">5. OBJETIVO Y RECOMENDACIONES</p>
 
-    <p id="instagramMessage" class="small"></p>
-  </div>
+<h3>¿QUÉ ESTILO DESEA EL CLIENTE?</h3>
+
+<label for="hairDesired">Tipo de cabello o acabado deseado</label>
+<select id="hairDesired">
+<option value="">Seleccionar</option>
+<option>Lacio</option>
+<option>Ondulado</option>
+<option>Rizado</option>
+<option>Crespo</option>
+<option>Con más volumen</option>
+<option>Más textura</option>
+<option>Más definido</option>
+<option>Alisado</option>
+</select>
+
+<label for="style">Estilo que busca</label>
+<select id="style">
+<option value="">Seleccionar</option>
+<option value="moderno">Moderno</option>
+<option value="clasico">Clásico</option>
+<option value="juvenil">Juvenil</option>
+<option value="formal">Formal</option>
+<option value="atrevido">Atrevido</option>
+</select>
+
+<hr>
+
+<h3>SELECCIÓN DE CORTE SEGÚN EL LARGO</h3>
+
+<label for="hairLength">¿Qué largo tiene el cabello?</label>
+<select id="hairLength">
+<option value="">Seleccionar largo</option>
+<option value="largo">Cabello largo</option>
+<option value="corto">Cabello corto</option>
+</select>
+
+<div id="cutChoices" class="result">
+<p class="small">
+Primero selecciona si el cabello es largo o corto.
+</p>
+</div>
+
+<label for="desiredCut">Corte seleccionado o deseado</label>
+<input id="desiredCut" placeholder="Selecciona un corte o escríbelo">
+
+<button id="recommendBtn" type="button">
+GENERAR RECOMENDACIONES DE CORTE
+</button>
+
+<div id="recommendations" class="result hidden"></div>
+
+<hr>
+
+<label for="observations">Observaciones del barbero</label>
+<textarea id="observations"
+placeholder="Remolinos, entradas, densidad, occipital, preferencias..."></textarea>
+
+<button id="saveConsultationBtn" type="button">
+GUARDAR ANÁLISIS
+</button>
+
+<p id="consultMessage" class="small"></p>
+
+<button id="historyBtn" type="button" class="secondary">
+VER HISTORIAL DEL CLIENTE
+</button>
+
+<div id="history"></div>
+
+</section>
+
+<div class="card">
+<h2>DK Barber Studio en Instagram</h2>
+<p class="small">Coloca el enlace de tu perfil.</p>
+
+<input id="instagramUrl" type="url"
+placeholder="https://www.instagram.com/tu_cuenta/">
+
+<button id="instagramBtn" type="button">
+ABRIR INSTAGRAM
+</button>
+
+<p id="instagramMessage" class="small"></p>
+</div>
+
 </section>
 </main>
-
 <script>
-"use strict";
+
+/* =====================================
+   1. CONEXIÓN CON SUPABASE
+===================================== */
 
 const SUPABASE_URL = "https://mzbadavawmsbacvfunso.supabase.co";
 
 const SUPABASE_KEY = "sb_publishable_a8AgwyUc_wGJKDhilKA8HQ_nOGOC-ce";
 
 const APP_URL = "https://junior1999gp-cloud.github.io/dk-visagismo-ia/";
-
-const $ = id => document.getElementById(id);
 
 const db = window.supabase.createClient(
   SUPABASE_URL,
@@ -362,47 +476,59 @@ const db = window.supabase.createClient(
   }
 );
 
-let currentClient = null;
-let allClients = [];
+
+/* =====================================
+   2. FUNCIONES GENERALES
+===================================== */
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let selectedClient = null;
+let clientsData = [];
 let recoveryMode = false;
-let photoDataUrl = "";
-let faceLandmarker = null;
-let lastAnalysis = null;
 
 function msg(id, text) {
-  const el = $(id);
-  if (el) el.textContent = text;
+  const element = $(id);
+  if (element) element.textContent = text;
 }
 
-function esc(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
+function showOnly(id) {
+  ["login", "resetPassword", "app"].forEach(section => {
+    const element = $(section);
+    if (element) element.classList.add("hidden");
+  });
+
+  const selected = $(id);
+  if (selected) selected.classList.remove("hidden");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
-    "'": "&#39;"
-  }[c]));
+    "'": "&#039;"
+  })[character]);
 }
 
-function showOnly(id) {
-  ["login", "resetPassword", "app"].forEach(x =>
-    $(x).classList.add("hidden")
-  );
-  $(id).classList.remove("hidden");
-}
 
-/* INICIAR SESIÓN */
+/* =====================================
+   3. INICIAR SESIÓN
+===================================== */
 
 async function loginUser() {
   const email = $("email").value.trim();
   const password = $("password").value;
 
   if (!email || !password) {
-    msg("message", "Escribe tu correo y contraseña.");
+    msg("message", "Ingresa tu correo y contraseña.");
     return;
   }
 
-  $("loginBtn").disabled = true;
+  const button = $("loginBtn");
+  button.disabled = true;
   msg("message", "Ingresando...");
 
   try {
@@ -413,32 +539,31 @@ async function loginUser() {
 
     if (error) throw error;
 
-    if (!data.session) {
-      throw new Error("No se pudo iniciar sesión.");
-    }
-
+    currentUser = data.user;
     recoveryMode = false;
-    showOnly("app");
-    await loadClients();
 
-  } catch (e) {
-    msg("message", "Error de acceso: " + e.message);
+    await initializeApp();
+
+  } catch (error) {
+    msg("message", "Error: " + error.message);
   } finally {
-    $("loginBtn").disabled = false;
+    button.disabled = false;
   }
 }
 
-/* RECUPERAR CONTRASEÑA */
+
+/* =====================================
+   4. RECUPERAR CONTRASEÑA
+===================================== */
 
 async function forgotPassword() {
-  const email = $("email").value.trim().toLowerCase();
+  const email = $("email").value.trim();
 
   if (!email) {
-    msg("message", "Escribe tu correo electrónico.");
+    msg("message", "Escribe tu correo para recuperar tu contraseña.");
     return;
   }
 
-  $("forgotBtn").disabled = true;
   msg("message", "Enviando enlace de recuperación...");
 
   try {
@@ -448,148 +573,70 @@ async function forgotPassword() {
 
     if (error) throw error;
 
-    msg(
-      "message",
-      "Solicitud enviada. Revisa tu correo y la carpeta de spam."
-    );
+    msg("message", "Revisa tu correo para cambiar tu contraseña.");
 
-  } catch (e) {
-    msg("message", "Error al recuperar contraseña: " + e.message);
-  } finally {
-    $("forgotBtn").disabled = false;
+  } catch (error) {
+    msg("message", "Error: " + error.message);
   }
 }
 
 
-/* GUARDAR NUEVA CONTRASEÑA */
+/* =====================================
+   5. GUARDAR NUEVA CONTRASEÑA
+===================================== */
 
 async function saveNewPassword() {
   const password = $("newPassword").value;
-  const confirm = $("confirmPassword").value;
+  const confirmation = $("confirmPassword").value;
 
-  if (password.length < 8) {
-    msg("resetMessage", "Utiliza mínimo 8 caracteres.");
+  if (!password || password.length < 6) {
+    msg("resetMessage", "La contraseña debe tener al menos 6 caracteres.");
     return;
   }
 
-  if (password !== confirm) {
+  if (password !== confirmation) {
     msg("resetMessage", "Las contraseñas no coinciden.");
     return;
   }
 
-  $("savePasswordBtn").disabled = true;
-  msg("resetMessage", "Actualizando contraseña...");
-
   try {
-    const { data: sessionData, error: sessionError } =
-      await db.auth.getSession();
-
-    if (sessionError) throw sessionError;
-
-    if (!sessionData.session) {
-      throw new Error(
-        "El enlace de recuperación venció o no es válido. Solicita uno nuevo."
-      );
-    }
-
     const { error } = await db.auth.updateUser({
       password: password
     });
 
     if (error) throw error;
 
-    msg("resetMessage", "¡Contraseña actualizada correctamente!");
+    recoveryMode = false;
+    msg("resetMessage", "Contraseña actualizada correctamente.");
 
-    $("newPassword").value = "";
-    $("confirmPassword").value = "";
+    await db.auth.signOut();
+    showOnly("login");
 
-    setTimeout(async () => {
-      await db.auth.signOut();
-      recoveryMode = false;
+    msg("message", "Ya puedes ingresar con tu nueva contraseña.");
 
-      history.replaceState(
-        null,
-        document.title,
-        window.location.pathname + window.location.search
-      );
-
-      showOnly("login");
-      msg("message", "Ingresa con tu nueva contraseña.");
-    }, 1800);
-
-  } catch (e) {
-    msg("resetMessage", "Error: " + e.message);
-  } finally {
-    $("savePasswordBtn").disabled = false;
+  } catch (error) {
+    msg("resetMessage", "Error: " + error.message);
   }
 }
-  /* CERRAR SESIÓN */
+
+
+/* =====================================
+   6. CERRAR SESIÓN
+===================================== */
 
 async function logout() {
-  const { error } = await db.auth.signOut();
-
-  if (error) {
-    msg("message", error.message);
-    return;
-  }
-
-  currentClient = null;
-  allClients = [];
-
-  $("clients").innerHTML = "";
-  $("serviceSection").classList.add("hidden");
-
+  await db.auth.signOut();
+  currentUser = null;
+  selectedClient = null;
   showOnly("login");
-  msg("message", "Sesión cerrada.");
 }
 
-/* CLIENTES */
 
-async function loadClients() {
-  msg("saveMessage", "Cargando clientes...");
+/* =====================================
+   7. REGISTRAR CLIENTE
+===================================== */
 
-  try {
-    const { data, error } = await db
-      .from("clients")
-      .select("id,name,phone,created_at")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    allClients = data || [];
-    renderClients();
-
-    msg("saveMessage", "");
-
-  } catch (e) {
-    msg("saveMessage", "Error al cargar clientes: " + e.message);
-  }
-}
-
-function renderClients() {
-  const q = $("search").value.toLowerCase().trim();
-
-  const rows = allClients.filter(c =>
-    (c.name || "").toLowerCase().includes(q) ||
-    (c.phone || "").toLowerCase().includes(q)
-  );
-
-  $("clients").innerHTML = rows.map(c => `
-    <div class="client">
-      <strong>${esc(c.name)}</strong>
-      <p>${esc(c.phone || "Sin teléfono")}</p>
-      <button type="button" data-id="${esc(c.id)}">
-        SELECCIONAR CLIENTE
-      </button>
-    </div>
-  `).join("") || "<p class='small'>No hay clientes registrados.</p>";
-
-  $("clients").querySelectorAll("[data-id]").forEach(b => {
-    b.addEventListener("click", () => selectClient(b.dataset.id));
-  });
-}
-
-async function addClient() {
+async function saveClient() {
   const name = $("name").value.trim();
   const phone = $("phone").value.trim();
 
@@ -598,126 +645,124 @@ async function addClient() {
     return;
   }
 
+  if (!currentUser) {
+    msg("saveMessage", "Debes iniciar sesión.");
+    return;
+  }
+
   try {
-    const { data, error: userError } = await db.auth.getUser();
-
-    if (userError || !data.user) {
-      throw new Error("No se pudo verificar al administrador.");
-    }
-
-    const { error } = await db.from("clients").insert({
-      name,
-      phone,
-      owner_id: data.user.id
-    });
+    const { error } = await db
+      .from("clients")
+      .insert([{
+        name,
+        phone,
+        owner_id: currentUser.id
+      }]);
 
     if (error) throw error;
 
     $("name").value = "";
     $("phone").value = "";
 
-    msg("saveMessage", "Cliente registrado.");
+    msg("saveMessage", "Cliente registrado correctamente.");
+
     await loadClients();
 
-  } catch (e) {
-    msg("saveMessage", "Error: " + e.message);
+  } catch (error) {
+    msg("saveMessage", "Error: " + error.message);
   }
 }
 
-/* SELECCIONAR CLIENTE */
 
-function selectClient(id) {
-  currentClient = allClients.find(c => c.id === id);
+/* =====================================
+   8. CARGAR CLIENTES
+===================================== */
 
-  if (!currentClient) return;
+async function loadClients() {
+  if (!currentUser) return;
 
-  $("serviceSection").classList.remove("hidden");
+  const { data, error } = await db
+    .from("clients")
+    .select("*")
+    .eq("owner_id", currentUser.id)
+    .order("created_at", { ascending: false });
 
-  $("selectedClient").textContent =
-    "Cliente: " + currentClient.name;
+  if (error) {
+    msg("saveMessage", "Error al cargar clientes: " + error.message);
+    return;
+  }
 
-  $("history").innerHTML = "";
+  clientsData = data || [];
 
-  resetConsultation();
+  renderClients();
+}
 
-  $("serviceSection").scrollIntoView({
-    behavior: "smooth",
-    block: "start"
+
+/* =====================================
+   9. MOSTRAR Y BUSCAR CLIENTES
+===================================== */
+
+function renderClients() {
+  const search = $("search").value.trim().toLowerCase();
+
+  const filtered = clientsData.filter(client =>
+    (client.name || "").toLowerCase().includes(search) ||
+    (client.phone || "").toLowerCase().includes(search)
+  );
+
+  $("clients").innerHTML = "";
+
+  if (!filtered.length) {
+    $("clients").innerHTML =
+      '<p class="small">No se encontraron clientes.</p>';
+    return;
+  }
+
+  filtered.forEach(client => {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "secondary";
+
+    button.textContent =
+      client.name + (client.phone ? " · " + client.phone : "");
+
+    button.addEventListener("click", () => selectClient(client));
+
+    $("clients").appendChild(button);
   });
 }
 
-function resetConsultation() {
-  [
-    "hairCurrent",
-    "faceShape",
-    "hairDesired",
-    "style"
-  ].forEach(id => $(id).value = "");
 
-  [
-    "desiredCut",
-    "observations"
-  ].forEach(id => $(id).value = "");
+/* =====================================
+   10. SELECCIONAR CLIENTE
+===================================== */
 
-  $("recommendations").classList.add("hidden");
-  $("faceAnalysis").classList.add("hidden");
+function selectClient(client) {
+  selectedClient = client;
 
-  msg("faceMessage", "");
+  $("selectedClient").textContent =
+    "Cliente seleccionado: " + client.name;
+
+  $("serviceSection").classList.remove("hidden");
+
   msg("consultMessage", "");
 
-  clearPhoto();
+  resetConsultation();
+
+  loadHistory();
 }
 
-/* FOTOGRAFÍA */
+</script>
+<script>
 
-function clearPhoto() {
-  photoDataUrl = "";
-  lastAnalysis = null;
+/* =====================================
+   11. FOTOGRAFÍA FRONTAL
+===================================== */
 
-  $("photoCamera").value = "";
-  $("photoFile").value = "";
-
-  $("photoPreview").removeAttribute("src");
-  $("photoPreview").classList.add("hidden");
-
-  $("faceOverlay").classList.add("hidden");
-  $("photoEmpty").classList.remove("hidden");
-  $("faceAnalysis").classList.add("hidden");
-
-  msg("faceMessage", "");
-}/* LIMPIAR FOTO DE PERFIL LATERAL */
-
-function clearProfile(){
-
-  profilePhotoDataUrl = "";
-
-  $("profileCamera").value = "";
-  $("profileFile").value = "";
-
-  $("profilePreview").removeAttribute("src");
-
-  $("profileVisual").classList.add("hidden");
-  $("profileEmpty").classList.remove("hidden");
-
-  $("profileResults").classList.add("hidden");
-  $("profileDiagnosis").textContent = "";
-
-  // Limpiar líneas y puntos biométricos
-  const canvas = $("profileOverlay");
-
-  if(canvas){
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  msg("profileMessage", "");
-}
-
-
-/* CARGAR FOTO FRONTAL */
+let facePhotoDataUrl = "";
 
 function loadPhoto(file) {
-
   if (!file) return;
 
   if (!file.type.startsWith("image/")) {
@@ -726,63 +771,51 @@ function loadPhoto(file) {
   }
 
   if (file.size > 12 * 1024 * 1024) {
-    msg("faceMessage", "La imagen supera 12 MB. Elige una más ligera.");
+    msg("faceMessage", "La imagen supera 12 MB.");
     return;
   }
 
   const reader = new FileReader();
 
-  reader.onload = e => {
+  reader.onload = function(event) {
+    facePhotoDataUrl = event.target.result;
 
-    photoDataUrl = e.target.result;
-
-    $("photoPreview").src = photoDataUrl;
+    $("photoPreview").src = facePhotoDataUrl;
     $("photoPreview").classList.remove("hidden");
-
     $("photoEmpty").classList.add("hidden");
-    $("faceOverlay").classList.add("hidden");
-    $("faceAnalysis").classList.add("hidden");
 
-    lastAnalysis = null;
-
-    msg("faceMessage", "Fotografía cargada. Pulsa ANALIZAR ROSTRO.");
-  };
-
-  reader.onerror = () => {
-    msg("faceMessage", "No se pudo leer la fotografía.");
+    msg("faceMessage", "Fotografía frontal cargada correctamente.");
   };
 
   reader.readAsDataURL(file);
 }
 
 
-/* BOTÓN DE CÁMARA FRONTAL */
+/* =====================================
+   12. LIMPIAR FOTO FRONTAL
+===================================== */
 
-$("photoCamera").addEventListener("change", e => {
+function clearPhoto() {
+  facePhotoDataUrl = "";
 
-  if (e.target.files[0]) {
+  $("photoFile").value = "";
+  $("photoCamera").value = "";
+  $("photoPreview").src = "";
 
-    $("photoFile").value = "";
+  $("photoPreview").classList.add("hidden");
+  $("photoEmpty").classList.remove("hidden");
 
-    loadPhoto(e.target.files[0]);
+  if ($("faceAnalysis")) {
+    $("faceAnalysis").classList.add("hidden");
   }
 
-});
+  msg("faceMessage", "Fotografía eliminada.");
+}
 
 
-/* BOTÓN DE ARCHIVOS FRONTAL */
-
-$("photoFile").addEventListener("change", e => {
-
-  if (e.target.files[0]) {
-
-    $("photoCamera").value = "";
-
-    loadPhoto(e.target.files[0]);
-  }
-
-});
-});/* CARGAR FOTO DE PERFIL Y CRANEO */
+/* =====================================
+   13. FOTO DE PERFIL Y CRÁNEO
+===================================== */
 
 let profilePhotoDataUrl = "";
 
@@ -801,742 +834,724 @@ function loadProfilePhoto(file) {
 
   const reader = new FileReader();
 
-  reader.onload = e => {
-    profilePhotoDataUrl = e.target.result;
+  reader.onload = function(event) {
+    profilePhotoDataUrl = event.target.result;
 
-    const preview = $("profilePreview");
-    const visual = $("profileVisual");
-    const canvas = $("profileOverlay");
-
-    preview.onload = () => {
-      canvas.width = preview.naturalWidth;
-      canvas.height = preview.naturalHeight;
-    };
-
-    preview.src = profilePhotoDataUrl;
-
-    visual.classList.remove("hidden");
+    $("profilePreview").src = profilePhotoDataUrl;
+    $("profilePreview").classList.remove("hidden");
     $("profileEmpty").classList.add("hidden");
-    $("profileResults").classList.add("hidden");
 
-    msg("profileMessage", "Foto lateral cargada correctamente.");
-  };
+    drawProfileGuide();
 
-  reader.onerror = () => {
-    msg("profileMessage", "No se pudo leer la fotografía.");
+    msg("profileMessage", "Fotografía lateral cargada correctamente.");
   };
 
   reader.readAsDataURL(file);
 }
 
 
-/* BOTONES PARA CARGAR FOTO LATERAL */
+/* =====================================
+   14. DIBUJAR LÍNEAS VERDES DE PERFIL
+===================================== */
 
-$("profileCamera").addEventListener("change", e => {
-  if (e.target.files[0]) {
-    $("profileFile").value = "";
-    loadProfilePhoto(e.target.files[0]);
-  }
-});
+function drawProfileGuide() {
+  const image = $("profilePreview");
+  const canvas = $("profileOverlay");
 
-$("profileFile").addEventListener("change", e => {
-  if (e.target.files[0]) {
-    $("profileCamera").value = "";
-    loadProfilePhoto(e.target.files[0]);
-  }
-});
+  if (!image || !canvas || !image.naturalWidth) return;
 
+  const width = image.clientWidth;
+  const height = image.clientHeight;
 
-/* MODELO DE ANÁLISIS FACIAL */
+  if (!width || !height) return;
 
-async function loadFaceModel() {
-  if (faceLandmarker) return faceLandmarker;
+  canvas.width = width * 2;
+  canvas.height = height * 2;
 
-  msg("faceMessage", "Cargando modelo de análisis facial...");
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
 
-  const vision = await import(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"
+  const ctx = canvas.getContext("2d");
+
+  ctx.scale(2, 2);
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.strokeStyle = "#20e66b";
+  ctx.fillStyle = "#20e66b";
+  ctx.lineWidth = 2;
+
+  const direction = $("profileDirection").value;
+
+  const startX = direction === "left"
+    ? width * 0.18
+    : width * 0.82;
+
+  const endX = direction === "left"
+    ? width * 0.82
+    : width * 0.18;
+
+  /* Línea de frente */
+
+  ctx.beginPath();
+  ctx.moveTo(startX, height * 0.20);
+  ctx.lineTo(startX, height * 0.65);
+  ctx.stroke();
+
+  /* Línea superior del cráneo */
+
+  ctx.beginPath();
+  ctx.moveTo(width * 0.20, height * 0.16);
+  ctx.quadraticCurveTo(
+    width * 0.50,
+    height * 0.02,
+    width * 0.80,
+    height * 0.18
+  );
+  ctx.stroke();
+
+  /* Línea de occipital aproximada */
+
+  ctx.beginPath();
+  ctx.moveTo(
+    direction === "left" ? width * 0.72 : width * 0.28,
+    height * 0.25
   );
 
-  const fileset = await vision.FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+  ctx.quadraticCurveTo(
+    direction === "left" ? width * 0.90 : width * 0.10,
+    height * 0.40,
+    direction === "left" ? width * 0.75 : width * 0.25,
+    height * 0.58
   );
 
-  faceLandmarker = await vision.FaceLandmarker.createFromOptions(
-    fileset,
-    {
-      baseOptions: {
-        modelAssetPath:
-          "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-        delegate: "CPU"
-      },
-      runningMode: "IMAGE",
-      numFaces: 1
-    }
-  );
+  ctx.stroke();
 
-  return faceLandmarker;
-}
-  /* MODELO DE ANÁLISIS FACIAL */
+  /* Línea de nuca */
 
-async function loadFaceModel() {
-  if (faceLandmarker) return faceLandmarker;
+  ctx.beginPath();
+  ctx.moveTo(endX, height * 0.58);
+  ctx.lineTo(endX, height * 0.85);
+  ctx.stroke();
 
-  msg("faceMessage", "Cargando modelo de análisis facial...");
+  /* Línea horizontal de referencia */
 
-  const vision = await import(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"
-  );
+  ctx.setLineDash([5, 5]);
 
-  const fileset = await vision.FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-  );
-
-  faceLandmarker = await vision.FaceLandmarker.createFromOptions(
-    fileset,
-    {
-      baseOptions: {
-        modelAssetPath:
-          "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-        delegate: "CPU"
-      },
-      runningMode: "IMAGE",
-      numFaces: 1
-    }
-  );
-
-  return faceLandmarker;
-}
-
-/* MEDIDAS Y ANÁLISIS FACIAL */
-
-function pct(a,b,total){
-  return total > 0
-    ? Math.round(Math.abs(b-a)/total*100) + "%"
-    : "No disponible";
-}
-
-async function analyzeFace(){
-  if(!photoDataUrl){
-    msg("faceMessage","Primero toma o sube una fotografía.");
-    return;
-  }
-
-  const btn=$("analyzeFaceBtn");
-  btn.disabled=true;
-
-  try{
-    msg("faceMessage","Analizando rostro...");
-
-    const model=await loadFaceModel();
-    const img=$("photoPreview");
-
-    if(!img.complete || !img.naturalWidth){
-      throw new Error("La fotografía todavía no está lista.");
-    }
-
-    let result=model.detect(img);
-
-    if(!result.faceLandmarks || !result.faceLandmarks.length){
-
-      const canvas=document.createElement("canvas");
-      canvas.width=img.naturalWidth;
-      canvas.height=img.naturalHeight;
-
-      const ctx=canvas.getContext("2d");
-
-      ctx.filter="brightness(1.35) contrast(1.20)";
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      ctx.filter="none";
-
-      result=model.detect(canvas);
-    }
-
-    if(!result.faceLandmarks || !result.faceLandmarks.length){
-
-      const canvas=document.createElement("canvas");
-      canvas.width=img.naturalWidth;
-      canvas.height=img.naturalHeight;
-
-      const ctx=canvas.getContext("2d");
-
-      ctx.filter="brightness(1.60) contrast(1.30)";
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      ctx.filter="none";
-
-      result=model.detect(canvas);
-    }
-
-    if(!result.faceLandmarks || !result.faceLandmarks.length){
-      throw new Error(
-        "No se detectó el rostro. Intenta una foto frontal, enfocada y sin sombras fuertes."
-      );
-    }
-
-    const pts=result.faceLandmarks[0];
-
-    const point=i=>({
-      x:pts[i].x*img.naturalWidth,
-      y:pts[i].y*img.naturalHeight
-    });
-
-    const top=point(10);
-    const brow=point(168);
-    const noseBase=point(2);
-    const chin=point(152);
-    const left=point(234);
-    const right=point(454);
-    const noseTip=point(1);
-
-    const faceH=Math.max(1,chin.y-top.y);
-    const faceW=Math.max(1,right.x-left.x);
-
-    const upper=Math.abs(brow.y-top.y);
-    const middle=Math.abs(noseBase.y-brow.y);
-    const lower=Math.abs(chin.y-noseBase.y);
-    const sum=upper+middle+lower || 1;
-
-    const ratio=(faceW/faceH).toFixed(2);
-
-    let estimate="Ovalado (estimación orientativa)";
-
-    if(faceW/faceH > .88){
-      estimate="Redondo o ancho (estimación orientativa)";
-    }else if(faceW/faceH < .70){
-      estimate="Alargado (estimación orientativa)";
-    }
-
-    $("ratioValue").textContent=ratio;
-    $("upperValue").textContent=Math.round(upper/sum*100)+"%";
-    $("middleValue").textContent=Math.round(middle/sum*100)+"%";
-    $("lowerValue").textContent=Math.round(lower/sum*100)+"%";
-    $("widthValue").textContent=Math.round(faceW)+" px";
-    $("noseValue").textContent=
-      Math.round(Math.abs(noseTip.y-brow.y))+" px aprox.";
-
-    $("faceEstimate").textContent=
-      "Forma sugerida: "+estimate+
-      ". Confirma el diagnóstico en el selector de rostro.";
-
-    drawOverlay(img,pts);
-
-    lastAnalysis={
-      ratio,
-      upper:Math.round(upper/sum*100),
-      middle:Math.round(middle/sum*100),
-      lower:Math.round(lower/sum*100),
-      width:Math.round(faceW),
-      nose:Math.round(Math.abs(noseTip.y-brow.y)),
-      estimate
-    };
-
-    $("faceAnalysis").classList.remove("hidden");
-
-    msg(
-      "faceMessage",
-      "Análisis facial completado. Revisa los puntos y confirma el diagnóstico."
-    );
-
-  }catch(e){
-    msg("faceMessage","No se pudo analizar: "+e.message);
-  }finally{
-    btn.disabled=false;
-  }
-}/* ANALISIS GRATUITO DE PERFIL Y CRANEO */
-
-async function analyzeProfile(){
-
-  if(!profilePhotoDataUrl){
-    msg("profileMessage","Primero toma o sube una fotografía lateral.");
-    return;
-  }
-
-  const btn=$("analyzeProfileBtn");
-  btn.disabled=true;
-
-  try{
-
-    msg("profileMessage","Analizando perfil lateral...");
-    $("profileResults").classList.add("hidden");
-
-    // Cargar el modelo MediaPipe existente
-    const model=await loadFaceModel();
-
-    // Preparar fotografía
-    const img=new Image();
-    img.src=profilePhotoDataUrl;
-
-    await new Promise((resolve,reject)=>{
-      img.onload=resolve;
-      img.onerror=reject;
-    });
-
-    // Detectar puntos faciales
-    let result=model.detect(img);
-
-// Segundo intento: mejorar brillo y contraste
-if(!result.faceLandmarks || !result.faceLandmarks.length){
-
-  const canvas=document.createElement("canvas");
-  canvas.width=img.naturalWidth;
-  canvas.height=img.naturalHeight;
-
-  const ctx=canvas.getContext("2d");
-
-  ctx.filter="brightness(1.35) contrast(1.25) saturate(1.10)";
-  ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  ctx.filter="none";
-
-  result=model.detect(canvas);
-}
-
-// Tercer intento: aumentar iluminación
-if(!result.faceLandmarks || !result.faceLandmarks.length){
-
-  const canvas=document.createElement("canvas");
-  canvas.width=img.naturalWidth;
-  canvas.height=img.naturalHeight;
-
-  const ctx=canvas.getContext("2d");
-
-  ctx.filter="brightness(1.60) contrast(1.35)";
-  ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  ctx.filter="none";
-
-  result=model.detect(canvas);
-}
-
-if(!result.faceLandmarks || !result.faceLandmarks.length){
-  throw new Error(
-    "No se reconoce el perfil. Intenta una fotografía lateral más enfocada y con el rostro completo."
-  );
-}
-
-    const pts=result.faceLandmarks[0];
-
-    const point=i=>({
-      x:pts[i].x*img.naturalWidth,
-      y:pts[i].y*img.naturalHeight
-    });
-
-    // Referencias faciales
-    const forehead=point(10);
-    const nose=point(1);
-    const chin=point(152);
-    const cheek=point(234);
-    const jaw=point(172);
-
-    // Cálculos orientativos
-    const faceHeight=Math.abs(chin.y-forehead.y);
-    const noseProjection=Math.abs(nose.x-cheek.x);
-    const chinPosition=Math.abs(chin.x-jaw.x);
-
-    // Informe
-    const diagnosis =
-`ANÁLISIS LATERAL Y PERFIL
-
-DETECCIÓN FACIAL
-Detección de puntos faciales: correcta.
-
-FRENTE
-Referencia superior detectada.
-
-NARIZ
-Proyección aproximada: ${Math.round(noseProjection)} px.
-
-MENTÓN
-Referencia lateral: ${Math.round(chinPosition)} px.
-
-ALTURA FACIAL
-${Math.round(faceHeight)} px.
-
-RECOMENDACIONES DE BARBERÍA
-
-• Para un perfil equilibrado: Quiff texturizado.
-• Para aportar volumen superior: Pompadour.
-• Para un estilo moderno: Taper Fade.
-• Para un estilo juvenil: Crop texturizado.
-
-IMPORTANTE:
-Este análisis es orientativo. Los puntos faciales no permiten medir con precisión el cráneo ni la zona occipital.
-La fotografía debe mostrar claramente el perfil lateral.`;
-
-    $("profileDiagnosis").textContent=diagnosis;
-    $("profileDiagnosis").style.whiteSpace="pre-wrap";
-
-    $("profileResults").classList.remove("hidden");
-
-    msg("profileMessage","Análisis lateral completado correctamente.");
-
-  }catch(e){
-
-    console.error("Error perfil:",e);
-
-    msg("profileMessage","No se pudo analizar: "+e.message);
-
-  }finally{
-
-    btn.disabled=false;
-
-  }
-}
-  /* DIBUJAR GUÍAS SOBRE EL ROSTRO */
-
-function drawOverlay(img,pts){
-  const canvas=$("faceOverlay");
-  const width=img.clientWidth;
-  const height=img.clientHeight;
-
-  canvas.width=Math.round(width*devicePixelRatio);
-  canvas.height=Math.round(height*devicePixelRatio);
-
-  canvas.style.width=width+"px";
-  canvas.style.height=height+"px";
-
-  const ctx=canvas.getContext("2d");
-  ctx.scale(devicePixelRatio,devicePixelRatio);
-
-  const scale=Math.min(
-    width/img.naturalWidth,
-    height/img.naturalHeight
-  );
-
-  const drawW=img.naturalWidth*scale;
-  const drawH=img.naturalHeight*scale;
-
-  const offX=(width-drawW)/2;
-  const offY=(height-drawH)/2;
-
-  const xy=i=>({
-    x:offX+pts[i].x*drawW,
-    y:offY+pts[i].y*drawH
-  });
-
-  ctx.lineWidth=1.5;
-  ctx.strokeStyle="#00e879";
-  ctx.fillStyle="#ffffff";
-
-  [[10,168],[168,2],[2,152],[234,454],[33,263]].forEach(pair=>{
-    const a=xy(pair[0]);
-    const b=xy(pair[1]);
-
-    ctx.beginPath();
-    ctx.moveTo(a.x,a.y);
-    ctx.lineTo(b.x,b.y);
-    ctx.stroke();
-  });
-
-  const guides=[10,168,2,152];
-
-  ctx.setLineDash([5,4]);
-
-  guides.forEach(i=>{
-    const p=xy(i);
-    ctx.beginPath();
-    ctx.moveTo(0,p.y);
-    ctx.lineTo(width,p.y);
-    ctx.stroke();
-  });
+  ctx.beginPath();
+  ctx.moveTo(width * 0.10, height * 0.50);
+  ctx.lineTo(width * 0.90, height * 0.50);
+  ctx.stroke();
 
   ctx.setLineDash([]);
 
-  [10,168,2,152,234,454,1,33,263].forEach(i=>{
-    const p=xy(i);
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,3,0,Math.PI*2);
-    ctx.fill();
-  });
+  /* Etiquetas */
 
-  canvas.classList.remove("hidden");
+  ctx.font = "11px Arial";
+
+  ctx.fillText("FRENTE", width * 0.03, height * 0.12);
+  ctx.fillText("CORONILLA", width * 0.35, height * 0.10);
+  ctx.fillText("OCCIPITAL", width * 0.60, height * 0.70);
+  ctx.fillText("NUCA", width * 0.40, height * 0.92);
 }
 
-/* RECOMENDACIONES DE CORTE */
 
-function recommend(){
-  const face=$("faceShape").value;
-  const style=$("style").value;
-  const hair=$("hairCurrent").value;
+/* =====================================
+   15. LIMPIAR FOTO DE PERFIL
+===================================== */
 
-  if(!face || !style || !hair){
-    msg("consultMessage","Selecciona tipo de cabello, forma del rostro y estilo.");
+function clearProfile() {
+  profilePhotoDataUrl = "";
+
+  $("profileFile").value = "";
+  $("profileCamera").value = "";
+
+  $("profilePreview").src = "";
+  $("profilePreview").classList.add("hidden");
+
+  $("profileEmpty").classList.remove("hidden");
+
+  const canvas = $("profileOverlay");
+
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  if ($("profileResults")) {
+    $("profileResults").classList.add("hidden");
+  }
+
+  msg("profileMessage", "Fotografía lateral eliminada.");
+}
+
+
+/* =====================================
+   16. ANALIZAR REFERENCIAS DE PERFIL
+===================================== */
+
+function analyzeProfile() {
+  if (!profilePhotoDataUrl) {
+    msg("profileMessage", "Primero carga una fotografía lateral.");
     return;
   }
 
-  const map={
-    Ovalado:["Quiff texturizado","Crop francés","Slick Back","Mid Fade"],
-    Redondo:["Pompadour","Quiff con volumen","Fade alto","Crop texturizado"],
-    Cuadrado:["Buzz Cut degradado","Crew Cut","Taper Fade","Quiff"],
-    Alargado:["Crop francés","Fringe texturizado","Fade bajo","Corte en capas"],
-    Triangular:["Quiff con volumen","Corte en capas","Taper Fade","Texturizado"],
-    Diamante:["Fringe texturizado","Mullet moderno","Taper Fade","Quiff"]
-  };
+  drawProfileGuide();
 
-  const extra={
-    moderno:"Mid Fade, Mullet moderno y Quiff texturizado.",
-    clasico:"Corte clásico, Side Part y Slick Back.",
-    juvenil:"Crop francés, Burst Fade y Texturizado.",
-    formal:"Slick Back, Side Part y Taper Fade.",
-    atrevido:"Mullet moderno, Mohicano y diseños."
-  };
+  $("profileResults").classList.remove("hidden");
 
-  let servicios="";
-  const tipo=hair.toLowerCase();
+  $("profileDiagnosis").innerHTML = `
+    <strong>Referencias visuales:</strong><br><br>
+    • Frente: observa la línea frontal.<br>
+    • Coronilla: revisa el volumen superior.<br>
+    • Occipital: evalúa visualmente la prominencia posterior.<br>
+    • Nuca: observa la transición hacia el cuello.<br><br>
+    <strong>Importante:</strong> las líneas verdes son guías
+    aproximadas. No detectan automáticamente los huesos
+    ni miden con precisión el occipital.
+  `;
 
-  if(tipo.includes("lacio") || tipo.includes("liso")){
-    servicios=`
-      <h3>RECOMENDACIÓN DE TRANSFORMACIÓN</h3>
-      <div class="recommend-box">
-        <h4>1. ONDULACIÓN</h4>
-        <p>Ideal para conseguir rizos definidos, textura y mayor volumen.</p>
-        <h4>2. SEMI ONDULACIÓN</h4>
-        <p>Ideal para conseguir ondas suaves, movimiento y un acabado natural.</p>
-        <p><b>Consejo DK:</b> Evaluar el largo, la densidad y la resistencia del cabello antes de elegir el procedimiento.</p>
-      </div>
-    `;
-  }else if(tipo.includes("ondulado")){
-    servicios=`
-      <h3>RECOMENDACIÓN DE TEXTURA</h3>
-      <p>Potenciar las ondas naturales, definir la textura y aportar volumen.</p>
-    `;
-  }else if(tipo.includes("rizado") || tipo.includes("crespo")){
-    servicios=`
-      <h3>RECOMENDACIÓN DE TEXTURA</h3>
-      <p>Definir los rizos, controlar el volumen y elegir un corte que respete la textura natural.</p>
-    `;
+  msg("profileMessage", "Guías de perfil generadas.");
+}
+
+
+/* =====================================
+   17. ANALIZAR REFERENCIAS FRONTALES
+===================================== */
+
+function analyzeFace() {
+  if (!facePhotoDataUrl) {
+    msg("faceMessage", "Primero carga una fotografía frontal.");
+    return;
   }
 
-  const list=map[face] || [];
+  const shape = $("faceShape").value;
 
-  $("recommendations").innerHTML=`
-    <h3>RECOMENDACIONES PARA EL CLIENTE</h3>
-    <p><b>Rostro:</b> ${esc(face)}</p>
-    <p><b>Cabello actual:</b> ${esc(hair)}</p>
-    <p><b>Estilo buscado:</b> ${esc(style)}</p>
+  if (!shape) {
+    msg("faceMessage", "Selecciona la forma del rostro.");
+    return;
+  }
 
-    <p><b>Cortes sugeridos:</b></p>
-    <ul>${list.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+  $("faceAnalysis").classList.remove("hidden");
 
-    <p><b>Otras opciones:</b> ${esc(extra[style]||"")}</p>
+  $("faceEstimate").textContent =
+    "Forma seleccionada: " + shape;
 
-    ${servicios}
+  $("ratioValue").textContent = "Referencia visual";
+  $("upperValue").textContent = "Evaluación manual";
+  $("middleValue").textContent = "Evaluación manual";
+  $("lowerValue").textContent = "Evaluación manual";
+  $("widthValue").textContent = "Evaluación manual";
+  $("noseValue").textContent = "Evaluación manual";
 
-    <p><b>Corte que desea:</b> ${esc($("desiredCut").value||"Sin preferencia indicada")}</p>
+  msg(
+    "faceMessage",
+    "Fotografía frontal lista para la asesoría de visagismo."
+  );
+}
+
+
+/* =====================================
+   18. REINICIAR CONSULTA
+===================================== */
+
+function resetConsultation() {
+  clearPhoto();
+  clearProfile();
+
+  $("faceShape").value = "";
+  $("hairDesired").value = "";
+  $("style").value = "";
+  $("hairLength").value = "";
+  $("desiredCut").value = "";
+  $("observations").value = "";
+
+  $("cutChoices").innerHTML =
+    '<p class="small">Primero selecciona si el cabello es largo o corto.</p>';
+
+  $("recommendations").innerHTML = "";
+  $("recommendations").classList.add("hidden");
+}
+
+</script>
+<script>
+
+/* =====================================
+   19. SELECCIÓN DE CORTES SEGÚN EL LARGO
+===================================== */
+
+function renderCutChoices() {
+  const length = $("hairLength").value;
+  const container = $("cutChoices");
+
+  let cuts = [];
+
+  if (length === "largo") {
+    cuts = [
+      "Mod Cut",
+      "Wolf Cut",
+      "Mullet moderno",
+      "Corte en capas",
+      "Shaggy"
+    ];
+  } else if (length === "corto") {
+    cuts = [
+      "Buzz Cut",
+      "Crop francés",
+      "Low Fade",
+      "Mid Fade",
+      "High Fade",
+      "Taper Fade",
+      "Crew Cut",
+      "Quiff texturizado",
+      "Pompadour"
+    ];
+  }
+
+  if (!cuts.length) {
+    container.innerHTML =
+      '<p class="small">Selecciona cabello largo o corto.</p>';
+    return;
+  }
+
+  container.innerHTML = "";
+
+  cuts.forEach(cut => {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "secondary";
+    button.textContent = cut;
+
+    button.addEventListener("click", () => {
+      $("desiredCut").value = cut;
+
+      container.querySelectorAll("button").forEach(item => {
+        item.classList.remove("selected");
+      });
+
+      button.classList.add("selected");
+    });
+
+    container.appendChild(button);
+  });
+}
+
+
+/* =====================================
+   20. RECOMENDACIONES POR FORMA DEL ROSTRO
+===================================== */
+
+function recommend() {
+  const shape = $("faceShape").value;
+  const style = $("style").value;
+  const desired = $("desiredCut").value.trim();
+  const hairDesired = $("hairDesired").value;
+  const length = $("hairLength").value;
+
+  if (!shape) {
+    msg("consultMessage", "Selecciona la forma del rostro.");
+    return;
+  }
+
+  const recommendations = {
+    ovalado: [
+      "Quiff texturizado",
+      "Crop francés",
+      "Slick Back",
+      "Mid Fade",
+      "Taper Fade"
+    ],
+
+    redondo: [
+      "Pompadour",
+      "Quiff con volumen",
+      "Fade alto",
+      "Crop texturizado"
+    ],
+
+    cuadrado: [
+      "Buzz Cut degradado",
+      "Crew Cut",
+      "Taper Fade",
+      "Quiff"
+    ],
+
+    alargado: [
+      "Crop francés",
+      "Fringe texturizado",
+      "Fade bajo",
+      "Corte en capas"
+    ],
+
+    triangular: [
+      "Quiff con volumen",
+      "Corte en capas",
+      "Taper Fade",
+      "Texturizado"
+    ],
+
+    diamante: [
+      "Fringe texturizado",
+      "Mullet moderno",
+      "Taper Fade",
+      "Quiff"
+    ]
+  };
+
+  let cuts = recommendations[shape] || [];
+
+  if (length === "largo") {
+    cuts = [
+      "Mod Cut",
+      "Wolf Cut",
+      "Mullet moderno",
+      "Corte en capas"
+    ].concat(cuts);
+  }
+
+  if (length === "corto") {
+    cuts = [
+      "Buzz Cut",
+      "Crop francés",
+      "Low Fade",
+      "Mid Fade",
+      "Taper Fade"
+    ].concat(cuts);
+  }
+
+  cuts = [...new Set(cuts)];
+
+  let extra = "";
+
+  if (style === "moderno") {
+    extra = "Priorizar acabados modernos y texturizados.";
+  } else if (style === "clasico") {
+    extra = "Priorizar líneas limpias y acabados clásicos.";
+  } else if (style === "juvenil") {
+    extra = "Priorizar movimiento, textura y estilos juveniles.";
+  } else if (style === "formal") {
+    extra = "Priorizar acabados elegantes y fáciles de peinar.";
+  } else if (style === "atrevido") {
+    extra = "Se pueden explorar diseños y estilos más atrevidos.";
+  }
+
+  $("recommendations").innerHTML = `
+    <h3>RESULTADO DEL VISAGISMO</h3>
+
+    <p><strong>Forma del rostro:</strong>
+    ${escapeHTML(shape)}</p>
+
+    <p><strong>Estilo deseado:</strong>
+    ${escapeHTML(style || "No especificado")}</p>
+
+    <p><strong>Acabado deseado:</strong>
+    ${escapeHTML(hairDesired || "No especificado")}</p>
+
+    <p><strong>Corte elegido:</strong>
+    ${escapeHTML(desired || "Por decidir")}</p>
+
+    <h4>CORTES RECOMENDADOS</h4>
+
+    <ol>
+      ${cuts.map(cut => `<li>${escapeHTML(cut)}</li>`).join("")}
+    </ol>
+
+    <p>${escapeHTML(extra)}</p>
+
+    <p class="small">
+      La recomendación es orientativa. El barbero debe
+      considerar densidad, crecimiento, remolinos,
+      entradas y estructura craneal.
+    </p>
   `;
 
   $("recommendations").classList.remove("hidden");
 
-  msg("consultMessage","Recomendaciones generadas. Puedes guardar la asesoría.");
+  msg("consultMessage", "Recomendaciones generadas correctamente.");
 }
 
-/* GUARDAR ASESORÍA */
 
-async function saveConsultation(){
-  if(!currentClient){
-    msg("consultMessage","Primero selecciona un cliente.");
+/* =====================================
+   21. GUARDAR CONSULTA EN SUPABASE
+===================================== */
+
+async function saveConsultation() {
+  if (!currentUser) {
+    msg("consultMessage", "Inicia sesión para guardar.");
     return;
   }
 
-  const hair=$("hairCurrent").value;
-  const face=$("faceShape").value;
-  const style=$("style").value;
-
-  if(!hair || !face || !style){
-    msg("consultMessage","Completa cabello actual, rostro y estilo.");
+  if (!selectedClient) {
+    msg("consultMessage", "Primero selecciona un cliente.");
     return;
   }
 
-  const analysis=lastAnalysis
-    ? "Proporciones estimadas: ancho/alto "+lastAnalysis.ratio+
-      "; tercios "+lastAnalysis.upper+"% / "+
-      lastAnalysis.middle+"% / "+lastAnalysis.lower+
-      "%; anchura "+lastAnalysis.width+
-      " px; referencia nariz "+lastAnalysis.nose+
-      " px; sugerencia: "+lastAnalysis.estimate
-    : "Análisis biométrico no realizado.";
+  const shape = $("faceShape").value;
+  const desired = $("desiredCut").value.trim();
 
-  const notes=[
-    "ASESORÍA DK VISAGISMO IA",
-    "Rostro: "+face,
-    "Cabello actual: "+hair,
-    "Cabello deseado: "+$("hairDesired").value,
-    "Estilo: "+style,
-    "Corte deseado: "+$("desiredCut").value,
-    analysis,
-    "Observaciones: "+$("observations").value,
-    "Recomendaciones: "+$("recommendations").innerText
+  if (!shape) {
+    msg("consultMessage", "Selecciona la forma del rostro.");
+    return;
+  }
+
+  const notes = [
+    "ANÁLISIS DE VISAGISMO",
+    "Forma del rostro: " + shape,
+    "Largo del cabello: " + ($("hairLength").value || "No especificado"),
+    "Corte deseado: " + (desired || "No especificado"),
+    "Acabado: " + ($("hairDesired").value || "No especificado"),
+    "Estilo: " + ($("style").value || "No especificado"),
+    "Observaciones: " + ($("observations").value.trim() || "Sin observaciones")
   ].join("\n");
 
-  const btn=$("saveConsultationBtn");
-  btn.disabled=true;
+  try {
+    const { error } = await db
+      .from("client_services")
+      .insert([{
+        client_id: selectedClient.id,
+        owner_id: currentUser.id,
+        service_name: "Análisis de visagismo",
+        notes: notes
+      }]);
 
-  try{
-    const {data,error:userError}=await db.auth.getUser();
+    if (error) throw error;
 
-    if(userError || !data.user){
-      throw new Error("No se pudo verificar la sesión.");
-    }
+    msg("consultMessage", "¡Análisis guardado correctamente!");
 
-    const {error}=await db.from("client_services").insert({
-      client_id:currentClient.id,
-      owner_id:data.user.id,
-      service_name:"Asesoría de visagismo",
-      notes:notes
-    });
-
-    if(error) throw error;
-
-    msg("consultMessage","¡Asesoría guardada correctamente!");
     await loadHistory();
 
-  }catch(e){
-    msg("consultMessage","No se pudo guardar: "+e.message);
-  }finally{
-    btn.disabled=false;
+  } catch (error) {
+    msg("consultMessage", "Error al guardar: " + error.message);
   }
 }
 
-/* HISTORIAL DEL CLIENTE */
 
-async function loadHistory(){
-  if(!currentClient) return;
+/* =====================================
+   22. HISTORIAL DEL CLIENTE
+===================================== */
 
-  try{
-    const {data,error}=await db
+async function loadHistory() {
+  if (!currentUser || !selectedClient) return;
+
+  const container = $("history");
+
+  container.innerHTML = "<p class='small'>Cargando historial...</p>";
+
+  try {
+    const { data, error } = await db
       .from("client_services")
-      .select("service_name,notes,created_at")
-      .eq("client_id",currentClient.id)
-      .order("created_at",{ascending:false});
+      .select("*")
+      .eq("client_id", selectedClient.id)
+      .eq("owner_id", currentUser.id)
+      .order("created_at", { ascending: false });
 
-    if(error) throw error;
+    if (error) throw error;
 
-    $("history").innerHTML=
-      "<h3>Historial del cliente</h3>"+
-      ((data||[]).map(x=>`
-        <div class="client">
-          <strong>${esc(x.service_name)}</strong>
-          <p style="white-space:pre-wrap">${esc(x.notes||"")}</p>
-          <span class="small">${new Date(x.created_at).toLocaleString("es-PE")}</span>
-        </div>
-      `).join("") || "<p class='small'>Todavía no hay registros.</p>");
+    if (!data || !data.length) {
+      container.innerHTML =
+        "<p class='small'>Este cliente todavía no tiene consultas guardadas.</p>";
+      return;
+    }
 
-  }catch(e){
-    $("history").textContent="Error al cargar historial: "+e.message;
+    container.innerHTML = "";
+
+    data.forEach(item => {
+      const card = document.createElement("div");
+
+      card.className = "result";
+
+      const date = item.created_at
+        ? new Date(item.created_at).toLocaleString("es-PE")
+        : "Fecha no disponible";
+
+      card.innerHTML = `
+        <h4>${escapeHTML(item.service_name)}</h4>
+        <p class="small">${escapeHTML(date)}</p>
+        <p>${escapeHTML(item.notes || "")}</p>
+      `;
+
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    container.innerHTML =
+      "<p class='small'>Error al cargar historial: " +
+      escapeHTML(error.message) + "</p>";
   }
 }
 
-/* INSTAGRAM */
 
-function openInstagram(){
-  const enteredUrl=$("instagramUrl").value.trim();
-  const destination=enteredUrl || "https://www.instagram.com/DAVITHEDU21/";
+/* =====================================
+   23. ABRIR INSTAGRAM
+===================================== */
 
-  try{
-    const url=new URL(destination);
+function openInstagram() {
+  const url = $("instagramUrl").value.trim();
 
-    if(url.protocol!=="https:"){
-      throw new Error("El enlace debe comenzar con https://");
+  if (!url) {
+    msg("instagramMessage", "Escribe el enlace de Instagram.");
+    return;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (
+      parsed.protocol !== "https:" ||
+      !parsed.hostname.endsWith("instagram.com")
+    ) {
+      throw new Error("Enlace no válido.");
     }
 
-    window.open(url.href,"_blank","noopener,noreferrer");
-    msg("instagramMessage","Abriendo Instagram...");
+    window.open(parsed.href, "_blank", "noopener,noreferrer");
 
-  }catch(e){
-    msg("instagramMessage","Escribe un enlace válido de Instagram.");
+    msg("instagramMessage", "Abriendo Instagram...");
+
+  } catch (error) {
+    msg("instagramMessage", "Ingresa un enlace válido de Instagram.");
   }
 }
 
-/* CONECTAR TODOS LOS BOTONES */
 
-function bindEvents(){
+/* =====================================
+   24. CONECTAR TODOS LOS BOTONES
+===================================== */
 
-  const connect = (id, event, fn) => {
-    const element = $(id);
+function bindEvents() {
 
-    if(element && typeof fn === "function"){
-      element.addEventListener(event, fn);
-    }else{
-      console.warn("No se pudo conectar:", id);
+  $("loginBtn").addEventListener("click", loginUser);
+
+  $("forgotBtn").addEventListener("click", forgotPassword);
+
+  $("savePasswordBtn").addEventListener("click", saveNewPassword);
+
+  $("logoutBtn").addEventListener("click", logout);
+
+  $("saveBtn").addEventListener("click", saveClient);
+
+  $("search").addEventListener("input", renderClients);
+
+  $("photoFile").addEventListener("change", event => {
+    if (event.target.files[0]) {
+      loadPhoto(event.target.files[0]);
     }
-  };
+  });
 
-  connect("loginBtn","click",loginUser);
-  connect("forgotBtn","click",forgotPassword);
-  connect("savePasswordBtn","click",saveNewPassword);
-  connect("logoutBtn","click",logout);
-  connect("saveBtn","click",addClient);
+  $("photoCamera").addEventListener("change", event => {
+    if (event.target.files[0]) {
+      loadPhoto(event.target.files[0]);
+    }
+  });
 
-  connect("search","input",renderClients);
-  connect("clearPhoto","click",clearPhoto);
-  connect("analyzeFaceBtn","click",analyzeFace);
-  connect("recommendBtn","click",recommend);
-  connect("saveConsultationBtn","click",saveConsultation);
-  connect("historyBtn","click",loadHistory);
-  connect("instagramBtn","click",openInstagram);
+  $("clearPhoto").addEventListener("click", clearPhoto);
 
-  connect("clearProfile","click",clearProfile);
-  connect("analyzeProfileBtn","click",analyzeProfile);
+  $("analyzeFaceBtn").addEventListener("click", analyzeFace);
 
+  $("profileFile").addEventListener("change", event => {
+    if (event.target.files[0]) {
+      loadProfilePhoto(event.target.files[0]);
+    }
+  });
+
+  $("profileCamera").addEventListener("change", event => {
+    if (event.target.files[0]) {
+      loadProfilePhoto(event.target.files[0]);
+    }
+  });
+
+  $("clearProfile").addEventListener("click", clearProfile);
+
+  $("analyzeProfileBtn").addEventListener("click", analyzeProfile);
+
+  $("profileDirection").addEventListener("change", drawProfileGuide);
+
+  $("profilePreview").addEventListener("load", drawProfileGuide);
+
+  $("hairLength").addEventListener("change", renderCutChoices);
+
+  $("recommendBtn").addEventListener("click", recommend);
+
+  $("saveConsultationBtn").addEventListener("click", saveConsultation);
+
+  $("historyBtn").addEventListener("click", loadHistory);
+
+  $("instagramBtn").addEventListener("click", openInstagram);
+
+  $("password").addEventListener("keydown", event => {
+    if (event.key === "Enter") loginUser();
+  });
 }
 
-/* SESIÓN Y ARRANQUE */
+
+/* =====================================
+   25. INICIAR APLICACIÓN
+===================================== */
+
+async function initializeApp() {
+  const { data, error } = await db.auth.getSession();
+
+  if (error) {
+    showOnly("login");
+    msg("message", error.message);
+    return;
+  }
+
+  const session = data.session;
+
+  if (session && !recoveryMode) {
+    currentUser = session.user;
+
+    showOnly("app");
+
+    await loadClients();
+
+  } else if (!recoveryMode) {
+    currentUser = null;
+    showOnly("login");
+  }
+}
+
+
+/* =====================================
+   26. CONTROL DE AUTENTICACIÓN
+===================================== */
 
 db.auth.onAuthStateChange((event, session) => {
 
   if (event === "PASSWORD_RECOVERY") {
     recoveryMode = true;
     showOnly("resetPassword");
-
-    history.replaceState(
-      null,
-      document.title,
-      window.location.pathname + window.location.search
-    );
-
     return;
   }
 
-  if (session && !recoveryMode) {
+  if (event === "SIGNED_IN" && session && !recoveryMode) {
+    currentUser = session.user;
+
     showOnly("app");
+
+    setTimeout(() => {
+      loadClients();
+    }, 0);
   }
 
-  if (!session && !recoveryMode) {
+  if (event === "SIGNED_OUT") {
+    currentUser = null;
+    selectedClient = null;
     showOnly("login");
   }
 
 });
+
+
+/* =====================================
+   27. CARGAR APLICACIÓN
+===================================== */
+
 bindEvents();
-
-async function initializeApp(){
-  try{
-    const {data,error}=await db.auth.getSession();
-
-    if(error) throw error;
-
-    const params=new URLSearchParams(
-      window.location.hash.replace(/^#/,"")
-    );
-
-    if(params.get("type")==="recovery"){
-      recoveryMode=true;
-      showOnly("resetPassword");
-      return;
-    }
-
-    if(data.session && !recoveryMode){
-      showOnly("app");
-      await loadClients();
-    }else if(!recoveryMode){
-      showOnly("login");
-    }
-
-  }catch(e){
-    showOnly("login");
-    msg("message","Error al iniciar: "+e.message);
-  }
-}
 
 initializeApp();
 
 </script>
+
 </body>
 </html>
