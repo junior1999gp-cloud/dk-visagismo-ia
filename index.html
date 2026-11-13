@@ -148,6 +148,41 @@ background:#0b1b15;
 color:#dfffee;
 font-size:13px;
 }
+
+/* ACABADO VERDE BRILLANTE DK */
+button{
+box-shadow:0 0 10px rgba(0,232,121,.12);
+transition:.18s ease;
+}
+button:not(:disabled):hover{
+filter:brightness(1.12);
+box-shadow:0 0 18px rgba(0,232,121,.28);
+}
+.client-select{
+background:linear-gradient(135deg,#00e879,#00bd65)!important;
+color:#042014!important;
+border:1px solid #61ffad!important;
+font-weight:800!important;
+box-shadow:0 0 12px rgba(0,232,121,.2);
+}
+.client-select:active{transform:scale(.99)}
+#selectedClient{
+border-left:4px solid #00e879;
+background:linear-gradient(90deg,rgba(0,232,121,.18),rgba(0,232,121,.04));
+color:#eafff3;
+box-shadow:0 0 14px rgba(0,232,121,.10);
+}
+.metric{box-shadow:inset 0 0 12px rgba(0,232,121,.035)}
+.photo-stage{box-shadow:0 0 18px rgba(0,232,121,.08)}
+#faceOverlay,#profileOverlay{z-index:3}
+#profileVisual{min-height:220px;display:block}
+#profilePreview{max-width:100%;background:#020706}
+#profileOverlay{display:block}
+.selected{
+background:#00e879!important;
+color:#04150c!important;
+border-color:#8bffc0!important;
+}
 @media(max-width:500px){
 main{padding:8px}
 .card{padding:12px}
@@ -210,6 +245,7 @@ CERRAR SESIÓN
 <input id="search" placeholder="Buscar por nombre o teléfono">
 <div id="clients"></div>
 </div>
+
 <section id="serviceSection" class="card hidden">
 
 <h2>Cliente seleccionado</h2>
@@ -361,6 +397,7 @@ Las líneas verdes son guías visuales aproximadas. La zona occipital
 no se mide ni se detecta como estructura ósea exacta mediante esta guía.
 </p>
 </div>
+
 <hr>
 
 <p class="section-kicker">5. OBJETIVO Y RECOMENDACIONES</p>
@@ -452,6 +489,7 @@ ABRIR INSTAGRAM
 
 </section>
 </main>
+
 <script>
 
 /* =====================================
@@ -722,7 +760,7 @@ function renderClients() {
     const button = document.createElement("button");
 
     button.type = "button";
-    button.className = "secondary";
+    button.className = "client-select";
 
     button.textContent =
       client.name + (client.phone ? " · " + client.phone : "");
@@ -757,10 +795,63 @@ function selectClient(client) {
 <script>
 
 /* =====================================
-   11. FOTOGRAFÍA FRONTAL
+   11. CARGAR MODELO DE DETECCIÓN FACIAL
 ===================================== */
 
+let faceLandmarker = null;
+let faceModelLoading = false;
 let facePhotoDataUrl = "";
+let faceLandmarkerReady = false;
+
+async function loadFaceModel() {
+  if (faceLandmarkerReady) return faceLandmarker;
+  if (faceModelLoading) {
+    while (faceModelLoading) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    return faceLandmarker;
+  }
+
+  faceModelLoading = true;
+
+  try {
+    const vision = await import(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm"
+    );
+
+    const files = await vision.FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+    );
+
+    faceLandmarker = await vision.FaceLandmarker.createFromOptions(
+      files,
+      {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+          delegate: "CPU"
+        },
+        runningMode: "IMAGE",
+        numFaces: 1
+      }
+    );
+
+    faceLandmarkerReady = true;
+    return faceLandmarker;
+
+  } catch (error) {
+    console.error("Error cargando modelo facial:", error);
+    throw error;
+
+  } finally {
+    faceModelLoading = false;
+  }
+}
+
+
+/* =====================================
+   12. CARGAR FOTOGRAFÍA FRONTAL
+===================================== */
 
 function loadPhoto(file) {
   if (!file) return;
@@ -780,11 +871,20 @@ function loadPhoto(file) {
   reader.onload = function(event) {
     facePhotoDataUrl = event.target.result;
 
-    $("photoPreview").src = facePhotoDataUrl;
-    $("photoPreview").classList.remove("hidden");
-    $("photoEmpty").classList.add("hidden");
+    const preview = $("photoPreview");
 
-    msg("faceMessage", "Fotografía frontal cargada correctamente.");
+    $("photoEmpty").classList.add("hidden");
+    preview.classList.remove("hidden");
+
+    preview.onload = function() {
+      $("faceOverlay").classList.remove("hidden");
+      drawFaceGuide();
+      msg("faceMessage", "Fotografía frontal cargada correctamente.");
+    };
+
+    preview.src = facePhotoDataUrl;
+
+    $("faceAnalysis").classList.add("hidden");
   };
 
   reader.readAsDataURL(file);
@@ -792,29 +892,231 @@ function loadPhoto(file) {
 
 
 /* =====================================
-   12. LIMPIAR FOTO FRONTAL
+   13. DIBUJAR GUÍAS FACIALES
+===================================== */
+
+function drawFaceGuide(points = null) {
+  const image = $("photoPreview");
+  const canvas = $("faceOverlay");
+  const stage = image.parentElement;
+
+  if (!image.complete || !image.naturalWidth) return;
+
+  const rect = image.getBoundingClientRect();
+  const stageRect = stage.getBoundingClientRect();
+
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+
+  if (!width || !height) return;
+
+  canvas.width = width * 2;
+  canvas.height = height * 2;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(2, 0, 0, 2, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+
+  const offsetX = rect.left - stageRect.left;
+  const offsetY = rect.top - stageRect.top;
+
+  const imageWidth = rect.width;
+  const imageHeight = rect.height;
+
+  const X = value => offsetX + value * imageWidth;
+  const Y = value => offsetY + value * imageHeight;
+
+  ctx.strokeStyle = "#00ff80";
+  ctx.fillStyle = "#00ff80";
+  ctx.lineWidth = 1.8;
+  ctx.shadowColor = "#00ff80";
+  ctx.shadowBlur = 5;
+
+  function line(x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.moveTo(X(x1), Y(y1));
+    ctx.lineTo(X(x2), Y(y2));
+    ctx.stroke();
+  }
+
+  function label(text, x, y) {
+    ctx.font = "bold 11px Arial";
+    ctx.fillText(text, X(x), Y(y));
+  }
+
+  if (points && points.length > 400) {
+    const get = index => points[index];
+
+    const keyPoints = [
+      10, 152, 234, 454, 127, 356,
+      33, 263, 168, 1, 61, 291
+    ];
+
+    keyPoints.forEach(index => {
+      const p = get(index);
+      if (!p) return;
+
+      ctx.beginPath();
+      ctx.arc(X(p.x), Y(p.y), 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Línea central del rostro
+    line(get(1).x, get(10).y, get(1).x, get(152).y);
+
+    // Referencias horizontales
+    const forehead = get(10).y;
+    const chin = get(152).y;
+    const eyeLeft = get(33);
+    const eyeRight = get(263);
+
+    line(get(10).x, forehead, get(152).x, forehead);
+    line(eyeLeft.x, (eyeLeft.y + eyeRight.y) / 2,
+         eyeRight.x, (eyeLeft.y + eyeRight.y) / 2);
+
+    line(get(61).x, get(61).y, get(291).x, get(291).y);
+    line(get(234).x, get(234).y, get(454).x, get(454).y);
+
+    label("FRENTE", 0.05, forehead);
+    label("OJOS", 0.05, (eyeLeft.y + eyeRight.y) / 2);
+    label("PÓMULOS", 0.05, get(234).y);
+    label("MENTÓN", 0.05, chin);
+
+    return;
+  }
+
+  // Guías visuales provisionales mientras se detecta el rostro.
+  line(0.5, 0.08, 0.5, 0.92);
+  line(0.2, 0.35, 0.8, 0.35);
+  line(0.2, 0.52, 0.8, 0.52);
+  line(0.25, 0.72, 0.75, 0.72);
+
+  label("FRENTE", 0.05, 0.35);
+  label("OJOS", 0.05, 0.52);
+  label("MENTÓN", 0.05, 0.72);
+}
+
+
+/* =====================================
+   14. ANALIZAR ROSTRO
+===================================== */
+
+async function analyzeFace() {
+  if (!facePhotoDataUrl) {
+    msg("faceMessage", "Primero carga una fotografía frontal.");
+    return;
+  }
+
+  const button = $("analyzeFaceBtn");
+  button.disabled = true;
+
+  msg("faceMessage", "Detectando rostro y calculando proporciones...");
+
+  try {
+    await loadFaceModel();
+
+    const image = $("photoPreview");
+
+    const result = faceLandmarker.detect(image);
+
+    if (!result.faceLandmarks || !result.faceLandmarks.length) {
+      throw new Error("No se pudo detectar el rostro. Usa una foto frontal, clara y con buena iluminación.");
+    }
+
+    const points = result.faceLandmarks[0];
+
+    drawFaceGuide(points);
+
+    const get = index => points[index];
+
+    // Puntos faciales de referencia
+    const forehead = get(10);
+    const chin = get(152);
+    const leftCheek = get(234);
+    const rightCheek = get(454);
+    const leftEye = get(33);
+    const rightEye = get(263);
+    const nose = get(1);
+    const noseBase = get(2);
+
+    const faceHeight = Math.abs(chin.y - forehead.y);
+    const faceWidth = Math.abs(rightCheek.x - leftCheek.x);
+
+    const ratio = faceHeight / faceWidth;
+
+    const upper = Math.abs(leftEye.y - forehead.y);
+    const middle = Math.abs(noseBase.y - leftEye.y);
+    const lower = Math.abs(chin.y - noseBase.y);
+
+    const total = upper + middle + lower;
+
+    const percent = value =>
+      ((value / total) * 100).toFixed(1) + "%";
+
+    $("ratioValue").textContent = ratio.toFixed(2);
+    $("upperValue").textContent = percent(upper);
+    $("middleValue").textContent = percent(middle);
+    $("lowerValue").textContent = percent(lower);
+
+    $("widthValue").textContent =
+      (faceWidth * 100).toFixed(1) + " % de imagen";
+
+    $("noseValue").textContent =
+      (nose.x * 100).toFixed(1) + " % horizontal";
+
+    $("faceEstimate").textContent =
+      "Relación facial alto/ancho: " + ratio.toFixed(2) +
+      ". Estas referencias permiten orientar el visagismo y elegir cortes.";
+
+    $("faceAnalysis").classList.remove("hidden");
+
+    msg("faceMessage", "Análisis facial completado correctamente.");
+
+  } catch (error) {
+    console.error(error);
+
+    msg(
+      "faceMessage",
+      error.message || "No se pudo realizar el análisis facial."
+    );
+
+  } finally {
+    button.disabled = false;
+  }
+}
+
+
+/* =====================================
+   15. LIMPIAR FOTOGRAFÍA FRONTAL
 ===================================== */
 
 function clearPhoto() {
   facePhotoDataUrl = "";
 
+  $("photoPreview").src = "";
+  $("photoPreview").classList.add("hidden");
+
+  $("photoEmpty").classList.remove("hidden");
+  $("faceOverlay").classList.add("hidden");
+
+  const ctx = $("faceOverlay").getContext("2d");
+  ctx.clearRect(0, 0, $("faceOverlay").width, $("faceOverlay").height);
+
+  $("faceAnalysis").classList.add("hidden");
+
   $("photoFile").value = "";
   $("photoCamera").value = "";
-  $("photoPreview").src = "";
-
-  $("photoPreview").classList.add("hidden");
-  $("photoEmpty").classList.remove("hidden");
-
-  if ($("faceAnalysis")) {
-    $("faceAnalysis").classList.add("hidden");
-  }
 
   msg("faceMessage", "Fotografía eliminada.");
 }
 
+</script>
+<script>
 
 /* =====================================
-   13. FOTO DE PERFIL Y CRÁNEO
+   16. CARGAR FOTOGRAFÍA LATERAL
 ===================================== */
 
 let profilePhotoDataUrl = "";
@@ -846,6 +1148,10 @@ function loadProfilePhoto(file) {
       drawProfileGuide();
     };
 
+    preview.onerror = function() {
+      msg("profileMessage", "No se pudo mostrar la fotografía. Prueba con otra imagen.");
+    };
+
     preview.src = profilePhotoDataUrl;
 
     $("profileResults").classList.add("hidden");
@@ -853,136 +1159,146 @@ function loadProfilePhoto(file) {
     msg("profileMessage", "Fotografía lateral cargada correctamente.");
   };
 
+  reader.onerror = function() {
+    msg("profileMessage", "Error al leer la fotografía.");
+  };
+
   reader.readAsDataURL(file);
 }
 
 
 /* =====================================
-   14. DIBUJAR LÍNEAS VERDES DE PERFIL
+   17. DIBUJAR GUÍAS DE PERFIL
 ===================================== */
 
 function drawProfileGuide() {
+  const image = $("profilePreview");
   const canvas = $("profileOverlay");
-  const preview = $("profilePreview");
 
-  if (!canvas || !preview || !preview.naturalWidth) return;
+  if (!image || !image.complete || !image.naturalWidth) return;
 
-  const w = preview.clientWidth;
-  const h = preview.clientHeight;
+  const width = image.clientWidth;
+  const height = image.clientHeight;
 
-  if (!w || !h) return;
+  if (!width || !height) return;
 
-  canvas.width = w * 2;
-  canvas.height = h * 2;
+  canvas.width = width * 2;
+  canvas.height = height * 2;
 
-  canvas.style.width = w + "px";
-  canvas.style.height = h + "px";
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+
+  canvas.classList.remove("hidden");
 
   const ctx = canvas.getContext("2d");
-  ctx.scale(2, 2);
+
+  ctx.setTransform(2, 0, 0, 2, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.strokeStyle = "#00ff80";
+  ctx.fillStyle = "#00ff80";
+  ctx.lineWidth = 2;
+  ctx.shadowColor = "#00ff80";
+  ctx.shadowBlur = 6;
 
   const direction = $("profileDirection").value === "right";
 
-  const X = v => direction ? (1 - v) * w : v * w;
-  const Y = v => v * h;
+  const X = value =>
+    direction ? (1 - value) * width : value * width;
 
-  ctx.strokeStyle = "#00e879";
-  ctx.fillStyle = "#00e879";
-  ctx.lineWidth = 2;
+  const Y = value => value * height;
 
-  function line(points) {
+  function line(x1, y1, x2, y2) {
     ctx.beginPath();
-    points.forEach((p, i) => {
-      if (i === 0) ctx.moveTo(X(p[0]), Y(p[1]));
-      else ctx.lineTo(X(p[0]), Y(p[1]));
-    });
+    ctx.moveTo(X(x1), Y(y1));
+    ctx.lineTo(X(x2), Y(y2));
     ctx.stroke();
   }
 
-  // Referencia superior del cráneo
-  line([
-    [0.30, 0.18],
-    [0.39, 0.09],
-    [0.53, 0.07],
-    [0.66, 0.13],
-    [0.72, 0.25]
-  ]);
+  function curve(points) {
+    ctx.beginPath();
+    ctx.moveTo(X(points[0][0]), Y(points[0][1]));
 
-  // Referencia de frente
-  line([
-    [0.30, 0.18],
-    [0.25, 0.30],
-    [0.21, 0.38],
-    [0.25, 0.43]
-  ]);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(X(points[i][0]), Y(points[i][1]));
+    }
 
-  // Referencia posterior del cráneo
-  line([
-    [0.72, 0.25],
-    [0.73, 0.39],
-    [0.69, 0.52],
-    [0.63, 0.66],
-    [0.55, 0.78]
-  ]);
-
-  // Occipital aproximado
-  ctx.beginPath();
-  ctx.arc(X(0.69), Y(0.43), w * 0.035, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Nuca
-  line([
-    [0.30, 0.62],
-    [0.42, 0.73],
-    [0.55, 0.78]
-  ]);
+    ctx.stroke();
+  }
 
   function label(text, x, y) {
     ctx.font = "bold 11px Arial";
     ctx.fillText(text, X(x), Y(y));
   }
 
-  label("FRENTE", 0.10, 0.25);
-  label("CORONILLA", 0.40, 0.055);
-  label("OCCIPITAL", 0.57, 0.37);
-  label("NUCA", 0.47, 0.84);
+  // Línea superior de coronilla
+  curve([
+    [0.23, 0.28],
+    [0.32, 0.15],
+    [0.48, 0.08],
+    [0.65, 0.12],
+    [0.76, 0.24]
+  ]);
 
-  canvas.classList.remove("hidden");
+  // Referencia de frente
+  curve([
+    [0.76, 0.24],
+    [0.82, 0.34],
+    [0.85, 0.43]
+  ]);
+
+  // Referencia de nariz y rostro
+  curve([
+    [0.85, 0.43],
+    [0.91, 0.51],
+    [0.86, 0.56],
+    [0.82, 0.63]
+  ]);
+
+  // Mentón y mandíbula
+  curve([
+    [0.82, 0.63],
+    [0.76, 0.70],
+    [0.69, 0.75],
+    [0.62, 0.79]
+  ]);
+
+  // Nuca
+  curve([
+    [0.62, 0.79],
+    [0.56, 0.85],
+    [0.48, 0.90]
+  ]);
+
+  // Referencia occipital aproximada
+  ctx.beginPath();
+  ctx.ellipse(
+    X(0.27),
+    Y(0.57),
+    width * 0.105,
+    height * 0.17,
+    0,
+    0,
+    Math.PI * 2
+  );
+  ctx.stroke();
+
+  // Línea de referencia del cráneo
+  line(0.25, 0.40, 0.70, 0.40);
+
+  // Línea de base
+  line(0.35, 0.91, 0.65, 0.91);
+
+  label("CORONILLA", 0.30, 0.08);
+  label("FRENTE", 0.77, 0.30);
+  label("OCCIPITAL", 0.04, 0.56);
+  label("NUCA", 0.39, 0.96);
+  label("MENTÓN", 0.77, 0.73);
 }
 
 
 /* =====================================
-   15. LIMPIAR FOTO DE PERFIL
-===================================== */
-
-function clearProfile() {
-  profilePhotoDataUrl = "";
-
-  $("profileFile").value = "";
-  $("profileCamera").value = "";
-
-  $("profilePreview").src = "";
-  $("profilePreview").classList.add("hidden");
-
-  $("profileEmpty").classList.remove("hidden");
-
-  const canvas = $("profileOverlay");
-
-  if (canvas) {
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  if ($("profileResults")) {
-    $("profileResults").classList.add("hidden");
-  }
-
-  msg("profileMessage", "Fotografía lateral eliminada.");
-}
-
-
-/* =====================================
-   16. ANALIZAR REFERENCIAS DE PERFIL
+   18. ANALIZAR PERFIL
 ===================================== */
 
 function analyzeProfile() {
@@ -996,64 +1312,60 @@ function analyzeProfile() {
   $("profileResults").classList.remove("hidden");
 
   $("profileDiagnosis").innerHTML = `
-    <strong>Referencias visuales:</strong><br><br>
-    • Frente: observa la línea frontal.<br>
-    • Coronilla: revisa el volumen superior.<br>
-    • Occipital: evalúa visualmente la prominencia posterior.<br>
-    • Nuca: observa la transición hacia el cuello.<br><br>
-    <strong>Importante:</strong> las líneas verdes son guías
-    aproximadas. No detectan automáticamente los huesos
-    ni miden con precisión el occipital.
+    <p><strong>Guía de coronilla:</strong> referencia superior del cráneo.</p>
+    <p><strong>Guía de occipital:</strong> referencia visual de la zona posterior.</p>
+    <p><strong>Guía de nuca:</strong> referencia para el acabado inferior.</p>
+    <p><strong>Guía de frente y mentón:</strong> referencias del perfil facial.</p>
+    <p class="small">
+      Estas líneas son orientativas y deben ajustarse visualmente a la fotografía.
+      No representan una detección anatómica automática.
+    </p>
   `;
 
-  msg("profileMessage", "Guías de perfil generadas.");
+  msg("profileMessage", "Guías verdes de perfil generadas.");
 }
 
 
 /* =====================================
-   17. ANALIZAR REFERENCIAS FRONTALES
+   19. LIMPIAR FOTOGRAFÍA LATERAL
 ===================================== */
 
-function analyzeFace() {
-  if (!facePhotoDataUrl) {
-    msg("faceMessage", "Primero carga una fotografía frontal.");
-    return;
-  }
+function clearProfile() {
+  profilePhotoDataUrl = "";
 
-  const shape = $("faceShape").value;
+  $("profilePreview").src = "";
 
-  if (!shape) {
-    msg("faceMessage", "Selecciona la forma del rostro.");
-    return;
-  }
+  $("profileVisual").classList.add("hidden");
+  $("profileEmpty").classList.remove("hidden");
+  $("profileOverlay").classList.add("hidden");
 
-  $("faceAnalysis").classList.remove("hidden");
+  $("profileFile").value = "";
+  $("profileCamera").value = "";
 
-  $("faceEstimate").textContent =
-    "Forma seleccionada: " + shape;
+  $("profileResults").classList.add("hidden");
 
-  $("ratioValue").textContent = "Referencia visual";
-  $("upperValue").textContent = "Evaluación manual";
-  $("middleValue").textContent = "Evaluación manual";
-  $("lowerValue").textContent = "Evaluación manual";
-  $("widthValue").textContent = "Evaluación manual";
-  $("noseValue").textContent = "Evaluación manual";
+  const ctx = $("profileOverlay").getContext("2d");
 
-  msg(
-    "faceMessage",
-    "Fotografía frontal lista para la asesoría de visagismo."
+  ctx.clearRect(
+    0,
+    0,
+    $("profileOverlay").width,
+    $("profileOverlay").height
   );
+
+  msg("profileMessage", "Fotografía lateral eliminada.");
 }
 
 
 /* =====================================
-   18. REINICIAR CONSULTA
+   20. REINICIAR CONSULTA
 ===================================== */
 
 function resetConsultation() {
   clearPhoto();
   clearProfile();
 
+  $("hairCurrent").value = "";
   $("faceShape").value = "";
   $("hairDesired").value = "";
   $("style").value = "";
@@ -1061,203 +1373,200 @@ function resetConsultation() {
   $("desiredCut").value = "";
   $("observations").value = "";
 
+  $("recommendations").classList.add("hidden");
+
   $("cutChoices").innerHTML =
     '<p class="small">Primero selecciona si el cabello es largo o corto.</p>';
 
-  $("recommendations").innerHTML = "";
-  $("recommendations").classList.add("hidden");
+  $("history").innerHTML = "";
 }
 
 </script>
 <script>
 
 /* =====================================
-   19. SELECCIÓN DE CORTES SEGÚN EL LARGO
+   21. RECOMENDACIONES DE CORTES
+===================================== */
+
+const recommendationsByFace = {
+  ovalado: [
+    "Quiff texturizado",
+    "Crop francés",
+    "Slick Back",
+    "Mid Fade",
+    "Taper Fade",
+    "Mod Cut",
+    "Wolf Cut"
+  ],
+  redondo: [
+    "Pompadour",
+    "Quiff con volumen",
+    "Fade alto",
+    "Crop texturizado",
+    "Mohicano moderno"
+  ],
+  cuadrado: [
+    "Buzz Cut",
+    "Low Fade",
+    "Crew Cut",
+    "Slick Back",
+    "Textured Crop"
+  ],
+  alargado: [
+    "Mod Cut",
+    "Wolf Cut",
+    "Fringe",
+    "Crop francés",
+    "Corte con flequillo"
+  ],
+  triangular: [
+    "Quiff texturizado",
+    "Taper Fade",
+    "Fringe",
+    "Mod Cut"
+  ],
+  diamante: [
+    "Textured Crop",
+    "Quiff",
+    "Medium Length",
+    "Wolf Cut",
+    "Side Part"
+  ]
+};
+
+
+/* =====================================
+   22. CORTES SEGÚN EL LARGO
 ===================================== */
 
 function renderCutChoices() {
   const length = $("hairLength").value;
   const container = $("cutChoices");
 
-  let cuts = [];
-
-  if (length === "largo") {
-    cuts = [
-      "Mod Cut",
-      "Wolf Cut",
-      "Mullet moderno",
-      "Corte en capas",
-      "Shaggy"
-    ];
-  } else if (length === "corto") {
-    cuts = [
-      "Buzz Cut",
-      "Crop francés",
-      "Low Fade",
-      "Mid Fade",
-      "High Fade",
-      "Taper Fade",
-      "Crew Cut",
-      "Quiff texturizado",
-      "Pompadour"
-    ];
-  }
-
-  if (!cuts.length) {
+  if (!length) {
     container.innerHTML =
-      '<p class="small">Selecciona cabello largo o corto.</p>';
+      '<p class="small">Primero selecciona el largo del cabello.</p>';
     return;
   }
 
-  container.innerHTML = "";
+  const cuts = length === "largo"
+    ? [
+        "Mod Cut",
+        "Wolf Cut",
+        "Mullet moderno",
+        "Capas largas",
+        "Ondulación natural",
+        "Slick Back largo"
+      ]
+    : [
+        "Low Fade",
+        "Mid Fade",
+        "High Fade",
+        "Taper Fade",
+        "Buzz Cut",
+        "French Crop",
+        "Quiff texturizado",
+        "Crew Cut",
+        "Mohicano moderno"
+      ];
 
-  cuts.forEach(cut => {
-    const button = document.createElement("button");
+  container.innerHTML = `
+    <h3>CORTES RECOMENDADOS</h3>
+    <div class="small">Selecciona una opción:</div>
+    ${cuts.map(cut => `
+      <button type="button"
+        class="secondary cut-option"
+        data-cut="${escapeHTML(cut)}">
+        ${escapeHTML(cut)}
+      </button>
+    `).join("")}
+  `;
 
-    button.type = "button";
-    button.className = "secondary";
-    button.textContent = cut;
-
+  container.querySelectorAll(".cut-option").forEach(button => {
     button.addEventListener("click", () => {
-      $("desiredCut").value = cut;
+      $("desiredCut").value = button.dataset.cut;
 
-      container.querySelectorAll("button").forEach(item => {
+      container.querySelectorAll(".cut-option").forEach(item => {
         item.classList.remove("selected");
       });
 
       button.classList.add("selected");
     });
-
-    container.appendChild(button);
   });
 }
 
 
 /* =====================================
-   20. RECOMENDACIONES POR FORMA DEL ROSTRO
+   23. GENERAR RECOMENDACIONES
 ===================================== */
 
 function recommend() {
-  const shape = $("faceShape").value;
+  const shape = $("faceShape").value.toLowerCase();
   const style = $("style").value;
-  const desired = $("desiredCut").value.trim();
-  const hairDesired = $("hairDesired").value;
   const length = $("hairLength").value;
+  const desired = $("desiredCut").value.trim();
 
   if (!shape) {
     msg("consultMessage", "Selecciona la forma del rostro.");
     return;
   }
 
-  const recommendations = {
-    ovalado: [
-      "Quiff texturizado",
-      "Crop francés",
-      "Slick Back",
-      "Mid Fade",
-      "Taper Fade"
-    ],
-
-    redondo: [
-      "Pompadour",
-      "Quiff con volumen",
-      "Fade alto",
-      "Crop texturizado"
-    ],
-
-    cuadrado: [
-      "Buzz Cut degradado",
-      "Crew Cut",
-      "Taper Fade",
-      "Quiff"
-    ],
-
-    alargado: [
-      "Crop francés",
-      "Fringe texturizado",
-      "Fade bajo",
-      "Corte en capas"
-    ],
-
-    triangular: [
-      "Quiff con volumen",
-      "Corte en capas",
-      "Taper Fade",
-      "Texturizado"
-    ],
-
-    diamante: [
-      "Fringe texturizado",
-      "Mullet moderno",
-      "Taper Fade",
-      "Quiff"
-    ]
-  };
-
-  let cuts = recommendations[shape] || [];
+  let cuts = recommendationsByFace[shape] || [];
 
   if (length === "largo") {
-    cuts = [
+    cuts = cuts.filter(cut =>
+      ["Mod Cut", "Wolf Cut", "Mullet moderno",
+       "Capas largas", "Medium Length"].includes(cut)
+    );
+
+    cuts = [...new Set([
+      ...cuts,
       "Mod Cut",
-      "Wolf Cut",
-      "Mullet moderno",
-      "Corte en capas"
-    ].concat(cuts);
+      "Wolf Cut"
+    ])];
   }
 
   if (length === "corto") {
-    cuts = [
-      "Buzz Cut",
-      "Crop francés",
-      "Low Fade",
-      "Mid Fade",
-      "Taper Fade"
-    ].concat(cuts);
+    cuts = cuts.filter(cut =>
+      !["Wolf Cut", "Mod Cut", "Capas largas"].includes(cut)
+    );
   }
 
-  cuts = [...new Set(cuts)];
-
-  let extra = "";
-
-  if (style === "moderno") {
-    extra = "Priorizar acabados modernos y texturizados.";
-  } else if (style === "clasico") {
-    extra = "Priorizar líneas limpias y acabados clásicos.";
-  } else if (style === "juvenil") {
-    extra = "Priorizar movimiento, textura y estilos juveniles.";
-  } else if (style === "formal") {
-    extra = "Priorizar acabados elegantes y fáciles de peinar.";
-  } else if (style === "atrevido") {
-    extra = "Se pueden explorar diseños y estilos más atrevidos.";
+  if (style === "clasico") {
+    cuts = ["Side Part", "Slick Back", "Crew Cut", ...cuts];
   }
+
+  if (style === "juvenil") {
+    cuts = ["Mod Cut", "Wolf Cut", "French Crop", ...cuts];
+  }
+
+  if (style === "atrevido") {
+    cuts = ["Mohicano moderno", "Mullet moderno", "Buzz Cut", ...cuts];
+  }
+
+  if (desired) {
+    cuts = [desired, ...cuts];
+  }
+
+  cuts = [...new Set(cuts)].slice(0, 8);
 
   $("recommendations").innerHTML = `
-    <h3>RESULTADO DEL VISAGISMO</h3>
-
-    <p><strong>Forma del rostro:</strong>
-    ${escapeHTML(shape)}</p>
-
-    <p><strong>Estilo deseado:</strong>
-    ${escapeHTML(style || "No especificado")}</p>
-
-    <p><strong>Acabado deseado:</strong>
-    ${escapeHTML(hairDesired || "No especificado")}</p>
-
-    <p><strong>Corte elegido:</strong>
-    ${escapeHTML(desired || "Por decidir")}</p>
-
-    <h4>CORTES RECOMENDADOS</h4>
-
-    <ol>
-      ${cuts.map(cut => `<li>${escapeHTML(cut)}</li>`).join("")}
-    </ol>
-
-    <p>${escapeHTML(extra)}</p>
-
+    <h3>PROPUESTA DE VISAGISMO</h3>
+    <p><strong>Forma del rostro:</strong> ${escapeHTML(shape)}</p>
+    <p><strong>Estilo buscado:</strong> ${escapeHTML(style || "Sin especificar")}</p>
+    <p><strong>Largo:</strong> ${escapeHTML(length || "Sin especificar")}</p>
+    <hr>
+    <h3>CORTES RECOMENDADOS</h3>
+    ${cuts.map((cut, index) => `
+      <div class="result">
+        <strong style="color:#00e879">
+          ${index + 1}. ${escapeHTML(cut)}
+        </strong>
+      </div>
+    `).join("")}
     <p class="small">
-      La recomendación es orientativa. El barbero debe
-      considerar densidad, crecimiento, remolinos,
-      entradas y estructura craneal.
+      La elección final debe considerar textura, densidad,
+      remolinos, entradas y preferencias del cliente.
     </p>
   `;
 
@@ -1268,36 +1577,25 @@ function recommend() {
 
 
 /* =====================================
-   21. GUARDAR CONSULTA EN SUPABASE
+   24. GUARDAR CONSULTA
 ===================================== */
 
 async function saveConsultation() {
-  if (!currentUser) {
-    msg("consultMessage", "Inicia sesión para guardar.");
-    return;
-  }
-
-  if (!selectedClient) {
+  if (!selectedClient || !currentUser) {
     msg("consultMessage", "Primero selecciona un cliente.");
     return;
   }
 
-  const shape = $("faceShape").value;
-  const desired = $("desiredCut").value.trim();
-
-  if (!shape) {
-    msg("consultMessage", "Selecciona la forma del rostro.");
-    return;
-  }
+  const serviceName = "Asesoría de visagismo";
 
   const notes = [
-    "ANÁLISIS DE VISAGISMO",
-    "Forma del rostro: " + shape,
-    "Largo del cabello: " + ($("hairLength").value || "No especificado"),
-    "Corte deseado: " + (desired || "No especificado"),
-    "Acabado: " + ($("hairDesired").value || "No especificado"),
-    "Estilo: " + ($("style").value || "No especificado"),
-    "Observaciones: " + ($("observations").value.trim() || "Sin observaciones")
+    "Textura actual: " + $("hairCurrent").value,
+    "Forma del rostro: " + $("faceShape").value,
+    "Textura deseada: " + $("hairDesired").value,
+    "Estilo: " + $("style").value,
+    "Largo: " + $("hairLength").value,
+    "Corte seleccionado: " + $("desiredCut").value,
+    "Observaciones: " + $("observations").value
   ].join("\n");
 
   try {
@@ -1306,13 +1604,13 @@ async function saveConsultation() {
       .insert([{
         client_id: selectedClient.id,
         owner_id: currentUser.id,
-        service_name: "Análisis de visagismo",
+        service_name: serviceName,
         notes: notes
       }]);
 
     if (error) throw error;
 
-    msg("consultMessage", "¡Análisis guardado correctamente!");
+    msg("consultMessage", "Análisis guardado correctamente.");
 
     await loadHistory();
 
@@ -1323,15 +1621,16 @@ async function saveConsultation() {
 
 
 /* =====================================
-   22. HISTORIAL DEL CLIENTE
+   25. HISTORIAL DEL CLIENTE
 ===================================== */
 
 async function loadHistory() {
-  if (!currentUser || !selectedClient) return;
+  if (!selectedClient || !currentUser) return;
 
   const container = $("history");
 
-  container.innerHTML = "<p class='small'>Cargando historial...</p>";
+  container.innerHTML =
+    '<p class="small">Cargando historial...</p>';
 
   try {
     const { data, error } = await db
@@ -1345,47 +1644,41 @@ async function loadHistory() {
 
     if (!data || !data.length) {
       container.innerHTML =
-        "<p class='small'>Este cliente todavía no tiene consultas guardadas.</p>";
+        '<p class="small">Este cliente todavía no tiene consultas guardadas.</p>';
       return;
     }
 
-    container.innerHTML = "";
-
-    data.forEach(item => {
-      const card = document.createElement("div");
-
-      card.className = "result";
-
-      const date = item.created_at
-        ? new Date(item.created_at).toLocaleString("es-PE")
-        : "Fecha no disponible";
-
-      card.innerHTML = `
-        <h4>${escapeHTML(item.service_name)}</h4>
-        <p class="small">${escapeHTML(date)}</p>
+    container.innerHTML = data.map(item => `
+      <div class="result">
+        <strong style="color:#00e879">
+          ${escapeHTML(item.service_name)}
+        </strong>
+        <p class="small">
+          ${item.created_at
+            ? new Date(item.created_at).toLocaleString("es-PE")
+            : ""}
+        </p>
         <p>${escapeHTML(item.notes || "")}</p>
-      `;
-
-      container.appendChild(card);
-    });
+      </div>
+    `).join("");
 
   } catch (error) {
     container.innerHTML =
-      "<p class='small'>Error al cargar historial: " +
-      escapeHTML(error.message) + "</p>";
+      '<p class="small">Error al cargar historial: ' +
+      escapeHTML(error.message) + '</p>';
   }
 }
 
 
 /* =====================================
-   23. ABRIR INSTAGRAM
+   26. ABRIR INSTAGRAM
 ===================================== */
 
 function openInstagram() {
   const url = $("instagramUrl").value.trim();
 
   if (!url) {
-    msg("instagramMessage", "Escribe el enlace de Instagram.");
+    msg("instagramMessage", "Introduce tu enlace de Instagram.");
     return;
   }
 
@@ -1396,120 +1689,105 @@ function openInstagram() {
       parsed.protocol !== "https:" ||
       !parsed.hostname.endsWith("instagram.com")
     ) {
-      throw new Error("Enlace no válido.");
+      throw new Error("Introduce un enlace válido de Instagram.");
     }
 
     window.open(parsed.href, "_blank", "noopener,noreferrer");
 
-    msg("instagramMessage", "Abriendo Instagram...");
-
   } catch (error) {
-    msg("instagramMessage", "Ingresa un enlace válido de Instagram.");
+    msg("instagramMessage", error.message);
   }
 }
 
 
 /* =====================================
-   24. CONECTAR TODOS LOS BOTONES
-===================================== */
-
-function bindEvents() {
-
-  $("loginBtn").addEventListener("click", loginUser);
-
-  $("forgotBtn").addEventListener("click", forgotPassword);
-
-  $("savePasswordBtn").addEventListener("click", saveNewPassword);
-
-  $("logoutBtn").addEventListener("click", logout);
-
-  $("saveBtn").addEventListener("click", saveClient);
-
-  $("search").addEventListener("input", renderClients);
-
-  $("photoFile").addEventListener("change", event => {
-    if (event.target.files[0]) {
-      loadPhoto(event.target.files[0]);
-    }
-  });
-
-  $("photoCamera").addEventListener("change", event => {
-    if (event.target.files[0]) {
-      loadPhoto(event.target.files[0]);
-    }
-  });
-
-  $("clearPhoto").addEventListener("click", clearPhoto);
-
-  $("analyzeFaceBtn").addEventListener("click", analyzeFace);
-
-  $("profileFile").addEventListener("change", event => {
-    if (event.target.files[0]) {
-      loadProfilePhoto(event.target.files[0]);
-    }
-  });
-
-  $("profileCamera").addEventListener("change", event => {
-    if (event.target.files[0]) {
-      loadProfilePhoto(event.target.files[0]);
-    }
-  });
-
-  $("clearProfile").addEventListener("click", clearProfile);
-
-  $("analyzeProfileBtn").addEventListener("click", analyzeProfile);
-
-  $("profileDirection").addEventListener("change", drawProfileGuide);
-
-  $("profilePreview").addEventListener("load", drawProfileGuide);
-
-  $("hairLength").addEventListener("change", renderCutChoices);
-
-  $("recommendBtn").addEventListener("click", recommend);
-
-  $("saveConsultationBtn").addEventListener("click", saveConsultation);
-
-  $("historyBtn").addEventListener("click", loadHistory);
-
-  $("instagramBtn").addEventListener("click", openInstagram);
-
-  $("password").addEventListener("keydown", event => {
-    if (event.key === "Enter") loginUser();
-  });
-}
-
-
-/* =====================================
-   25. INICIAR APLICACIÓN
+   27. INICIALIZAR APLICACIÓN
 ===================================== */
 
 async function initializeApp() {
-  const { data, error } = await db.auth.getSession();
+  const { data, error } = await db.auth.getUser();
 
-  if (error) {
+  if (error || !data.user) {
+    currentUser = null;
     showOnly("login");
-    msg("message", error.message);
     return;
   }
 
-  const session = data.session;
+  currentUser = data.user;
 
-  if (session && !recoveryMode) {
-    currentUser = session.user;
+  showOnly("app");
 
-    showOnly("app");
-
-    await loadClients();
-
-  } else if (!recoveryMode) {
-    currentUser = null;
-    showOnly("login");
-  }
+  await loadClients();
 }
 
 
 /* =====================================
-   26. CONTROL DE AUTENTICACIÓN
+   28. CONECTAR BOTONES
+===================================== */
+
+$("loginBtn").addEventListener("click", loginUser);
+
+$("forgotBtn").addEventListener("click", forgotPassword);
+
+$("savePasswordBtn").addEventListener("click", saveNewPassword);
+
+$("logoutBtn").addEventListener("click", logout);
+
+$("saveBtn").addEventListener("click", saveClient);
+
+$("search").addEventListener("input", renderClients);
+
+$("photoFile").addEventListener("change", event => {
+  loadPhoto(event.target.files[0]);
+});
+
+$("photoCamera").addEventListener("change", event => {
+  loadPhoto(event.target.files[0]);
+});
+
+$("clearPhoto").addEventListener("click", clearPhoto);
+
+$("analyzeFaceBtn").addEventListener("click", analyzeFace);
+
+$("profileFile").addEventListener("change", event => {
+  loadProfilePhoto(event.target.files[0]);
+});
+
+$("profileCamera").addEventListener("change", event => {
+  loadProfilePhoto(event.target.files[0]);
+});
+
+$("clearProfile").addEventListener("click", clearProfile);
+
+$("analyzeProfileBtn").addEventListener("click", analyzeProfile);
+
+$("profileDirection").addEventListener("change", () => {
+  if (profilePhotoDataUrl) drawProfileGuide();
+});
+
+$("hairLength").addEventListener("change", renderCutChoices);
+
+$("recommendBtn").addEventListener("click", recommend);
+
+$("saveConsultationBtn").addEventListener("click", saveConsultation);
+
+$("historyBtn").addEventListener("click", loadHistory);
+
+$("instagramBtn").addEventListener("click", openInstagram);
+
+
+/* =====================================
+   29. REDIBUJAR GUÍAS AL CAMBIAR TAMAÑO
+===================================== */
+
+window.addEventListener("resize", () => {
+  if (facePhotoDataUrl) drawFaceGuide();
+  if (profilePhotoDataUrl) drawProfileGuide();
+});
+
+
+/* =====================================
+   30. CONTROL DE SESIÓN
 ===================================== */
 
 db.auth.onAuthStateChange((event, session) => {
@@ -1520,19 +1798,15 @@ db.auth.onAuthStateChange((event, session) => {
     return;
   }
 
-  if (event === "SIGNED_IN" && session && !recoveryMode) {
+  if (session && !recoveryMode) {
     currentUser = session.user;
 
-    showOnly("app");
-
     setTimeout(() => {
-      loadClients();
+      initializeApp();
     }, 0);
-  }
 
-  if (event === "SIGNED_OUT") {
+  } else if (!session && !recoveryMode) {
     currentUser = null;
-    selectedClient = null;
     showOnly("login");
   }
 
@@ -1540,12 +1814,24 @@ db.auth.onAuthStateChange((event, session) => {
 
 
 /* =====================================
-   27. CARGAR APLICACIÓN
+   31. INICIAR
 ===================================== */
 
-bindEvents();
+(async function startApp() {
+  try {
+    const { data } = await db.auth.getSession();
 
-initializeApp();
+    if (data.session && !recoveryMode) {
+      await initializeApp();
+    } else {
+      showOnly("login");
+    }
+
+  } catch (error) {
+    console.error("Error al iniciar aplicación:", error);
+    showOnly("login");
+  }
+})();
 
 </script>
 
