@@ -183,6 +183,16 @@ background:#00e879!important;
 color:#04150c!important;
 border-color:#8bffc0!important;
 }
+
+.profile-stage #profileOverlay{z-index:4;pointer-events:auto;touch-action:none}
+.drawing-tools{background:#0d1918;border:1px solid #20543d;border-radius:10px;padding:12px;margin:12px 0}
+.drawing-colors{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 12px}
+.draw-color{width:38px;height:38px;min-width:38px;padding:0;border:3px solid #d9eee3;background:var(--swatch);border-radius:50%;box-shadow:none}
+.draw-color.active{outline:3px solid #00e879;outline-offset:3px}
+.drawing-actions{display:flex;gap:7px;flex-wrap:wrap}
+.drawing-actions button{flex:1;min-width:95px;font-size:12px;padding:10px 7px}
+#profileOverlay{touch-action:none}
+
 @media(max-width:500px){
 main{padding:8px}
 .card{padding:12px}
@@ -357,13 +367,7 @@ Toma una fotografía de perfil o sube una imagen del costado de la cabeza.
 <label for="profileFile">Subir fotografía lateral</label>
 <input id="profileFile" type="file" accept="image/*">
 
-<label for="profileDirection">Dirección del rostro</label>
-<select id="profileDirection">
-<option value="left">Rostro mirando hacia la izquierda</option>
-<option value="right">Rostro mirando hacia la derecha</option>
-</select>
-
-<div class="photo-stage" style="max-width:360px">
+<div class="photo-stage profile-stage" style="max-width:360px">
 <div id="profileEmpty" class="photo-empty">
 La fotografía lateral aparecerá aquí.
 </div>
@@ -371,18 +375,63 @@ La fotografía lateral aparecerá aquí.
 <div id="profileVisual" class="hidden" style="position:relative;width:100%">
 <img id="profilePreview" alt="Perfil lateral"
 style="width:100%;height:320px;object-fit:contain;display:block">
-<canvas id="profileOverlay"
-style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+<canvas id="profileOverlay" aria-label="Lienzo para dibujar sobre la fotografía lateral"
+style="position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;touch-action:none;cursor:crosshair">
 </canvas>
 </div>
 </div>
+
+<div id="profileDrawingTools" class="drawing-tools">
+  <p class="small"><strong>DIBUJA SOBRE EL CRÁNEO</strong> · Marca con el dedo las zonas que quieras evaluar.</p>
+  <div class="drawing-colors" role="group" aria-label="Colores del lápiz">
+    <button type="button" class="draw-color active" data-color="#00e879" aria-label="Verde" title="Verde" style="--swatch:#00e879"></button>
+    <button type="button" class="draw-color" data-color="#ffffff" aria-label="Blanco" title="Blanco" style="--swatch:#ffffff"></button>
+    <button type="button" class="draw-color" data-color="#ffcc33" aria-label="Amarillo" title="Amarillo" style="--swatch:#ffcc33"></button>
+    <button type="button" class="draw-color" data-color="#ff5c7a" aria-label="Rojo" title="Rojo" style="--swatch:#ff5c7a"></button>
+    <button type="button" class="draw-color" data-color="#4da3ff" aria-label="Azul" title="Azul" style="--swatch:#4da3ff"></button>
+  </div>
+  <div class="drawing-actions">
+    <button id="eraserProfile" type="button" class="secondary">GOMA</button>
+    <button id="undoProfile" type="button" class="secondary">DESHACER</button>
+    <button id="clearDrawingProfile" type="button" class="secondary">BORRAR DIBUJO</button>
+  </div>
+  <label for="profileBrushSize">Grosor del lápiz</label>
+  <select id="profileBrushSize">
+    <option value="2">Fino</option><option value="4" selected>Medio</option><option value="7">Grueso</option>
+  </select>
+</div>
+
+<h3>LECTURA DE LA ESTRUCTURA CRANEAL</h3>
+<p class="small">Selecciona lo que observas en la fotografía. La aplicación combinará estas referencias con tus marcas para orientar el corte.</p>
+<label for="occipitalShape">Zona occipital (parte posterior)</label>
+<select id="occipitalShape">
+  <option value="">Seleccionar</option>
+  <option value="prominente">Prominente / sobresaliente</option>
+  <option value="plano">Plana / poco proyectada</option>
+  <option value="equilibrado">Proyección equilibrada</option>
+</select>
+<label for="crownShape">Coronilla</label>
+<select id="crownShape">
+  <option value="">Seleccionar</option>
+  <option value="redondeada">Redondeada</option>
+  <option value="plana">Plana</option>
+  <option value="alta">Alta / elevada</option>
+</select>
+<label for="skullShape">Forma general del cráneo</label>
+<select id="skullShape">
+  <option value="">Seleccionar</option>
+  <option value="ovalado">Ovalado / proporcionado</option>
+  <option value="alargado">Alargado</option>
+  <option value="redondeado">Redondeado / ancho</option>
+  <option value="estrecho">Estrecho</option>
+</select>
 
 <button id="clearProfile" type="button" class="secondary">
 ELIMINAR FOTO LATERAL
 </button>
 
 <button id="analyzeProfileBtn" type="button">
-MOSTRAR GUÍAS DE PERFIL Y CRÁNEO
+GENERAR CONSEJOS DE VISAGISMO CRANEAL
 </button>
 
 <p id="profileMessage" class="small"></p>
@@ -393,11 +442,9 @@ MOSTRAR GUÍAS DE PERFIL Y CRÁNEO
 </div>
 
 <p class="small">
-Las líneas verdes son guías visuales aproximadas. La zona occipital
-no se mide ni se detecta como estructura ósea exacta mediante esta guía.
+La fotografía y los trazos se mantienen temporalmente en el navegador. El análisis ofrece orientación profesional según las características que selecciones; no realiza mediciones óseas automáticas.
 </p>
 </div>
-
 <hr>
 
 <p class="section-kicker">5. OBJETIVO Y RECOMENDACIONES</p>
@@ -770,9 +817,7 @@ function renderClients() {
     $("clients").appendChild(button);
   });
 }
-
-
-/* =====================================
+   /* =====================================
    10. SELECCIONAR CLIENTE
 ===================================== */
 
@@ -791,8 +836,6 @@ function selectClient(client) {
   loadHistory();
 }
 
-</script>
-<script>
 
 /* =====================================
    11. CARGAR MODELO DE DETECCIÓN FACIAL
@@ -805,6 +848,7 @@ let faceLandmarkerReady = false;
 
 async function loadFaceModel() {
   if (faceLandmarkerReady) return faceLandmarker;
+
   if (faceModelLoading) {
     while (faceModelLoading) {
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -876,10 +920,30 @@ function loadPhoto(file) {
     $("photoEmpty").classList.add("hidden");
     preview.classList.remove("hidden");
 
-    preview.onload = function() {
+    preview.onload = async function() {
       $("faceOverlay").classList.remove("hidden");
       drawFaceGuide();
-      msg("faceMessage", "Fotografía frontal cargada correctamente.");
+
+      msg("faceMessage", "Foto cargada. Detectando el contorno del rostro...");
+
+      try {
+        await loadFaceModel();
+
+        const detected = faceLandmarker.detect(preview);
+
+        if (!detected.faceLandmarks || !detected.faceLandmarks.length) {
+          throw new Error("No se detectó un rostro frontal claro.");
+        }
+
+        drawFaceGuide(detected.faceLandmarks[0]);
+
+        msg("faceMessage", "Contorno facial detectado y guías verdes ajustadas al rostro.");
+
+      } catch (error) {
+        console.warn("No se pudo ajustar el contorno automáticamente:", error);
+
+        msg("faceMessage", "Foto cargada. Para ajustar las guías, prueba con el rostro de frente y bien iluminado; también puedes pulsar ANALIZAR ROSTRO.");
+      }
     };
 
     preview.src = facePhotoDataUrl;
@@ -912,10 +976,12 @@ function drawFaceGuide(points = null) {
 
   canvas.width = width * 2;
   canvas.height = height * 2;
+
   canvas.style.width = width + "px";
   canvas.style.height = height + "px";
 
   const ctx = canvas.getContext("2d");
+
   ctx.setTransform(2, 0, 0, 2, 0, 0);
   ctx.clearRect(0, 0, width, height);
 
@@ -949,6 +1015,27 @@ function drawFaceGuide(points = null) {
   if (points && points.length > 400) {
     const get = index => points[index];
 
+    const faceOutline = [
+      10,338,297,332,284,251,389,356,454,323,361,288,397,365,
+      379,378,400,377,152,148,176,149,150,136,172,58,132,93,
+      234,127,162,21,54,103,67,109,10
+    ];
+
+    ctx.beginPath();
+
+    faceOutline.forEach((index, position) => {
+      const point = get(index);
+      if (!point) return;
+
+      if (position === 0) {
+        ctx.moveTo(X(point.x), Y(point.y));
+      } else {
+        ctx.lineTo(X(point.x), Y(point.y));
+      }
+    });
+
+    ctx.stroke();
+
     const keyPoints = [
       10, 152, 234, 454, 127, 356,
       33, 263, 168, 1, 61, 291
@@ -963,18 +1050,21 @@ function drawFaceGuide(points = null) {
       ctx.fill();
     });
 
-    // Línea central del rostro
     line(get(1).x, get(10).y, get(1).x, get(152).y);
 
-    // Referencias horizontales
     const forehead = get(10).y;
     const chin = get(152).y;
     const eyeLeft = get(33);
     const eyeRight = get(263);
 
     line(get(10).x, forehead, get(152).x, forehead);
-    line(eyeLeft.x, (eyeLeft.y + eyeRight.y) / 2,
-         eyeRight.x, (eyeLeft.y + eyeRight.y) / 2);
+
+    line(
+      eyeLeft.x,
+      (eyeLeft.y + eyeRight.y) / 2,
+      eyeRight.x,
+      (eyeLeft.y + eyeRight.y) / 2
+    );
 
     line(get(61).x, get(61).y, get(291).x, get(291).y);
     line(get(234).x, get(234).y, get(454).x, get(454).y);
@@ -987,7 +1077,6 @@ function drawFaceGuide(points = null) {
     return;
   }
 
-  // Guías visuales provisionales mientras se detecta el rostro.
   line(0.5, 0.08, 0.5, 0.92);
   line(0.2, 0.35, 0.8, 0.35);
   line(0.2, 0.52, 0.8, 0.52);
@@ -1031,7 +1120,6 @@ async function analyzeFace() {
 
     const get = index => points[index];
 
-    // Puntos faciales de referencia
     const forehead = get(10);
     const chin = get(152);
     const leftCheek = get(234);
@@ -1086,305 +1174,7 @@ async function analyzeFace() {
     button.disabled = false;
   }
 }
-
-
-/* =====================================
-   15. LIMPIAR FOTOGRAFÍA FRONTAL
-===================================== */
-
-function clearPhoto() {
-  facePhotoDataUrl = "";
-
-  $("photoPreview").src = "";
-  $("photoPreview").classList.add("hidden");
-
-  $("photoEmpty").classList.remove("hidden");
-  $("faceOverlay").classList.add("hidden");
-
-  const ctx = $("faceOverlay").getContext("2d");
-  ctx.clearRect(0, 0, $("faceOverlay").width, $("faceOverlay").height);
-
-  $("faceAnalysis").classList.add("hidden");
-
-  $("photoFile").value = "";
-  $("photoCamera").value = "";
-
-  msg("faceMessage", "Fotografía eliminada.");
-}
-
-</script>
-<script>
-
-/* =====================================
-   16. CARGAR FOTOGRAFÍA LATERAL
-===================================== */
-
-let profilePhotoDataUrl = "";
-
-function loadProfilePhoto(file) {
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    msg("profileMessage", "Selecciona una imagen válida.");
-    return;
-  }
-
-  if (file.size > 12 * 1024 * 1024) {
-    msg("profileMessage", "La imagen supera 12 MB.");
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = function(event) {
-    profilePhotoDataUrl = event.target.result;
-
-    const preview = $("profilePreview");
-
-    $("profileVisual").classList.remove("hidden");
-    $("profileEmpty").classList.add("hidden");
-
-    preview.onload = function() {
-      drawProfileGuide();
-    };
-
-    preview.onerror = function() {
-      msg("profileMessage", "No se pudo mostrar la fotografía. Prueba con otra imagen.");
-    };
-
-    preview.src = profilePhotoDataUrl;
-
-    $("profileResults").classList.add("hidden");
-
-    msg("profileMessage", "Fotografía lateral cargada correctamente.");
-  };
-
-  reader.onerror = function() {
-    msg("profileMessage", "Error al leer la fotografía.");
-  };
-
-  reader.readAsDataURL(file);
-}
-
-
-/* =====================================
-   17. DIBUJAR GUÍAS DE PERFIL
-===================================== */
-
-function drawProfileGuide() {
-  const image = $("profilePreview");
-  const canvas = $("profileOverlay");
-
-  if (!image || !image.complete || !image.naturalWidth) return;
-
-  const width = image.clientWidth;
-  const height = image.clientHeight;
-
-  if (!width || !height) return;
-
-  canvas.width = width * 2;
-  canvas.height = height * 2;
-
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
-
-  canvas.classList.remove("hidden");
-
-  const ctx = canvas.getContext("2d");
-
-  ctx.setTransform(2, 0, 0, 2, 0, 0);
-  ctx.clearRect(0, 0, width, height);
-
-  ctx.strokeStyle = "#00ff80";
-  ctx.fillStyle = "#00ff80";
-  ctx.lineWidth = 2;
-  ctx.shadowColor = "#00ff80";
-  ctx.shadowBlur = 6;
-
-  const direction = $("profileDirection").value === "right";
-
-  const X = value =>
-    direction ? (1 - value) * width : value * width;
-
-  const Y = value => value * height;
-
-  function line(x1, y1, x2, y2) {
-    ctx.beginPath();
-    ctx.moveTo(X(x1), Y(y1));
-    ctx.lineTo(X(x2), Y(y2));
-    ctx.stroke();
-  }
-
-  function curve(points) {
-    ctx.beginPath();
-    ctx.moveTo(X(points[0][0]), Y(points[0][1]));
-
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(X(points[i][0]), Y(points[i][1]));
-    }
-
-    ctx.stroke();
-  }
-
-  function label(text, x, y) {
-    ctx.font = "bold 11px Arial";
-    ctx.fillText(text, X(x), Y(y));
-  }
-
-  // Línea superior de coronilla
-  curve([
-    [0.23, 0.28],
-    [0.32, 0.15],
-    [0.48, 0.08],
-    [0.65, 0.12],
-    [0.76, 0.24]
-  ]);
-
-  // Referencia de frente
-  curve([
-    [0.76, 0.24],
-    [0.82, 0.34],
-    [0.85, 0.43]
-  ]);
-
-  // Referencia de nariz y rostro
-  curve([
-    [0.85, 0.43],
-    [0.91, 0.51],
-    [0.86, 0.56],
-    [0.82, 0.63]
-  ]);
-
-  // Mentón y mandíbula
-  curve([
-    [0.82, 0.63],
-    [0.76, 0.70],
-    [0.69, 0.75],
-    [0.62, 0.79]
-  ]);
-
-  // Nuca
-  curve([
-    [0.62, 0.79],
-    [0.56, 0.85],
-    [0.48, 0.90]
-  ]);
-
-  // Referencia occipital aproximada
-  ctx.beginPath();
-  ctx.ellipse(
-    X(0.27),
-    Y(0.57),
-    width * 0.105,
-    height * 0.17,
-    0,
-    0,
-    Math.PI * 2
-  );
-  ctx.stroke();
-
-  // Línea de referencia del cráneo
-  line(0.25, 0.40, 0.70, 0.40);
-
-  // Línea de base
-  line(0.35, 0.91, 0.65, 0.91);
-
-  label("CORONILLA", 0.30, 0.08);
-  label("FRENTE", 0.77, 0.30);
-  label("OCCIPITAL", 0.04, 0.56);
-  label("NUCA", 0.39, 0.96);
-  label("MENTÓN", 0.77, 0.73);
-}
-
-
-/* =====================================
-   18. ANALIZAR PERFIL
-===================================== */
-
-function analyzeProfile() {
-  if (!profilePhotoDataUrl) {
-    msg("profileMessage", "Primero carga una fotografía lateral.");
-    return;
-  }
-
-  drawProfileGuide();
-
-  $("profileResults").classList.remove("hidden");
-
-  $("profileDiagnosis").innerHTML = `
-    <p><strong>Guía de coronilla:</strong> referencia superior del cráneo.</p>
-    <p><strong>Guía de occipital:</strong> referencia visual de la zona posterior.</p>
-    <p><strong>Guía de nuca:</strong> referencia para el acabado inferior.</p>
-    <p><strong>Guía de frente y mentón:</strong> referencias del perfil facial.</p>
-    <p class="small">
-      Estas líneas son orientativas y deben ajustarse visualmente a la fotografía.
-      No representan una detección anatómica automática.
-    </p>
-  `;
-
-  msg("profileMessage", "Guías verdes de perfil generadas.");
-}
-
-
-/* =====================================
-   19. LIMPIAR FOTOGRAFÍA LATERAL
-===================================== */
-
-function clearProfile() {
-  profilePhotoDataUrl = "";
-
-  $("profilePreview").src = "";
-
-  $("profileVisual").classList.add("hidden");
-  $("profileEmpty").classList.remove("hidden");
-  $("profileOverlay").classList.add("hidden");
-
-  $("profileFile").value = "";
-  $("profileCamera").value = "";
-
-  $("profileResults").classList.add("hidden");
-
-  const ctx = $("profileOverlay").getContext("2d");
-
-  ctx.clearRect(
-    0,
-    0,
-    $("profileOverlay").width,
-    $("profileOverlay").height
-  );
-
-  msg("profileMessage", "Fotografía lateral eliminada.");
-}
-
-
-/* =====================================
-   20. REINICIAR CONSULTA
-===================================== */
-
-function resetConsultation() {
-  clearPhoto();
-  clearProfile();
-
-  $("hairCurrent").value = "";
-  $("faceShape").value = "";
-  $("hairDesired").value = "";
-  $("style").value = "";
-  $("hairLength").value = "";
-  $("desiredCut").value = "";
-  $("observations").value = "";
-
-  $("recommendations").classList.add("hidden");
-
-  $("cutChoices").innerHTML =
-    '<p class="small">Primero selecciona si el cabello es largo o corto.</p>';
-
-  $("history").innerHTML = "";
-}
-
-</script>
-<script>
-
-/* =====================================
+   /* =====================================
    21. RECOMENDACIONES DE CORTES
 ===================================== */
 
@@ -1595,6 +1385,9 @@ async function saveConsultation() {
     "Estilo: " + $("style").value,
     "Largo: " + $("hairLength").value,
     "Corte seleccionado: " + $("desiredCut").value,
+    "Occipital: " + ($("occipitalShape").value || "No evaluado"),
+    "Coronilla: " + ($("crownShape").value || "No evaluada"),
+    "Forma del cráneo: " + ($("skullShape").value || "No evaluada"),
     "Observaciones: " + $("observations").value
   ].join("\n");
 
@@ -1668,7 +1461,402 @@ async function loadHistory() {
       escapeHTML(error.message) + '</p>';
   }
 }
+ /* =====================================
+   15. LIMPIAR FOTOGRAFÍA FRONTAL
+===================================== */
 
+function clearPhoto() {
+  facePhotoDataUrl = "";
+
+  $("photoPreview").src = "";
+  $("photoPreview").classList.add("hidden");
+
+  $("photoEmpty").classList.remove("hidden");
+  $("faceOverlay").classList.add("hidden");
+
+  const ctx = $("faceOverlay").getContext("2d");
+  ctx.clearRect(0, 0, $("faceOverlay").width, $("faceOverlay").height);
+
+  $("faceAnalysis").classList.add("hidden");
+
+  $("photoFile").value = "";
+  $("photoCamera").value = "";
+
+  msg("faceMessage", "Fotografía eliminada.");
+}
+
+</script>
+<script>
+
+/* =====================================
+   16. CARGAR FOTOGRAFÍA LATERAL
+===================================== */
+
+let profilePhotoDataUrl = "";
+
+function loadProfilePhoto(file) {
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    msg("profileMessage", "Selecciona una imagen válida.");
+    return;
+  }
+
+  if (file.size > 12 * 1024 * 1024) {
+    msg("profileMessage", "La imagen supera 12 MB.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+    profilePhotoDataUrl = event.target.result;
+
+    const preview = $("profilePreview");
+
+    $("profileVisual").classList.remove("hidden");
+    $("profileEmpty").classList.add("hidden");
+
+    preview.onload = function() {
+      setupProfileDrawingCanvas();
+      redrawProfileStrokes();
+    };
+
+    preview.onerror = function() {
+      msg("profileMessage", "No se pudo mostrar la fotografía. Prueba con otra imagen.");
+    };
+
+    preview.src = profilePhotoDataUrl;
+
+    $("profileResults").classList.add("hidden");
+
+    msg("profileMessage", "Fotografía lateral cargada correctamente.");
+  };
+
+  reader.onerror = function() {
+    msg("profileMessage", "Error al leer la fotografía.");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+
+/* =====================================
+   17. DIBUJO MANUAL SOBRE FOTO LATERAL
+===================================== */
+
+let profileStrokes = [];
+let activeProfileStroke = null;
+let profileDrawColor = "#00e879";
+let profileEraserMode = false;
+let profileCanvasReady = false;
+
+function setupProfileDrawingCanvas() {
+  const image = $("profilePreview");
+  const canvas = $("profileOverlay");
+  if (!image || !canvas || !image.naturalWidth) return;
+
+  const width = image.clientWidth;
+  const height = image.clientHeight;
+  if (!width || !height) return;
+
+  const ratio = Math.max(1, window.devicePixelRatio || 1);
+
+  canvas.width = Math.round(width * ratio);
+  canvas.height = Math.round(height * ratio);
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+  canvas.classList.remove("hidden");
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+  profileCanvasReady = true;
+  redrawProfileStrokes();
+}
+
+function redrawProfileStrokes() {
+  const canvas = $("profileOverlay");
+  if (!canvas || !canvas.width || !canvas.height) return;
+
+  const ratio = canvas.width / Math.max(1, canvas.clientWidth);
+  const ctx = canvas.getContext("2d");
+
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+  profileStrokes.forEach(stroke => {
+    if (!stroke.points.length) return;
+
+    ctx.save();
+    ctx.globalCompositeOperation = stroke.erase
+      ? "destination-out"
+      : "source-over";
+
+    ctx.strokeStyle = stroke.color;
+    ctx.fillStyle = stroke.color;
+    ctx.lineWidth = stroke.size;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    if (stroke.points.length === 1) {
+      const point = stroke.points[0];
+
+      ctx.beginPath();
+      ctx.arc(
+        point.x * canvas.clientWidth,
+        point.y * canvas.clientHeight,
+        stroke.size / 2,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+
+      stroke.points.forEach((point, index) => {
+        const x = point.x * canvas.clientWidth;
+        const y = point.y * canvas.clientHeight;
+
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  });
+}
+
+function profilePointerPosition(event) {
+  const canvas = $("profileOverlay");
+  const rect = canvas.getBoundingClientRect();
+
+  return {
+    x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)),
+    y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height))
+  };
+}
+
+function startProfileDrawing(event) {
+  if (!profilePhotoDataUrl) return;
+
+  event.preventDefault();
+
+  const canvas = $("profileOverlay");
+
+  if (canvas.setPointerCapture) {
+    canvas.setPointerCapture(event.pointerId);
+  }
+
+  activeProfileStroke = {
+    color: profileDrawColor,
+    size: Number($("profileBrushSize").value || 4),
+    erase: profileEraserMode,
+    points: [profilePointerPosition(event)]
+  };
+
+  profileStrokes.push(activeProfileStroke);
+  redrawProfileStrokes();
+}
+
+function continueProfileDrawing(event) {
+  if (!activeProfileStroke) return;
+
+  event.preventDefault();
+
+  activeProfileStroke.points.push(profilePointerPosition(event));
+  redrawProfileStrokes();
+}
+
+function stopProfileDrawing(event) {
+  if (!activeProfileStroke) return;
+
+  if (event && event.preventDefault) {
+    event.preventDefault();
+  }
+
+  activeProfileStroke = null;
+}
+
+function selectProfileDrawColor(color) {
+  profileDrawColor = color;
+  profileEraserMode = false;
+
+  document.querySelectorAll(".draw-color").forEach(button => {
+    button.classList.toggle("active", button.dataset.color === color);
+  });
+
+  $("eraserProfile").classList.remove("selected");
+}
+
+function enableProfileEraser() {
+  profileEraserMode = true;
+
+  document.querySelectorAll(".draw-color").forEach(button => {
+    button.classList.remove("active");
+  });
+
+  $("eraserProfile").classList.add("selected");
+}
+
+function undoProfileDrawing() {
+  profileStrokes.pop();
+  redrawProfileStrokes();
+}
+
+function clearProfileDrawing() {
+  profileStrokes = [];
+  activeProfileStroke = null;
+  redrawProfileStrokes();
+}
+
+function bindProfileDrawing() {
+  const canvas = $("profileOverlay");
+
+  canvas.addEventListener("pointerdown", startProfileDrawing);
+  canvas.addEventListener("pointermove", continueProfileDrawing);
+  canvas.addEventListener("pointerup", stopProfileDrawing);
+  canvas.addEventListener("pointercancel", stopProfileDrawing);
+  canvas.addEventListener("lostpointercapture", stopProfileDrawing);
+
+  document.querySelectorAll(".draw-color").forEach(button => {
+    button.addEventListener("click", () => {
+      selectProfileDrawColor(button.dataset.color);
+    });
+  });
+
+  $("eraserProfile").addEventListener("click", enableProfileEraser);
+  $("undoProfile").addEventListener("click", undoProfileDrawing);
+  $("clearDrawingProfile").addEventListener("click", clearProfileDrawing);
+}
+
+
+/* =====================================
+   18. CONSEJOS SEGÚN ESTRUCTURA CRANEAL
+===================================== */
+
+function analyzeProfile() {
+  if (!profilePhotoDataUrl) {
+    msg("profileMessage", "Primero carga una fotografía lateral.");
+    return;
+  }
+
+  const occipital = $("occipitalShape").value;
+  const crown = $("crownShape").value;
+  const skull = $("skullShape").value;
+
+  if (!occipital || !crown || !skull) {
+    msg("profileMessage", "Selecciona las tres características del cráneo para generar consejos más precisos.");
+    return;
+  }
+
+  const advice = [];
+
+  if (occipital === "prominente") {
+    advice.push("<strong>Occipital prominente:</strong> conserva una transición limpia alrededor de la prominencia y evita subir demasiado el degradado si eso crea un salto visual. Un low o mid fade bien conectado suele permitir controlar mejor el peso posterior.");
+  } else if (occipital === "plano") {
+    advice.push("<strong>Occipital plano:</strong> evita vaciar en exceso la zona posterior. Mantener algo de peso y trabajar capas o textura puede crear una silueta más equilibrada. Un taper o degradado bajo suele ser una opción prudente.");
+  } else {
+    advice.push("<strong>Occipital equilibrado:</strong> permite mayor libertad para elegir la altura del degradado. Mantén una conexión uniforme entre laterales, zona posterior y parte superior.");
+  }
+
+  if (crown === "plana") {
+    advice.push("<strong>Coronilla plana:</strong> conserva soporte visual en la parte superior y evita reducir demasiado el volumen justo en esa zona. La textura y las capas suaves pueden ayudar a dar dimensión.");
+  } else if (crown === "alta") {
+    advice.push("<strong>Coronilla elevada:</strong> controla el volumen para que no se vea excesivamente alto. Distribuye la textura y conecta la parte superior con la zona posterior sin crear escalones.");
+  } else {
+    advice.push("<strong>Coronilla redondeada:</strong> puedes trabajar una transición natural alrededor de la curva, cuidando los remolinos y la dirección de crecimiento.");
+  }
+
+  if (skull === "alargado") {
+    advice.push("<strong>Forma alargada:</strong> evita exagerar la altura superior. Un flequillo, crop, Mod Cut o capas con caída frontal pueden equilibrar visualmente la longitud.");
+  } else if (skull === "redondeado") {
+    advice.push("<strong>Forma redondeada:</strong> una parte superior con algo de altura y laterales controlados puede estilizar la silueta. Ajusta la altura del fade según la proyección occipital.");
+  } else if (skull === "estrecho") {
+    advice.push("<strong>Forma estrecha:</strong> evita adelgazar demasiado los laterales. Mantener algo de volumen lateral o textura puede dar una apariencia más proporcionada.");
+  } else {
+    advice.push("<strong>Forma ovalada/proporcionada:</strong> admite distintos largos y alturas de degradado. La decisión puede centrarse en textura, densidad, remolinos y estilo personal.");
+  }
+
+  const drawn = profileStrokes.length
+    ? "Has realizado " + profileStrokes.length + " trazo(s) sobre la fotografía; úsalos como marcas de observación para explicar la forma y las zonas de peso."
+    : "Puedes dibujar sobre la fotografía para marcar la coronilla, el occipital, la nuca o las zonas donde deseas conservar peso.";
+
+  $("profileDiagnosis").innerHTML = `
+    <p><strong>Lectura orientativa de cráneo</strong></p>
+    <p>${drawn}</p>
+    ${advice.map(item => `<p>${item}</p>`).join("")}
+    <p class="small"><strong>Nota profesional:</strong> estas recomendaciones se basan en las características que seleccionaste y en tu observación de la foto. No son una medición ósea automática; confirma la forma palpando y observando el cráneo desde varios ángulos.</p>
+  `;
+
+  $("profileResults").classList.remove("hidden");
+  msg("profileMessage", "Consejos de visagismo craneal generados.");
+}
+
+
+/* =====================================
+   19. LIMPIAR FOTOGRAFÍA LATERAL
+===================================== */
+
+function clearProfile() {
+  profilePhotoDataUrl = "";
+  profileStrokes = [];
+  activeProfileStroke = null;
+  profileCanvasReady = false;
+
+  $("profilePreview").src = "";
+  $("profileVisual").classList.add("hidden");
+  $("profileEmpty").classList.remove("hidden");
+  $("profileOverlay").classList.add("hidden");
+
+  $("profileFile").value = "";
+  $("profileCamera").value = "";
+  $("profileResults").classList.add("hidden");
+
+  $("occipitalShape").value = "";
+  $("crownShape").value = "";
+  $("skullShape").value = "";
+
+  const canvas = $("profileOverlay");
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  msg("profileMessage", "Fotografía lateral eliminada.");
+}
+
+
+/* =====================================
+   20. REINICIAR CONSULTA
+===================================== */
+
+function resetConsultation() {
+  clearPhoto();
+  clearProfile();
+
+  $("hairCurrent").value = "";
+  $("faceShape").value = "";
+  $("hairDesired").value = "";
+  $("style").value = "";
+  $("hairLength").value = "";
+  $("desiredCut").value = "";
+  $("observations").value = "";
+
+  $("recommendations").classList.add("hidden");
+
+  $("cutChoices").innerHTML =
+    '<p class="small">Primero selecciona si el cabello es largo o corto.</p>';
+
+  $("history").innerHTML = "";
+}
+
+</script>
+  <script>
 
 /* =====================================
    26. ABRIR INSTAGRAM
@@ -1761,9 +1949,7 @@ $("clearProfile").addEventListener("click", clearProfile);
 
 $("analyzeProfileBtn").addEventListener("click", analyzeProfile);
 
-$("profileDirection").addEventListener("change", () => {
-  if (profilePhotoDataUrl) drawProfileGuide();
-});
+bindProfileDrawing();
 
 $("hairLength").addEventListener("change", renderCutChoices);
 
@@ -1782,7 +1968,11 @@ $("instagramBtn").addEventListener("click", openInstagram);
 
 window.addEventListener("resize", () => {
   if (facePhotoDataUrl) drawFaceGuide();
-  if (profilePhotoDataUrl) drawProfileGuide();
+
+  if (profilePhotoDataUrl) {
+    setupProfileDrawingCanvas();
+    redrawProfileStrokes();
+  }
 });
 
 
@@ -1836,4 +2026,4 @@ db.auth.onAuthStateChange((event, session) => {
 </script>
 
 </body>
-</html>
+</html> 
