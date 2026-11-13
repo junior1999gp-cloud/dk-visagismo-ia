@@ -837,11 +837,18 @@ function loadProfilePhoto(file) {
   reader.onload = function(event) {
     profilePhotoDataUrl = event.target.result;
 
-    $("profilePreview").src = profilePhotoDataUrl;
-    $("profilePreview").classList.remove("hidden");
+    const preview = $("profilePreview");
+
+    $("profileVisual").classList.remove("hidden");
     $("profileEmpty").classList.add("hidden");
 
-    drawProfileGuide();
+    preview.onload = function() {
+      drawProfileGuide();
+    };
+
+    preview.src = profilePhotoDataUrl;
+
+    $("profileResults").classList.add("hidden");
 
     msg("profileMessage", "Fotografía lateral cargada correctamente.");
   };
@@ -855,103 +862,92 @@ function loadProfilePhoto(file) {
 ===================================== */
 
 function drawProfileGuide() {
-  const image = $("profilePreview");
   const canvas = $("profileOverlay");
+  const preview = $("profilePreview");
 
-  if (!image || !canvas || !image.naturalWidth) return;
+  if (!canvas || !preview || !preview.naturalWidth) return;
 
-  const width = image.clientWidth;
-  const height = image.clientHeight;
+  const w = preview.clientWidth;
+  const h = preview.clientHeight;
 
-  if (!width || !height) return;
+  if (!w || !h) return;
 
-  canvas.width = width * 2;
-  canvas.height = height * 2;
+  canvas.width = w * 2;
+  canvas.height = h * 2;
 
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
 
   const ctx = canvas.getContext("2d");
-
   ctx.scale(2, 2);
-  ctx.clearRect(0, 0, width, height);
 
-  ctx.strokeStyle = "#20e66b";
-  ctx.fillStyle = "#20e66b";
+  const direction = $("profileDirection").value === "right";
+
+  const X = v => direction ? (1 - v) * w : v * w;
+  const Y = v => v * h;
+
+  ctx.strokeStyle = "#00e879";
+  ctx.fillStyle = "#00e879";
   ctx.lineWidth = 2;
 
-  const direction = $("profileDirection").value;
+  function line(points) {
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(X(p[0]), Y(p[1]));
+      else ctx.lineTo(X(p[0]), Y(p[1]));
+    });
+    ctx.stroke();
+  }
 
-  const startX = direction === "left"
-    ? width * 0.18
-    : width * 0.82;
+  // Referencia superior del cráneo
+  line([
+    [0.30, 0.18],
+    [0.39, 0.09],
+    [0.53, 0.07],
+    [0.66, 0.13],
+    [0.72, 0.25]
+  ]);
 
-  const endX = direction === "left"
-    ? width * 0.82
-    : width * 0.18;
+  // Referencia de frente
+  line([
+    [0.30, 0.18],
+    [0.25, 0.30],
+    [0.21, 0.38],
+    [0.25, 0.43]
+  ]);
 
-  /* Línea de frente */
+  // Referencia posterior del cráneo
+  line([
+    [0.72, 0.25],
+    [0.73, 0.39],
+    [0.69, 0.52],
+    [0.63, 0.66],
+    [0.55, 0.78]
+  ]);
 
+  // Occipital aproximado
   ctx.beginPath();
-  ctx.moveTo(startX, height * 0.20);
-  ctx.lineTo(startX, height * 0.65);
+  ctx.arc(X(0.69), Y(0.43), w * 0.035, 0, Math.PI * 2);
   ctx.stroke();
 
-  /* Línea superior del cráneo */
+  // Nuca
+  line([
+    [0.30, 0.62],
+    [0.42, 0.73],
+    [0.55, 0.78]
+  ]);
 
-  ctx.beginPath();
-  ctx.moveTo(width * 0.20, height * 0.16);
-  ctx.quadraticCurveTo(
-    width * 0.50,
-    height * 0.02,
-    width * 0.80,
-    height * 0.18
-  );
-  ctx.stroke();
+  function label(text, x, y) {
+    ctx.font = "bold 11px Arial";
+    ctx.fillText(text, X(x), Y(y));
+  }
 
-  /* Línea de occipital aproximada */
+  label("FRENTE", 0.10, 0.25);
+  label("CORONILLA", 0.40, 0.055);
+  label("OCCIPITAL", 0.57, 0.37);
+  label("NUCA", 0.47, 0.84);
 
-  ctx.beginPath();
-  ctx.moveTo(
-    direction === "left" ? width * 0.72 : width * 0.28,
-    height * 0.25
-  );
-
-  ctx.quadraticCurveTo(
-    direction === "left" ? width * 0.90 : width * 0.10,
-    height * 0.40,
-    direction === "left" ? width * 0.75 : width * 0.25,
-    height * 0.58
-  );
-
-  ctx.stroke();
-
-  /* Línea de nuca */
-
-  ctx.beginPath();
-  ctx.moveTo(endX, height * 0.58);
-  ctx.lineTo(endX, height * 0.85);
-  ctx.stroke();
-
-  /* Línea horizontal de referencia */
-
-  ctx.setLineDash([5, 5]);
-
-  ctx.beginPath();
-  ctx.moveTo(width * 0.10, height * 0.50);
-  ctx.lineTo(width * 0.90, height * 0.50);
-  ctx.stroke();
-
-  ctx.setLineDash([]);
-
-  /* Etiquetas */
-
-  ctx.font = "11px Arial";
-
-  ctx.fillText("FRENTE", width * 0.03, height * 0.12);
-  ctx.fillText("CORONILLA", width * 0.35, height * 0.10);
-  ctx.fillText("OCCIPITAL", width * 0.60, height * 0.70);
-  ctx.fillText("NUCA", width * 0.40, height * 0.92);
+  canvas.classList.remove("hidden");
 }
 
 
