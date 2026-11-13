@@ -1316,6 +1316,8 @@ async function drawFaceGuide() {
 
   const points = lastFaceLandmarks;
 
+  if (!points || points.length < 455) return;
+
   const box = prepareFaceCanvas();
 
   if (!box) return;
@@ -1332,16 +1334,15 @@ async function drawFaceGuide() {
     };
   };
 
-  const green = "#00ff83";
+  const green = "#00ff9d";
+  const cyan = "#35eaff";
 
-  ctx.strokeStyle = green;
-  ctx.fillStyle = green;
-  ctx.lineWidth = 1.8;
+  ctx.save();
 
-  ctx.shadowColor = "rgba(0,255,131,.8)";
-  ctx.shadowBlur = 6;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
 
-  /* CONTORNO FACIAL REAL */
+  // CONTORNO FACIAL
 
   const faceContour = [
     10, 338, 297, 332, 284, 251, 389,
@@ -1352,65 +1353,85 @@ async function drawFaceGuide() {
     109, 10
   ];
 
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = green;
+  ctx.shadowBlur = 8;
+
   ctx.beginPath();
 
-  faceContour.forEach((index, position) => {
+  faceContour.forEach((index, i) => {
 
     const p = point(index);
 
-    if (position === 0) {
+    if (i === 0) {
       ctx.moveTo(p.x, p.y);
     } else {
       ctx.lineTo(p.x, p.y);
     }
+
   });
 
   ctx.stroke();
 
-
-  /* LÍNEA DE CEJAS */
-
-  const leftBrow = point(105);
-  const rightBrow = point(334);
-
-  const browY = (leftBrow.y + rightBrow.y) / 2;
-
-  ctx.beginPath();
-  ctx.moveTo(point(234).x, browY);
-  ctx.lineTo(point(454).x, browY);
-  ctx.setLineDash([7, 5]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-
-  /* LÍNEA DE BASE DE NARIZ */
-
-  const noseBase = point(2);
-
-  ctx.beginPath();
-  ctx.moveTo(point(234).x, noseBase.y);
-  ctx.lineTo(point(454).x, noseBase.y);
-  ctx.setLineDash([7, 5]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-
-  /* EJE CENTRAL */
+  // EJE CENTRAL DE SIMETRÍA
 
   const top = point(10);
   const chin = point(152);
 
-  const centerX = (point(234).x + point(454).x) / 2;
+  const centerX =
+    (point(234).x + point(454).x) / 2;
+
+  ctx.strokeStyle = cyan;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([7, 5]);
 
   ctx.beginPath();
   ctx.moveTo(centerX, top.y);
   ctx.lineTo(centerX, chin.y);
-  ctx.setLineDash([5, 5]);
   ctx.stroke();
+
   ctx.setLineDash([]);
 
+  // TERCIOS FACIALES
 
-  /* PUNTOS DE REFERENCIA */
+  const browY =
+    (point(105).y + point(334).y) / 2;
+
+  const noseY = point(2).y;
+
+  const thirdLines = [
+    { y: browY, label: "TERCIO SUPERIOR" },
+    { y: noseY, label: "TERCIO MEDIO" },
+    { y: chin.y, label: "TERCIO INFERIOR" }
+  ];
+
+  thirdLines.forEach(item => {
+
+    ctx.strokeStyle = green;
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([5, 5]);
+
+    ctx.beginPath();
+    ctx.moveTo(point(234).x, item.y);
+    ctx.lineTo(point(454).x, item.y);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 9px Arial";
+
+    ctx.fillText(
+      item.label,
+      point(234).x + 5,
+      item.y - 6
+    );
+
+  });
+
+  // PUNTOS ANATÓMICOS
 
   const landmarks = [
     [10, "FRENTE"],
@@ -1426,15 +1447,63 @@ async function drawFaceGuide() {
 
     const p = point(index);
 
+    // CÍRCULO EXTERIOR
+
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+
+    ctx.arc(
+      p.x,
+      p.y,
+      5,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.strokeStyle = cyan;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // PUNTO CENTRAL
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p.x,
+      p.y,
+      2,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle = green;
     ctx.fill();
 
-    ctx.font = "bold 10px Arial";
-    ctx.fillText(label, p.x + 5, p.y - 6);
+    // ETIQUETA
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 9px Arial";
+
+    ctx.fillText(
+      label,
+      p.x + 7,
+      p.y - 7
+    );
+
   });
 
-  ctx.shadowBlur = 0;
+  // IDENTIFICACIÓN DEL ESCÁNER
+
+  ctx.fillStyle = green;
+  ctx.font = "bold 10px Arial";
+
+  ctx.fillText(
+    "DK · FACIAL SCAN",
+    box.offsetX + 8,
+    box.offsetY + 15
+  );
+
+  ctx.restore();
 }
 
 
@@ -1467,18 +1536,10 @@ async function analyzeFace() {
     return;
   }
 
-  const shape = $("faceShape").value;
-
-  if (!shape) {
-    msg("faceMessage", "Selecciona la forma del rostro.");
-    return;
-  }
-
   const button = $("analyzeFaceBtn");
-
   button.disabled = true;
 
-  msg("faceMessage", "Calculando proporciones faciales...");
+  msg("faceMessage", "Analizando estructura facial...");
 
   try {
 
@@ -1486,79 +1547,123 @@ async function analyzeFace() {
 
     await drawFaceGuide();
 
-    const distance = (a, b) => {
+    if (!points || points.length < 455) {
+      throw new Error("No se detectaron suficientes puntos faciales.");
+    }
 
-      return Math.hypot(
-        points[a].x - points[b].x,
-        points[a].y - points[b].y
-      );
-    };
+    const distance = (a, b) => Math.hypot(
+      points[a].x - points[b].x,
+      points[a].y - points[b].y
+    );
 
-    /* ALTURA Y ANCHURA */
+    // PROPORCIONES FACIALES
 
     const faceHeight = distance(10, 152);
     const faceWidth = distance(234, 454);
+    const foreheadWidth = distance(127, 356);
+    const jawWidth = distance(172, 397);
+    const cheekWidth = distance(234, 454);
 
-    if (faceHeight <= 0 || faceWidth <= 0) {
+    if (!faceHeight || !faceWidth) {
       throw new Error("No se pudieron calcular las proporciones.");
     }
 
-    /* ALTURA DE LOS TERCIOS */
+    // TERCIOS FACIALES
 
-    const browY =
-      (points[105].y + points[334].y) / 2;
+    const browY = (points[105].y + points[334].y) / 2;
 
-    const topY = points[10].y;
-    const noseY = points[2].y;
-    const chinY = points[152].y;
-
-    const upper = Math.max(0, browY - topY);
-    const middle = Math.max(0, noseY - browY);
-    const lower = Math.max(0, chinY - noseY);
+    const upper = Math.max(0, browY - points[10].y);
+    const middle = Math.max(0, points[2].y - browY);
+    const lower = Math.max(0, points[152].y - points[2].y);
 
     const total = upper + middle + lower;
 
-    if (total <= 0) {
-      throw new Error("Las referencias faciales no son válidas.");
+    const percentage = value =>
+      Math.round(value / total * 100) + "%";
+
+    // ANÁLISIS AUTOMÁTICO DE FORMA
+
+    const ratio = faceHeight / cheekWidth;
+    const foreheadRatio = foreheadWidth / cheekWidth;
+    const jawRatio = jawWidth / cheekWidth;
+
+    let faceType = "Ovalado";
+    let explanation = "Las proporciones presentan equilibrio general.";
+
+    if (ratio >= 1.48) {
+
+      faceType = "Alargado";
+      explanation = "El rostro presenta mayor longitud vertical.";
+
+    } else if (ratio <= 1.22) {
+
+      faceType = "Redondo";
+      explanation = "El rostro presenta proporciones más compactas.";
+
+    } else if (
+      foreheadRatio >= 0.95 &&
+      jawRatio >= 0.88
+    ) {
+
+      faceType = "Cuadrado";
+      explanation = "La frente y la mandíbula presentan anchuras similares.";
+
+    } else if (
+      foreheadRatio > 1.05 &&
+      jawRatio < 0.82
+    ) {
+
+      faceType = "Triangular invertido";
+      explanation = "La frente es más ancha que la mandíbula.";
+
+    } else if (
+      cheekWidth > foreheadWidth * 1.12 &&
+      cheekWidth > jawWidth * 1.12
+    ) {
+
+      faceType = "Diamante";
+      explanation = "La zona de los pómulos destaca por su anchura.";
+
     }
 
-    const percentage = value => {
-      return Math.round(value / total * 100) + "%";
-    };
+    // COMPLETAR AUTOMÁTICAMENTE EL SELECTOR
 
-    /* ANCHURA DE NARIZ */
+    const selector = $("faceShape");
 
-    const noseWidth = distance(98, 327);
+    const matchingOption = [...selector.options].find(option =>
+      option.textContent.toLowerCase().includes(faceType.toLowerCase())
+    );
 
-    const noseRelative =
-      Math.round((noseWidth / faceWidth) * 100);
+    if (matchingOption) {
+      selector.value = matchingOption.value;
+    }
 
-    /* MOSTRAR RESULTADOS */
+    // MOSTRAR MEDIDAS
 
     $("ratioValue").textContent =
-      (faceHeight / faceWidth).toFixed(2) + " : 1";
+      ratio.toFixed(2) + " : 1";
 
     $("upperValue").textContent = percentage(upper);
-
     $("middleValue").textContent = percentage(middle);
-
     $("lowerValue").textContent = percentage(lower);
 
     $("widthValue").textContent =
       Math.round(faceWidth / faceHeight * 100) + "% del alto";
 
     $("noseValue").textContent =
-      noseRelative + "% del ancho facial";
+      Math.round(distance(98, 327) / faceWidth * 100) +
+      "% del ancho facial";
 
-    $("faceEstimate").textContent =
-      "Forma seleccionada: " + shape +
-      ". Las proporciones se estimaron a partir de puntos faciales detectados.";
+    $("faceEstimate").innerHTML =
+      "<strong>Rostro estimado: " + faceType +
+      "</strong><br>" + explanation +
+      "<br><small>Estimación automática basada en proporciones faciales. Confirma visualmente el resultado.</small>";
 
     $("faceAnalysis").classList.remove("hidden");
 
     msg(
       "faceMessage",
-      "Análisis facial completado correctamente."
+      "¡Análisis facial automático completado!"
     );
 
   } catch (error) {
@@ -1573,7 +1678,6 @@ async function analyzeFace() {
     button.disabled = false;
   }
 }
-
 
 /* =========================================
    18. ELIMINAR FOTOGRAFÍA FRONTAL
@@ -1873,29 +1977,33 @@ function drawProfileGuide() {
 
   ctx.save();
 
-  ctx.strokeStyle = "#00ff83";
-  ctx.fillStyle = "#00ff83";
-  ctx.lineWidth = 2;
-  ctx.shadowColor = "rgba(0,255,131,.8)";
-  ctx.shadowBlur = 5;
-  ctx.font = "bold 12px Arial";
+  // ESTILO TECNOLÓGICO DK
 
-  /* EJE VERTICAL DE REFERENCIA */
+  ctx.strokeStyle = "#00ff9d";
+  ctx.fillStyle = "#00ff9d";
+  ctx.lineWidth = 1.8;
+  ctx.shadowColor = "#00ff9d";
+  ctx.shadowBlur = 9;
+
+  ctx.font = "bold 11px Arial";
+
+  // EJE CENTRAL
 
   ctx.beginPath();
-  ctx.moveTo(x(.50), y(.05));
-  ctx.lineTo(x(.50), y(.95));
-  ctx.setLineDash([7, 6]);
+  ctx.moveTo(x(.50), y(.04));
+  ctx.lineTo(x(.50), y(.96));
+
+  ctx.setLineDash([8, 5]);
   ctx.stroke();
   ctx.setLineDash([]);
 
-  /* REFERENCIAS ANATÓMICAS ORIENTATIVAS */
+  // REFERENCIAS DEL CRÁNEO
 
   const referenceLines = [
-    { pos: .20, label: "FRENTE" },
-    { pos: .38, label: "CORONILLA" },
-    { pos: .57, label: "OCCIPITAL" },
-    { pos: .84, label: "NUCA" }
+    { pos: .20, label: "01 · FRENTE" },
+    { pos: .38, label: "02 · CORONILLA" },
+    { pos: .57, label: "03 · OCCIPITAL" },
+    { pos: .84, label: "04 · NUCA" }
   ];
 
   referenceLines.forEach(item => {
@@ -1905,24 +2013,83 @@ function drawProfileGuide() {
     ctx.beginPath();
     ctx.moveTo(x(.08), lineY);
     ctx.lineTo(x(.92), lineY);
-    ctx.setLineDash([5, 5]);
+
+    ctx.setLineDash([4, 5]);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.fillText(item.label, x(.08), lineY - 6);
+    // PUNTOS DE REFERENCIA
+
+    [.08, .92].forEach(position => {
+
+      ctx.beginPath();
+      ctx.arc(x(position), lineY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+    });
+
+    // ETIQUETAS
+
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.fillText(
+      item.label,
+      x(.08),
+      lineY - 7
+    );
+
+    ctx.fillStyle = "#00ff9d";
+    ctx.shadowBlur = 9;
+
   });
 
-  /* MARCADOR VISUAL OCCIPITAL */
+  // ZONA OCCIPITAL DESTACADA
 
   ctx.beginPath();
-  ctx.arc(x(.80), y(.57), 5, 0, Math.PI * 2);
+
+  ctx.arc(
+    x(.80),
+    y(.57),
+    7,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.stroke();
+
+  ctx.beginPath();
+
+  ctx.arc(
+    x(.80),
+    y(.57),
+    2.5,
+    0,
+    Math.PI * 2
+  );
+
   ctx.fill();
+
+  // INDICADOR VISUAL
+
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 10px Arial";
+
+  ctx.fillText(
+    "DK · CRANIAL SCAN",
+    x(.08),
+    y(.97)
+  );
 
   ctx.restore();
 
+  // CONSERVAR DIBUJOS MANUALES
+
   redrawProfileStrokes(box);
 }
-
 
 /* =========================================
    25. ACTIVAR Y DESACTIVAR DIBUJO
