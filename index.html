@@ -2739,8 +2739,114 @@ function recommend() {
 
   cuts = [...new Set(cuts)];
 
-  const reasons = [];
+// ======================================
+// COMPATIBILIDAD DEL CORTE DK
+// ======================================
 
+// ======================================
+// EVALUADOR DE COMPATIBILIDAD DK
+// ======================================
+
+function evaluateCut(cut) {
+
+  if (!cut) return 0;
+
+  const name = cut.toLowerCase();
+  let score = 75;
+
+  // FORMA DEL ROSTRO
+
+  if (shape === "ovalado") {
+    score += 10;
+  }
+
+  if (shape === "alargado") {
+    if (/crop|fringe|flequillo|low fade|taper/.test(name)) score += 12;
+    if (/pompadour|quiff/.test(name)) score -= 8;
+  }
+
+  if (shape === "redondo") {
+    if (/pompadour|quiff|volumen|fade alto/.test(name)) score += 12;
+  }
+
+  if (shape === "cuadrado") {
+    if (/crew|buzz|taper|texturizado/.test(name)) score += 10;
+  }
+
+  if (shape === "diamante") {
+    if (/fringe|mullet|capas|quiff/.test(name)) score += 10;
+  }
+
+  if (shape === "triangular") {
+    if (/quiff|volumen|capas|mod cut/.test(name)) score += 10;
+  }
+
+  // LARGO DEL CABELLO
+
+  if (length === "largo" &&
+      /buzz cut|crew cut|high fade/.test(name)) {
+    score -= 12;
+  }
+
+  if (length !== "largo" &&
+      /wolf cut|shaggy|mod cut|mullet/.test(name)) {
+    score -= 10;
+  }
+
+  // ESTRUCTURA CRANEAL
+
+  if (occipital === "marcado" &&
+      /buzz cut/.test(name)) {
+    score -= 8;
+  }
+
+  if (skull === "irregular" &&
+      /buzz cut/.test(name)) {
+    score -= 8;
+  }
+
+  return Math.max(60, Math.min(98, score));
+}
+
+// CORTE ELEGIDO POR EL CLIENTE
+
+const selectedCompatibility = desired
+  ? evaluateCut(desired)
+  : null;
+
+// PRIMER CORTE RECOMENDADO POR DK
+
+const recommendedCut = cuts[0] || "Evaluación personalizada";
+
+const recommendedCompatibility =
+  evaluateCut(recommendedCut);
+// ======================================
+// GANADOR DE COMPARACIÓN DK
+// ======================================
+
+let comparisonWinner = "";
+
+if (selectedCompatibility === null) {
+
+  comparisonWinner =
+    "Selecciona un corte para comparar ambas opciones.";
+
+} else if (recommendedCompatibility > selectedCompatibility) {
+
+  comparisonWinner =
+    "⭐ DK recomienda su propuesta: presenta mayor afinidad según los datos registrados.";
+
+} else if (selectedCompatibility > recommendedCompatibility) {
+
+  comparisonWinner =
+    "🟢 Tu elección presenta mayor afinidad según los datos registrados.";
+
+} else {
+
+  comparisonWinner =
+    "🤝 Ambas opciones presentan una afinidad similar.";
+}
+const reasons = [];
   if (hairCurrent) {
     reasons.push("Textura actual: " + hairCurrent + ".");
   }
@@ -2778,6 +2884,102 @@ function recommend() {
 
     <p><strong>Corte seleccionado:</strong>
     ${escapeHTML(desired || "Por decidir")}</p>
+    <div style="
+  background:linear-gradient(135deg,#10251b,#111111);
+  border:1px solid #00a86b;
+  border-radius:14px;
+  padding:18px;
+  margin:18px 0;
+  text-align:center;
+">
+
+  <h4 style="
+    color:#00ff9d;
+    margin-top:0;
+  ">
+    🎯 COMPATIBILIDAD DK
+  </h4>
+
+  <div style="
+    color:#ffffff;
+    font-size:36px;
+    font-weight:bold;
+  ">
+    ${compatibility}%
+  </div>
+
+  <div style="
+    background:#333;
+    height:9px;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:12px;
+  ">
+ <div style="
+  background:#151515;
+  border:1px solid #c9a227;
+  border-radius:14px;
+  padding:17px;
+  margin:18px 0;
+">
+
+  <h4 style="color:#d8b54a;margin-top:0;">
+    🎯 COMPARACIÓN DE COMPATIBILIDAD DK
+  </h4>
+
+  <p style="color:white;">
+    CORTE ELEGIDO POR EL CLIENTE
+  </p>
+
+  <div style="font-size:27px;color:#d8b54a;font-weight:bold;">
+    ${selectedCompatibility === null ? "Sin seleccionar" : selectedCompatibility + "%"}
+  </div>
+
+  <p style="color:white;margin-top:18px;">
+    CORTE RECOMENDADO POR DK
+  </p>
+
+  <div style="font-size:27px;color:#00ff9d;font-weight:bold;">
+    ${recommendedCompatibility}%
+  </div>
+
+  <p style="color:#ccc;font-size:12px;line-height:1.5;">
+    Comparación orientativa basada en las características seleccionadas.
+    La evaluación final requiere comprobar el cabello y el cráneo del cliente.
+  </p>
+
+</div>
+
+<div style="
+  background:linear-gradient(135deg,#29200b,#111111);
+  border:1px solid #c9a227;
+  border-radius:14px;
+  padding:17px;
+  margin:18px 0;
+">
+
+  <h4 style="color:#d8b54a;margin-top:0;">
+    🏆 RESULTADO DE LA COMPARACIÓN DK
+  </h4>
+
+  <p style="
+    color:#ffffff;
+    font-size:14px;
+    line-height:1.7;
+    margin-bottom:0;
+  ">
+    ${escapeHTML(comparisonWinner)}
+  </p>
+
+  <div style="
+    color:#d8b54a;
+    font-size:11px;
+    margin-top:12px;
+  ">
+    DK BARBER STUDIO · ASESORÍA DE IMAGEN
+  </div>
+
+</div>
 
     <h4>CORTES RECOMENDADOS</h4>
 
