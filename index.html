@@ -440,8 +440,7 @@ hr{
 
     <p id="saveMessage" class="small"></p>
   </div>
-
-  <!-- BÚSQUEDA -->
+    <!-- BÚSQUEDA -->
 
   <div class="card">
     <h2>Buscar clientes</h2>
@@ -725,8 +724,7 @@ hr{
 
 <!-- PARTE 2: AQUÍ CONTINUARÁ EL JAVASCRIPT -->
   <script>
-
-/* =========================================
+    /* =========================================
    1. CONEXIÓN CON SUPABASE
 ========================================= */
 
@@ -1118,7 +1116,7 @@ async function loadFaceModel() {
     return await faceLandmarkerPromise;
 
   } catch (error) {
-    faceLandmarkerPromise = null;
+        faceLandmarkerPromise = null;
     faceLandmarker = null;
     throw error;
   }
@@ -1498,6 +1496,87 @@ async function drawFaceGuide() {
   ctx.font = "bold 10px Arial";
 
   ctx.fillText(
+        "DK · FACIAL SCAN",
+    box.offsetX + 8,
+    box.offsetY + 15
+  );
+
+  ctx.restore();
+}
+      item.label,
+      point(234).x + 5,
+      item.y - 6
+    );
+
+  });
+
+  // PUNTOS ANATÓMICOS
+
+  const landmarks = [
+    [10, "FRENTE"],
+    [105, "CEJA"],
+    [334, "CEJA"],
+    [1, "NARIZ"],
+    [152, "MENTÓN"],
+    [234, "PÓMULO"],
+    [454, "PÓMULO"]
+  ];
+
+  landmarks.forEach(([index, label]) => {
+
+    const p = point(index);
+
+    // CÍRCULO EXTERIOR
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p.x,
+      p.y,
+      5,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.strokeStyle = cyan;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // PUNTO CENTRAL
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p.x,
+      p.y,
+      2,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle = green;
+    ctx.fill();
+
+    // ETIQUETA
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 9px Arial";
+
+    ctx.fillText(
+      label,
+      p.x + 7,
+      p.y - 7
+    );
+
+  });
+
+  // IDENTIFICACIÓN DEL ESCÁNER
+
+  ctx.fillStyle = green;
+  ctx.font = "bold 10px Arial";
+
+  ctx.fillText(
     "DK · FACIAL SCAN",
     box.offsetX + 8,
     box.offsetY + 15
@@ -1679,6 +1758,7 @@ async function analyzeFace() {
   }
 }
 
+
 /* =========================================
    18. ELIMINAR FOTOGRAFÍA FRONTAL
 ========================================= */
@@ -1715,6 +1795,7 @@ function clearPhoto() {
    FIN DE LA PARTE 2
    NO CIERRES EL DOCUMENTO TODAVÍA.
 ========================================= */
+
 /* =========================================
    19. VARIABLES DEL PERFIL LATERAL
 ========================================= */
@@ -1723,9 +1804,7 @@ let profilePhotoDataUrl = "";
 let profileStrokes = [];
 let currentProfileStroke = null;
 let profileDrawingEnabled = false;
-
-
-/* =========================================
+    /* =========================================
    20. AGREGAR HERRAMIENTAS DE DIBUJO
 ========================================= */
 
@@ -2091,6 +2170,7 @@ function drawProfileGuide() {
   redrawProfileStrokes(box);
 }
 
+
 /* =========================================
    25. ACTIVAR Y DESACTIVAR DIBUJO
 ========================================= */
@@ -2165,9 +2245,7 @@ function profilePointerPosition(event) {
     y: imageY
   };
 }
-
-
-/* =========================================
+    /* =========================================
    27. INICIAR TRAZO
 ========================================= */
 
@@ -2264,6 +2342,7 @@ function redrawProfileStrokes(box) {
       } else {
         ctx.lineTo(px, py);
       }
+
     });
 
     if (stroke.points.length === 1) {
@@ -2285,22 +2364,26 @@ function redrawProfileStrokes(box) {
     } else {
 
       ctx.stroke();
+
     }
 
     ctx.restore();
+
   });
 }
 
 
 /* =========================================
-   31. REDIBUJAR LIENZO
+   31. REDIBUJAR LIENZO COMPLETO
 ========================================= */
 
 function redrawProfileCanvas() {
 
-  if (!profilePhotoDataUrl) return;
+  const box = prepareProfileCanvas();
 
-  drawProfileGuide();
+  if (!box) return;
+
+  redrawProfileGuide();
 }
 
 
@@ -2317,9 +2400,11 @@ function undoProfileStroke() {
 
   profileStrokes.pop();
 
-  redrawProfileCanvas();
+  currentProfileStroke = null;
 
-  msg("drawingMessage", "Se eliminó el último trazo.");
+  redrawProfileGuide();
+
+  msg("drawingMessage", "Último trazo eliminado.");
 }
 
 
@@ -2330,14 +2415,13 @@ function undoProfileStroke() {
 function clearProfileDrawing() {
 
   profileStrokes = [];
+  currentProfileStroke = null;
 
-  redrawProfileCanvas();
+  redrawProfileGuide();
 
   msg("drawingMessage", "Todos los trazos fueron eliminados.");
 }
-
-
-/* =========================================
+    /* =========================================
    34. CONECTAR EVENTOS DEL DIBUJO
 ========================================= */
 
@@ -2613,9 +2697,7 @@ function renderCutChoices() {
     container.appendChild(button);
   });
 }
-
-
-/* =========================================
+    /* =========================================
    39. RECOMENDACIONES SEGÚN VISAGISMO
 ========================================= */
 
@@ -2674,6 +2756,13 @@ function recommend() {
     ],
 
     triangular: [
+      "Quiff con volumen",
+      "Corte en capas",
+      "Taper Fade",
+      "Texturizado"
+    ],
+
+    "triangular invertido": [
       "Quiff con volumen",
       "Corte en capas",
       "Taper Fade",
@@ -2739,114 +2828,147 @@ function recommend() {
 
   cuts = [...new Set(cuts)];
 
-// ======================================
-// COMPATIBILIDAD DEL CORTE DK
-// ======================================
+  // ======================================
+  // EVALUADOR DE COMPATIBILIDAD DK
+  // ======================================
 
-// ======================================
-// EVALUADOR DE COMPATIBILIDAD DK
-// ======================================
+  function evaluateCut(cut) {
 
-function evaluateCut(cut) {
+    if (!cut) return 0;
 
-  if (!cut) return 0;
+    const name = cut.toLowerCase();
+    let score = 75;
 
-  const name = cut.toLowerCase();
-  let score = 75;
+    // FORMA DEL ROSTRO
 
-  // FORMA DEL ROSTRO
+    if (shape === "ovalado") {
+      score += 10;
+    }
 
-  if (shape === "ovalado") {
-    score += 10;
+    if (shape === "alargado") {
+
+      if (/crop|fringe|flequillo|low fade|taper/.test(name)) {
+        score += 12;
+      }
+
+      if (/pompadour|quiff/.test(name)) {
+        score -= 8;
+      }
+    }
+
+    if (shape === "redondo") {
+
+      if (/pompadour|quiff|volumen|fade alto/.test(name)) {
+        score += 12;
+      }
+    }
+
+    if (shape === "cuadrado") {
+
+      if (/crew|buzz|taper|texturizado/.test(name)) {
+        score += 10;
+      }
+    }
+
+    if (shape === "diamante") {
+
+      if (/fringe|mullet|capas|quiff/.test(name)) {
+        score += 10;
+      }
+    }
+
+    if (
+      shape === "triangular" ||
+      shape === "triangular invertido"
+    ) {
+
+      if (/quiff|volumen|capas|mod cut/.test(name)) {
+        score += 10;
+      }
+    }
+
+    // LARGO DEL CABELLO
+
+    if (
+      length === "largo" &&
+      /buzz cut|crew cut|high fade/.test(name)
+    ) {
+      score -= 12;
+    }
+
+    if (
+      length !== "largo" &&
+      /wolf cut|shaggy|mod cut|mullet/.test(name)
+    ) {
+      score -= 10;
+    }
+
+    // ESTRUCTURA CRANEAL
+
+    if (
+      occipital === "marcado" &&
+      /buzz cut/.test(name)
+    ) {
+      score -= 8;
+    }
+
+    if (
+      skull === "irregular" &&
+      /buzz cut/.test(name)
+    ) {
+      score -= 8;
+    }
+
+    return Math.max(60, Math.min(98, score));
   }
 
-  if (shape === "alargado") {
-    if (/crop|fringe|flequillo|low fade|taper/.test(name)) score += 12;
-    if (/pompadour|quiff/.test(name)) score -= 8;
+  // CORTE ELEGIDO POR EL CLIENTE
+
+  const selectedCompatibility = desired
+    ? evaluateCut(desired)
+    : null;
+
+  // CORTE RECOMENDADO POR DK
+
+  const recommendedCut =
+    cuts[0] || "Evaluación personalizada";
+
+  const recommendedCompatibility =
+    evaluateCut(recommendedCut);
+
+  // GANADOR DE COMPARACIÓN DK
+
+  let comparisonWinner = "";
+
+  if (selectedCompatibility === null) {
+
+    comparisonWinner =
+      "Selecciona un corte para comparar ambas opciones.";
+
+  } else if (
+    recommendedCompatibility > selectedCompatibility
+  ) {
+
+    comparisonWinner =
+      "⭐ DK recomienda su propuesta: presenta mayor afinidad según los datos registrados.";
+
+  } else if (
+    selectedCompatibility > recommendedCompatibility
+  ) {
+
+    comparisonWinner =
+      "🟢 Tu elección presenta mayor afinidad según los datos registrados.";
+
+  } else {
+
+    comparisonWinner =
+      "🤝 Ambas opciones presentan una afinidad similar.";
   }
 
-  if (shape === "redondo") {
-    if (/pompadour|quiff|volumen|fade alto/.test(name)) score += 12;
-  }
+  // FACTORES CONSIDERADOS
 
-  if (shape === "cuadrado") {
-    if (/crew|buzz|taper|texturizado/.test(name)) score += 10;
-  }
+  const reasons = [];
 
-  if (shape === "diamante") {
-    if (/fringe|mullet|capas|quiff/.test(name)) score += 10;
-  }
-
-  if (shape === "triangular") {
-    if (/quiff|volumen|capas|mod cut/.test(name)) score += 10;
-  }
-
-  // LARGO DEL CABELLO
-
-  if (length === "largo" &&
-      /buzz cut|crew cut|high fade/.test(name)) {
-    score -= 12;
-  }
-
-  if (length !== "largo" &&
-      /wolf cut|shaggy|mod cut|mullet/.test(name)) {
-    score -= 10;
-  }
-
-  // ESTRUCTURA CRANEAL
-
-  if (occipital === "marcado" &&
-      /buzz cut/.test(name)) {
-    score -= 8;
-  }
-
-  if (skull === "irregular" &&
-      /buzz cut/.test(name)) {
-    score -= 8;
-  }
-
-  return Math.max(60, Math.min(98, score));
-}
-
-// CORTE ELEGIDO POR EL CLIENTE
-
-const selectedCompatibility = desired
-  ? evaluateCut(desired)
-  : null;
-
-// PRIMER CORTE RECOMENDADO POR DK
-
-const recommendedCut = cuts[0] || "Evaluación personalizada";
-
-const recommendedCompatibility =
-  evaluateCut(recommendedCut);
-// ======================================
-// GANADOR DE COMPARACIÓN DK
-// ======================================
-
-let comparisonWinner = "";
-
-if (selectedCompatibility === null) {
-
-  comparisonWinner =
-    "Selecciona un corte para comparar ambas opciones.";
-
-} else if (recommendedCompatibility > selectedCompatibility) {
-
-  comparisonWinner =
-    "⭐ DK recomienda su propuesta: presenta mayor afinidad según los datos registrados.";
-
-} else if (selectedCompatibility > recommendedCompatibility) {
-
-  comparisonWinner =
-    "🟢 Tu elección presenta mayor afinidad según los datos registrados.";
-
-} else {
-
-  comparisonWinner =
-    "🤝 Ambas opciones presentan una afinidad similar.";
-}
-const reasons = [];
   if (hairCurrent) {
     reasons.push("Textura actual: " + hairCurrent + ".");
   }
@@ -2871,125 +2993,123 @@ const reasons = [];
     reasons.push("Estilo solicitado: " + style + ".");
   }
 
+  // MOSTRAR RESULTADOS
+
   const result = $("recommendations");
 
   result.innerHTML = `
+
     <h3>RESULTADO DEL VISAGISMO</h3>
 
-    <p><strong>Forma del rostro:</strong>
-    ${escapeHTML(shape)}</p>
+    <p>
+      <strong>Forma del rostro:</strong>
+      ${escapeHTML(shape)}
+    </p>
 
-    <p><strong>Largo del cabello:</strong>
-    ${escapeHTML(length)}</p>
+    <p>
+      <strong>Largo del cabello:</strong>
+      ${escapeHTML(length)}
+    </p>
 
-    <p><strong>Corte seleccionado:</strong>
-    ${escapeHTML(desired || "Por decidir")}</p>
+    <p>
+      <strong>Corte seleccionado:</strong>
+      ${escapeHTML(desired || "Por decidir")}
+    </p>
+
     <div style="
-  background:linear-gradient(135deg,#10251b,#111111);
-  border:1px solid #00a86b;
-  border-radius:14px;
-  padding:18px;
-  margin:18px 0;
-  text-align:center;
-">
+      background:#151515;
+      border:1px solid #c9a227;
+      border-radius:14px;
+      padding:17px;
+      margin:18px 0;
+    ">
 
-  <h4 style="
-    color:#00ff9d;
-    margin-top:0;
-  ">
-    🎯 COMPATIBILIDAD DK
-  </h4>
+      <h4 style="color:#d8b54a;margin-top:0;">
+        🎯 COMPARACIÓN DE COMPATIBILIDAD DK
+      </h4>
 
-  <div style="
-    color:#ffffff;
-    font-size:36px;
-    font-weight:bold;
-  ">
-    ${compatibility}%
-  </div>
+      <p style="color:white;">
+        CORTE ELEGIDO POR EL CLIENTE
+      </p>
 
-  <div style="
-    background:#333;
-    height:9px;
-    border-radius:20px;
-    overflow:hidden;
-    margin-top:12px;
-  ">
- <div style="
-  background:#151515;
-  border:1px solid #c9a227;
-  border-radius:14px;
-  padding:17px;
-  margin:18px 0;
-">
+      <div style="
+        font-size:27px;
+        color:#d8b54a;
+        font-weight:bold;
+      ">
+        ${
+          selectedCompatibility === null
+            ? "Sin seleccionar"
+            : selectedCompatibility + "%"
+        }
+      </div>
 
-  <h4 style="color:#d8b54a;margin-top:0;">
-    🎯 COMPARACIÓN DE COMPATIBILIDAD DK
-  </h4>
+      <p style="color:white;margin-top:18px;">
+        CORTE RECOMENDADO POR DK
+      </p>
 
-  <p style="color:white;">
-    CORTE ELEGIDO POR EL CLIENTE
-  </p>
+      <div style="
+        font-size:27px;
+        color:#00ff9d;
+        font-weight:bold;
+      ">
+        ${recommendedCompatibility}%
+      </div>
 
-  <div style="font-size:27px;color:#d8b54a;font-weight:bold;">
-    ${selectedCompatibility === null ? "Sin seleccionar" : selectedCompatibility + "%"}
-  </div>
+      <p style="color:#ccc;font-size:12px;line-height:1.5;">
+        Comparación orientativa basada en las características
+        seleccionadas. La evaluación final requiere comprobar
+        el cabello y el cráneo del cliente.
+      </p>
 
-  <p style="color:white;margin-top:18px;">
-    CORTE RECOMENDADO POR DK
-  </p>
+    </div>
 
-  <div style="font-size:27px;color:#00ff9d;font-weight:bold;">
-    ${recommendedCompatibility}%
-  </div>
+    <div style="
+      background:linear-gradient(135deg,#29200b,#111111);
+      border:1px solid #c9a227;
+      border-radius:14px;
+      padding:17px;
+      margin:18px 0;
+    ">
 
-  <p style="color:#ccc;font-size:12px;line-height:1.5;">
-    Comparación orientativa basada en las características seleccionadas.
-    La evaluación final requiere comprobar el cabello y el cráneo del cliente.
-  </p>
+      <h4 style="color:#d8b54a;margin-top:0;">
+        🏆 RESULTADO DE LA COMPARACIÓN DK
+      </h4>
 
-</div>
+      <p style="
+        color:#ffffff;
+        font-size:14px;
+        line-height:1.7;
+        margin-bottom:0;
+      ">
+        ${escapeHTML(comparisonWinner)}
+      </p>
 
-<div style="
-  background:linear-gradient(135deg,#29200b,#111111);
-  border:1px solid #c9a227;
-  border-radius:14px;
-  padding:17px;
-  margin:18px 0;
-">
+      <div style="
+        color:#d8b54a;
+        font-size:11px;
+        margin-top:12px;
+      ">
+        DK BARBER STUDIO · ASESORÍA DE IMAGEN
+      </div>
 
-  <h4 style="color:#d8b54a;margin-top:0;">
-    🏆 RESULTADO DE LA COMPARACIÓN DK
-  </h4>
-
-  <p style="
-    color:#ffffff;
-    font-size:14px;
-    line-height:1.7;
-    margin-bottom:0;
-  ">
-    ${escapeHTML(comparisonWinner)}
-  </p>
-
-  <div style="
-    color:#d8b54a;
-    font-size:11px;
-    margin-top:12px;
-  ">
-    DK BARBER STUDIO · ASESORÍA DE IMAGEN
-  </div>
-
-</div>
+    </div>
 
     <h4>CORTES RECOMENDADOS</h4>
 
     <ol>
-      ${cuts.map(cut => `<li>${escapeHTML(cut)}</li>`).join("")}
+      ${cuts.map(cut =>
+        `<li>${escapeHTML(cut)}</li>`
+      ).join("")}
     </ol>
 
     <h4>FACTORES CONSIDERADOS</h4>
 
-    <p>${escapeHTML(reasons.join("\n") || "Sin información adicional.")}</p>
+    <p>
+      ${escapeHTML(
+        reasons.join("\n") || "Sin información adicional."
+      )}
+    </p>
 
     <p class="gold-note">
       La recomendación combina la forma facial seleccionada,
@@ -2997,11 +3117,15 @@ const reasons = [];
       Es una guía profesional orientativa. El barbero debe
       comprobar crecimiento, densidad, remolinos y preferencias del cliente.
     </p>
+
   `;
 
   result.classList.remove("hidden");
 
-  msg("consultMessage", "Recomendaciones generadas correctamente.");
+  msg(
+    "consultMessage",
+    "Recomendaciones generadas correctamente."
+  );
 }
 
 
@@ -3019,7 +3143,8 @@ bindProfileDrawing();
 /* =========================================
    FIN DE LA PARTE 3
    CONTINUAR CON LA PARTE 4
-=========================================/* =========================================
+========================================= */
+    /* =========================================
    41. GUARDAR CONSULTA DEL CLIENTE
 ========================================= */
 
@@ -3242,9 +3367,7 @@ async function loadHistory() {
     `;
   }
 }
-
-
-/* =========================================
+    /* =========================================
    43. REINICIAR CONSULTA
 ========================================= */
 
@@ -3611,4 +3734,6 @@ initializeApp();
 </script>
 
 </body>
-</html>  
+</html>
+
+
