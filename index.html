@@ -387,7 +387,7 @@ hr{
   <label for="password">Contraseña</label>
   <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
 
-  <button id="loginBtn" type="button" onclick="loginUser()">INGRESAR</button>
+  <button id="loginBtn" type="button">INGRESAR</button>
 
   <button id="forgotBtn" type="button" class="secondary">
     ¿OLVIDASTE TU CONTRASEÑA?
@@ -517,7 +517,7 @@ hr{
     <p id="faceMessage" class="small"></p>
 
     <div id="faceAnalysis" class="analysis-box hidden">
-      <h3>LECTURA BIOMÉTRICA FACIAL</h3>
+            <h3>LECTURA BIOMÉTRICA FACIAL</h3>
 
       <div class="metric-grid">
 
@@ -948,7 +948,7 @@ async function saveClient() {
       .insert([{
         name,
         phone,
-        owner_id: currentUser.id
+                owner_id: currentUser.id
       }]);
 
     if (error) throw error;
@@ -1116,7 +1116,7 @@ async function loadFaceModel() {
     return await faceLandmarkerPromise;
 
   } catch (error) {
-        faceLandmarkerPromise = null;
+    faceLandmarkerPromise = null;
     faceLandmarker = null;
     throw error;
   }
@@ -1348,7 +1348,7 @@ async function drawFaceGuide() {
     379, 378, 400, 377, 152, 148, 176,
     149, 150, 136, 172, 58, 132, 93,
     234, 127, 162, 21, 54, 103, 67,
-    109, 10
+        109, 10
   ];
 
   ctx.strokeStyle = green;
@@ -1445,8 +1445,6 @@ async function drawFaceGuide() {
 
     const p = point(index);
 
-    // CÍRCULO EXTERIOR
-
     ctx.beginPath();
 
     ctx.arc(
@@ -1461,8 +1459,6 @@ async function drawFaceGuide() {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // PUNTO CENTRAL
-
     ctx.beginPath();
 
     ctx.arc(
@@ -1475,89 +1471,6 @@ async function drawFaceGuide() {
 
     ctx.fillStyle = green;
     ctx.fill();
-
-    // ETIQUETA
-
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 9px Arial";
-
-    ctx.fillText(
-      label,
-      p.x + 7,
-      p.y - 7
-    );
-
-  });
-
-  // IDENTIFICACIÓN DEL ESCÁNER
-
-  ctx.fillStyle = green;
-  ctx.font = "bold 10px Arial";
-
-  ctx.fillText(
-        "DK · FACIAL SCAN",
-    box.offsetX + 8,
-    box.offsetY + 15
-  );
-
-  ctx.restore();
-}
-      item.label,
-      point(234).x + 5,
-      item.y - 6
-    );
-
-  });
-
-  // PUNTOS ANATÓMICOS
-
-  const landmarks = [
-    [10, "FRENTE"],
-    [105, "CEJA"],
-    [334, "CEJA"],
-    [1, "NARIZ"],
-    [152, "MENTÓN"],
-    [234, "PÓMULO"],
-    [454, "PÓMULO"]
-  ];
-
-  landmarks.forEach(([index, label]) => {
-
-    const p = point(index);
-
-    // CÍRCULO EXTERIOR
-
-    ctx.beginPath();
-
-    ctx.arc(
-      p.x,
-      p.y,
-      5,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.strokeStyle = cyan;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // PUNTO CENTRAL
-
-    ctx.beginPath();
-
-    ctx.arc(
-      p.x,
-      p.y,
-      2,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fillStyle = green;
-    ctx.fill();
-
-    // ETIQUETA
 
     ctx.shadowBlur = 0;
     ctx.fillStyle = "#ffffff";
@@ -1792,11 +1705,6 @@ function clearPhoto() {
 
 
 /* =========================================
-   FIN DE LA PARTE 2
-   NO CIERRES EL DOCUMENTO TODAVÍA.
-========================================= */
-
-/* =========================================
    19. VARIABLES DEL PERFIL LATERAL
 ========================================= */
 
@@ -1804,7 +1712,9 @@ let profilePhotoDataUrl = "";
 let profileStrokes = [];
 let currentProfileStroke = null;
 let profileDrawingEnabled = false;
-    /* =========================================
+
+
+/* =========================================
    20. AGREGAR HERRAMIENTAS DE DIBUJO
 ========================================= */
 
@@ -2097,8 +2007,6 @@ function drawProfileGuide() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // PUNTOS DE REFERENCIA
-
     [.08, .92].forEach(position => {
 
       ctx.beginPath();
@@ -2106,8 +2014,6 @@ function drawProfileGuide() {
       ctx.fill();
 
     });
-
-    // ETIQUETAS
 
     ctx.shadowBlur = 0;
 
@@ -2137,8 +2043,7 @@ function drawProfileGuide() {
   );
 
   ctx.stroke();
-
-  ctx.beginPath();
+    ctx.beginPath();
 
   ctx.arc(
     x(.80),
@@ -2245,7 +2150,9 @@ function profilePointerPosition(event) {
     y: imageY
   };
 }
-    /* =========================================
+
+
+/* =========================================
    27. INICIAR TRAZO
 ========================================= */
 
@@ -2421,7 +2328,9 @@ function clearProfileDrawing() {
 
   msg("drawingMessage", "Todos los trazos fueron eliminados.");
 }
-    /* =========================================
+
+
+/* =========================================
    34. CONECTAR EVENTOS DEL DIBUJO
 ========================================= */
 
@@ -2542,7 +2451,7 @@ function analyzeProfile() {
 
   diagnosis.push(
     "Forma general del cráneo: " +
-    (skull || "No especificada")
+    (skull || "No especificado")
   );
 
   if (occipital === "marcado") {
@@ -2556,8 +2465,7 @@ function analyzeProfile() {
       "Recomendación: considera crear una transición visual que aporte equilibrio a la zona posterior."
     );
   }
-
-  if (crown === "plana") {
+    if (crown === "plana") {
     diagnosis.push(
       "Recomendación: revisa el volumen superior y la conexión con la coronilla."
     );
@@ -2697,7 +2605,9 @@ function renderCutChoices() {
     container.appendChild(button);
   });
 }
-    /* =========================================
+
+
+/* =========================================
    39. RECOMENDACIONES SEGÚN VISAGISMO
 ========================================= */
 
@@ -2976,8 +2886,7 @@ function recommend() {
   if (hairDesired) {
     reasons.push("Acabado buscado: " + hairDesired + ".");
   }
-
-  if (occipital) {
+    if (occipital) {
     reasons.push("Referencia occipital: " + occipital + ".");
   }
 
@@ -3141,10 +3050,6 @@ bindProfileDrawing();
 
 
 /* =========================================
-   FIN DE LA PARTE 3
-   CONTINUAR CON LA PARTE 4
-========================================= */
-    /* =========================================
    41. GUARDAR CONSULTA DEL CLIENTE
 ========================================= */
 
@@ -3357,6 +3262,26 @@ async function loadHistory() {
 
       }).join("")}
     `;
+            return `
+          <div class="analysis-box history-card">
+
+            <h3>${escapeHTML(item.service_name || "Consulta")}</h3>
+
+            <p class="small">
+              ${escapeHTML(
+                item.created_at
+                  ? new Date(item.created_at).toLocaleString("es-PE")
+                  : ""
+              )}
+            </p>
+
+            ${formattedNotes}
+
+          </div>
+        `;
+
+      }).join("")}
+    `;
 
   } catch (error) {
 
@@ -3367,7 +3292,9 @@ async function loadHistory() {
     `;
   }
 }
-    /* =========================================
+
+
+/* =========================================
    43. REINICIAR CONSULTA
 ========================================= */
 
@@ -3735,5 +3662,3 @@ initializeApp();
 
 </body>
 </html>
-
-
