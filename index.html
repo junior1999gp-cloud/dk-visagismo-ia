@@ -680,9 +680,32 @@ input:focus,select:focus,textarea:focus{
       </div>
     </div>
 
-        <button id="clearProfilePhoto" class="secondary">
-      ELIMINAR FOTOGRAFÍA DE PERFIL
-    </button>
+        <div class="profile-tools">
+
+  <button id="analyzeProfileBtn" type="button">
+    ANALIZAR PERFIL LATERAL
+  </button>
+
+  <button id="drawProfileBtn" type="button" class="secondary">
+    ✏️ ACTIVAR DIBUJO
+  </button>
+
+  <button id="clearProfileDrawingBtn" type="button" class="secondary">
+    BORRAR TRAZOS
+  </button>
+
+  <button id="clearProfilePhoto" type="button" class="secondary">
+    ELIMINAR FOTOGRAFÍA DE PERFIL
+  </button>
+
+</div>
+
+<div id="profileResults" class="result hidden">
+  <h3>RESULTADO DEL ANÁLISIS LATERAL</h3>
+  <div id="profileDiagnosis"></div>
+</div>
+
+<p id="profileMessage" class="small"></p>
 
     <p id="profileMessage" class="small"></p>
   </div>
@@ -917,8 +940,16 @@ async function initializeApp() {
 
     if (data.session) {
       currentUser = data.session.user;
+
       showApp();
-      await loadClients();
+
+      try {
+        await loadClients();
+      } catch (clientError) {
+        console.error("Error al cargar clientes:", clientError);
+        showMessage("message", "Sesión iniciada, pero no se pudieron cargar los clientes.");
+      }
+
     } else {
       currentUser = null;
       showLogin();
@@ -926,8 +957,14 @@ async function initializeApp() {
 
   } catch (error) {
     console.error("Error al iniciar:", error);
+
+    currentUser = null;
     showLogin();
-    showMessage("message", "No se pudo verificar la sesión.");
+
+    showMessage(
+      "message",
+      "No se pudo verificar la sesión. Comprueba tu conexión."
+    );
   }
 }
 
@@ -936,14 +973,12 @@ async function initializeApp() {
 ========================================= */
 
 async function loginUser() {
+
   const email = $("email")?.value.trim();
   const password = $("password")?.value;
 
   if (!email || !password) {
-    showMessage(
-      "message",
-      "Ingresa tu correo y contraseña."
-    );
+    showMessage("message", "Ingresa tu correo y contraseña.");
     return;
   }
 
@@ -957,6 +992,7 @@ async function loginUser() {
   showMessage("message", "Verificando acceso...", true);
 
   try {
+
     const { data, error } = await db.auth.signInWithPassword({
       email,
       password
@@ -968,25 +1004,37 @@ async function loginUser() {
 
     showApp();
 
-    showMessage("message", "", true);
+    showMessage("message", "Acceso correcto.", true);
 
-    await loadClients();
+    try {
+      await loadClients();
+    } catch (clientError) {
+      console.error("Error al cargar clientes:", clientError);
+
+      showMessage(
+        "message",
+        "Ingresaste correctamente, pero no se pudieron cargar los clientes."
+      );
+    }
 
   } catch (error) {
+
     console.error("Error de acceso:", error);
 
     showMessage(
       "message",
       error.message === "Invalid login credentials"
         ? "Correo o contraseña incorrectos."
-        : "No se pudo ingresar: " + error.message
+        : "No se pudo ingresar. Comprueba tu conexión e inténtalo nuevamente."
     );
 
   } finally {
+
     if (button) {
       button.disabled = false;
       button.textContent = "INGRESAR";
     }
+
   }
 }
 
@@ -1415,7 +1463,7 @@ function setupClientEvents() {
 function loadPhoto(file) {
   if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
+  if (!file.type || !file.type.startsWith("image/")) {
     showMessage("photoMessage", "Selecciona una imagen válida.");
     return;
   }
@@ -1425,34 +1473,46 @@ function loadPhoto(file) {
     return;
   }
 
+  const preview = $("photoPreview");
+  const empty = $("photoEmpty");
+
+  if (!preview) {
+    showMessage("photoMessage", "No se encontró el espacio de fotografía.");
+    return;
+  }
+
   clearPhoto(false);
 
   frontPhotoURL = URL.createObjectURL(file);
 
-  const preview = $("photoPreview");
-  const empty = $("photoEmpty");
-
-  if (preview) {
-    preview.src = frontPhotoURL;
+  preview.onload = () => {
+    preview.classList.remove("hidden");
     preview.style.display = "block";
 
-    preview.onload = () => {
-      showElement("faceOverlay");
-      showMessage(
-        "photoMessage",
-        "Fotografía frontal cargada correctamente.",
-        true
-      );
-    };
+    if (empty) {
+      empty.style.display = "none";
+    }
 
-    preview.onerror = () => {
-      showMessage("photoMessage", "No se pudo mostrar la fotografía.");
-    };
-  }
+    showElement("faceOverlay");
 
-  if (empty) {
-    empty.style.display = "none";
-  }
+    showMessage(
+      "photoMessage",
+      "Fotografía frontal cargada correctamente.",
+      true
+    );
+  };
+
+  preview.onerror = () => {
+    showMessage(
+      "photoMessage",
+      "No se pudo mostrar la fotografía. Intenta con otra imagen."
+    );
+
+    clearPhoto(false);
+  };
+
+  preview.style.display = "block";
+  preview.src = frontPhotoURL;
 
   detectedFace = null;
 
@@ -1479,7 +1539,8 @@ function clearPhoto(showMessageText = true) {
 
   if (preview) {
     preview.removeAttribute("src");
-    preview.style.display = "none";
+preview.classList.add("hidden");
+preview.style.display = "none";
   }
 
   if (input) input.value = "";
@@ -1511,7 +1572,7 @@ function clearPhoto(showMessageText = true) {
 function loadProfilePhoto(file) {
   if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
+  if (!file.type || !file.type.startsWith("image/")) {
     showMessage("profileMessage", "Selecciona una imagen válida.");
     return;
   }
@@ -1528,37 +1589,69 @@ function loadProfilePhoto(file) {
   const preview = $("profilePreview");
   const empty = $("profileEmpty");
   const visual = $("profileVisual");
+  const canvas = $("profileOverlay");
 
-if (visual) {
+  if (!preview || !visual) return;
+
   visual.classList.remove("hidden");
-}
 
-  if (preview) {
-    preview.src = profilePhotoURL;
+  preview.onload = () => {
     preview.style.display = "block";
 
-    preview.onload = () => {
-      showMessage(
-        "profileMessage",
-        "Fotografía de perfil cargada correctamente.",
-        true
-      );
-    };
+    if (empty) {
+      empty.style.display = "none";
+    }
 
-    preview.onerror = () => {
-      showMessage(
-        "profileMessage",
-        "No se pudo mostrar la fotografía."
-      );
-    };
-  }
+    if (canvas) {
+      const width = preview.clientWidth;
+      const height = preview.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
 
-  if (empty) {
-    empty.style.display = "none";
-  }
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+      canvas.style.position = "absolute";
+      canvas.style.left = "0";
+      canvas.style.top = "0";
+      canvas.style.pointerEvents = "none";
+    }
+
+    window.dkProfileDrawingEnabled = false;
+
+    const drawButton = $("drawProfileBtn");
+    if (drawButton) {
+      drawButton.textContent = "✏️ ACTIVAR DIBUJO";
+    }
+
+    showMessage(
+      "profileMessage",
+      "Fotografía lateral cargada correctamente.",
+      true
+    );
+  };
+
+  preview.onerror = () => {
+    showMessage(
+      "profileMessage",
+      "No se pudo mostrar la fotografía lateral."
+    );
+  };
+
+  preview.src = profilePhotoURL;
 
   const results = $("profileResults");
-  if (results) results.innerHTML = "";
+  const diagnosis = $("profileDiagnosis");
+
+  if (results) {
+    results.classList.add("hidden");
+    results.innerHTML = "";
+  }
+
+  if (diagnosis) {
+    diagnosis.innerHTML = "";
+  }
 }
 
 /* =========================================
@@ -1577,39 +1670,174 @@ function clearProfilePhoto(showMessageText = true) {
   const overlay = $("profileOverlay");
   const visual = $("profileVisual");
 
-if (visual) {
-  visual.classList.add("hidden");
-}
-
   if (preview) {
+    preview.onload = null;
+    preview.onerror = null;
     preview.removeAttribute("src");
     preview.style.display = "none";
   }
 
-  if (input) input.value = "";
+  if (input) {
+    input.value = "";
+  }
 
   if (empty) {
     empty.style.display = "";
   }
 
   if (overlay) {
-    const canvas = overlay.getContext("2d");
-    canvas.clearRect(0, 0, overlay.width, overlay.height);
+    const ctx = overlay.getContext("2d");
+
+    if (ctx) {
+      ctx.clearRect(0, 0, overlay.width, overlay.height);
+    }
+  }
+
+  if (visual) {
+    visual.classList.add("hidden");
   }
 
   const results = $("profileResults");
+  const diagnosis = $("profileDiagnosis");
+
   if (results) results.innerHTML = "";
+  if (diagnosis) diagnosis.innerHTML = "";
 
   if (showMessageText) {
     showMessage("profileMessage", "Fotografía de perfil eliminada.");
   }
 }
+/* =========================================
+   HERRAMIENTAS DE DIBUJO DEL PERFIL
+========================================= */
 
+function toggleProfileDrawing() {
+  const canvas = $("profileOverlay");
+  const image = $("profilePreview");
+  const visual = $("profileVisual");
+  const button = $("drawProfileBtn");
+
+  if (!canvas || !image || !image.naturalWidth) {
+    showMessage(
+      "profileMessage",
+      "Primero carga una fotografía lateral."
+    );
+    return;
+  }
+
+  window.dkProfileDrawingEnabled =
+    !window.dkProfileDrawingEnabled;
+
+  visual.style.position = "relative";
+
+  canvas.style.position = "absolute";
+  canvas.style.top = "0";
+  canvas.style.left = "0";
+  canvas.style.width = image.clientWidth + "px";
+  canvas.style.height = image.clientHeight + "px";
+  canvas.style.pointerEvents =
+    window.dkProfileDrawingEnabled ? "auto" : "none";
+  canvas.style.cursor =
+    window.dkProfileDrawingEnabled ? "crosshair" : "default";
+  canvas.style.touchAction = "none";
+
+  if (
+    canvas.width !== Math.round(image.clientWidth * devicePixelRatio) ||
+    canvas.height !== Math.round(image.clientHeight * devicePixelRatio)
+  ) {
+    canvas.width = Math.round(image.clientWidth * devicePixelRatio);
+    canvas.height = Math.round(image.clientHeight * devicePixelRatio);
+  }
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.setTransform(
+    devicePixelRatio, 0, 0,
+    devicePixelRatio, 0, 0
+  );
+
+  if (!canvas.dataset.drawingReady) {
+
+    canvas.addEventListener("pointerdown", event => {
+      if (!window.dkProfileDrawingEnabled) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const context = canvas.getContext("2d");
+
+      canvas.setPointerCapture(event.pointerId);
+
+      context.beginPath();
+      context.moveTo(
+        event.clientX - rect.left,
+        event.clientY - rect.top
+      );
+    });
+
+    canvas.addEventListener("pointermove", event => {
+      if (!window.dkProfileDrawingEnabled) return;
+      if (!event.buttons && event.pointerType !== "touch") return;
+
+      const rect = canvas.getBoundingClientRect();
+      const context = canvas.getContext("2d");
+
+      context.strokeStyle = "#d8b54a";
+      context.lineWidth = 3;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+
+      context.lineTo(
+        event.clientX - rect.left,
+        event.clientY - rect.top
+      );
+
+      context.stroke();
+    });
+
+    canvas.addEventListener("pointerup", () => {
+      canvas.getContext("2d").closePath();
+    });
+
+    canvas.dataset.drawingReady = "true";
+  }
+
+  if (button) {
+    button.textContent = window.dkProfileDrawingEnabled
+      ? "✋ DESACTIVAR DIBUJO"
+      : "✏️ ACTIVAR DIBUJO";
+  }
+
+  showMessage(
+    "profileMessage",
+    window.dkProfileDrawingEnabled
+      ? "Dibujo activado. Puedes marcar el perfil con el dedo."
+      : "Dibujo desactivado.",
+    true
+  );
+}
+
+
+function clearProfileDrawing() {
+  const canvas = $("profileOverlay");
+
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  showMessage(
+    "profileMessage",
+    "Trazos del perfil eliminados.",
+    true
+  );
+}
 /* =========================================
    21. EVENTOS DE LAS FOTOGRAFÍAS
 ========================================= */
 
 function setupPhotoEvents() {
+
+  // FOTOGRAFÍA FRONTAL
   $("photo")?.addEventListener("change", event => {
     const file = event.target.files?.[0];
     loadPhoto(file);
@@ -1619,6 +1847,7 @@ function setupPhotoEvents() {
     clearPhoto();
   });
 
+  // FOTOGRAFÍA DE PERFIL
   $("profilePhoto")?.addEventListener("change", event => {
     const file = event.target.files?.[0];
     loadProfilePhoto(file);
@@ -1627,6 +1856,22 @@ function setupPhotoEvents() {
   $("clearProfilePhoto")?.addEventListener("click", () => {
     clearProfilePhoto();
   });
+
+  // ANALIZAR PERFIL
+  $("analyzeProfileBtn")?.addEventListener("click", () => {
+    analyzeProfile();
+  });
+
+  // ACTIVAR O DESACTIVAR DIBUJO
+  $("drawProfileBtn")?.addEventListener("click", () => {
+    toggleProfileDrawing();
+  });
+
+  // BORRAR TRAZOS
+  $("clearProfileDrawingBtn")?.addEventListener("click", () => {
+    clearProfileDrawing();
+  });
+
 }
   /* =========================================
    22. CARGAR MODELO DE ANÁLISIS FACIAL
@@ -1876,69 +2121,86 @@ function classifyFace(landmarks) {
 function displayFaceResults(result) {
   const container = $("faceResults");
 
-  if (!container || !result) return;
+  if (!result) return;
 
   const shape = result.shape || "No determinado";
-  const explanation = result.explanation || "No hay información disponible.";
+  const explanation = result.explanation || "Análisis orientativo.";
 
   const ratio = Number(result.ratio);
   const jawRatio = Number(result.jawRatio);
   const foreheadRatio = Number(result.foreheadRatio);
 
-  container.innerHTML = `
-    <div class="metric">
-      <strong>FORMA DEL ROSTRO DETECTADA</strong>
-      <h3>${escapeHTML(shape)}</h3>
-      <p>${escapeHTML(explanation)}</p>
-    </div>
+  // MOSTRAR RESULTADOS PRINCIPALES
+  if (container) {
+    container.classList.remove("hidden");
 
-    <div class="metric">
-      <strong>PROPORCIÓN FACIAL</strong>
-      <h3>${Number.isFinite(ratio) ? ratio.toFixed(2) : "--"}</h3>
-      <p>Relación aproximada entre altura y anchura facial.</p>
-    </div>
+    container.innerHTML = `
+      <div class="metric">
+        <strong>FORMA DEL ROSTRO DETECTADA</strong>
+        <h3>${escapeHTML(shape)}</h3>
+        <p>${escapeHTML(explanation)}</p>
+      </div>
 
-    <div class="metric">
-      <strong>PROPORCIÓN DE MANDÍBULA</strong>
-      <h3>${Number.isFinite(jawRatio) ? jawRatio.toFixed(2) : "--"}</h3>
-      <p>Relación aproximada entre mandíbula y pómulos.</p>
-    </div>
+      <div class="metric">
+        <strong>PROPORCIÓN FACIAL</strong>
+        <h3>${Number.isFinite(ratio) ? ratio.toFixed(2) : "--"}</h3>
+        <p>Relación aproximada entre altura y anchura facial.</p>
+      </div>
 
-    <div class="metric">
-      <strong>PROPORCIÓN DE FRENTE</strong>
-      <h3>${Number.isFinite(foreheadRatio) ? foreheadRatio.toFixed(2) : "--"}</h3>
-      <p>Relación aproximada entre frente y pómulos.</p>
-    </div>
+      <div class="metric">
+        <strong>PROPORCIÓN DE MANDÍBULA</strong>
+        <h3>${Number.isFinite(jawRatio) ? jawRatio.toFixed(2) : "--"}</h3>
+      </div>
 
-    <p class="small">
-      Análisis orientativo de visagismo. Los resultados pueden variar
-      según la iluminación, el ángulo y la posición de la cabeza.
-    </p>
-  `;
+      <div class="metric">
+        <strong>PROPORCIÓN DE FRENTE</strong>
+        <h3>${Number.isFinite(foreheadRatio) ? foreheadRatio.toFixed(2) : "--"}</h3>
+      </div>
 
+      <p class="small">
+        Resultados orientativos de visagismo.
+      </p>
+    `;
+  }
+
+  // ACTUALIZAR INDICADORES DEL PANEL
+  const shapeResult = $("faceShapeResult");
+  const symmetryResult = $("symmetryResult");
+  const proportionResult = $("proportionResult");
+
+  if (shapeResult) {
+    shapeResult.textContent = shape;
+  }
+
+  if (symmetryResult) {
+    symmetryResult.textContent = "No evaluada";
+  }
+
+  if (proportionResult) {
+    proportionResult.textContent =
+      Number.isFinite(ratio) ? ratio.toFixed(2) : "No disponible";
+  }
+
+  // ACTUALIZAR SELECTOR DE FORMA FACIAL
   const faceSelect = $("faceShape");
 
   if (faceSelect) {
-    const normalizedShape = shape
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-
-    const matchingOption = Array.from(faceSelect.options).find(option => {
-      const normalizedOption = option.value
+    const normalize = value =>
+      String(value)
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
+        .toLowerCase()
+        .trim();
 
-      return normalizedOption === normalizedShape;
-    });
+    const matchingOption = Array.from(faceSelect.options).find(option =>
+      normalize(option.value) === normalize(shape)
+    );
 
     if (matchingOption) {
       faceSelect.value = matchingOption.value;
     }
   }
 }
-
 /* =========================================
    27. EJECUTAR ANÁLISIS FACIAL
 ========================================= */
@@ -2176,7 +2438,8 @@ function getCutsByFace(face) {
    31. RECOMENDACIONES SEGÚN CABELLO
 ========================================= */
 
-function adaptCutsToHair(cuts, hairType, hairLength) {
+function adaptCutsToHair(cuts, hairType, hairLength, hairDensity = "") {
+
   const normalize = value =>
     String(value || "")
       .normalize("NFD")
@@ -2186,16 +2449,28 @@ function adaptCutsToHair(cuts, hairType, hairLength) {
 
   const type = normalize(hairType);
   const length = normalize(hairLength);
+  const density = normalize(hairDensity);
 
   let adapted = [...cuts];
 
-  // CABELLO RIZADO O CRESPO
-  if (type.includes("rizado") || type.includes("crespo")) {
+  // CABELLO AFRO
+  if (type.includes("afro")) {
+    adapted.unshift(
+      "Afro Taper Fade",
+      "Low Fade Afro",
+      "Temple Fade",
+      "Afro corto definido",
+      "Shape Up"
+    );
+  }
+
+  // CABELLO RIZADO
+  else if (type.includes("rizado") || type.includes("crespo")) {
     adapted.unshift(
       "Curly Top con degradado",
       "Taper Fade para cabello rizado",
       "Curly Fringe",
-      "Afro Taper"
+      "Curly Crop"
     );
   }
 
@@ -2205,44 +2480,56 @@ function adaptCutsToHair(cuts, hairType, hairLength) {
       "Quiff ondulado",
       "Bro Flow texturizado",
       "Wavy Fringe",
-      "Taper Fade ondulado"
+      "Taper Fade ondulado",
+      "Mullet ondulado"
     );
   }
 
-  // CABELLO LACIO O LISO
+  // CABELLO LACIO
   else if (type.includes("lacio") || type.includes("liso")) {
     adapted.unshift(
       "Slick Back",
       "French Crop",
       "Side Part",
-      "Textured Crop"
+      "Textured Crop",
+      "Executive Contour"
     );
   }
 
-  // CABELLO GRUESO
-  if (type.includes("grueso")) {
+  // DENSIDAD BAJA
+  if (density === "baja") {
+    adapted.unshift(
+      "Crop texturizado para cabello fino",
+      "Quiff ligero",
+      "Taper Fade suave"
+    );
+  }
+
+  // DENSIDAD MEDIA
+  else if (density === "media") {
     adapted.unshift(
       "Textured Crop",
-      "Quiff con textura"
+      "Quiff natural"
     );
   }
 
-  // CABELLO FINO
-  if (type.includes("fino")) {
+  // DENSIDAD ALTA
+  else if (density === "alta") {
     adapted.unshift(
-      "Crop texturizado",
-      "Quiff ligero",
-      "Taper Fade"
+      "Textured Quiff",
+      "Mid Fade con volumen",
+      "Layered Crop"
     );
   }
 
-  // LARGO CORTO
+  // CABELLO CORTO
   if (length.includes("corto")) {
     adapted = adapted.filter(cut => {
       const name = normalize(cut);
 
       return !name.includes("bro flow") &&
-             !name.includes("mullet largo");
+             !name.includes("mullet largo") &&
+             !name.includes("slick back largo");
     });
 
     adapted.unshift(
@@ -2252,7 +2539,7 @@ function adaptCutsToHair(cuts, hairType, hairLength) {
     );
   }
 
-  // LARGO MEDIO
+  // CABELLO MEDIO
   else if (length.includes("medio")) {
     adapted.unshift(
       "Quiff texturizado",
@@ -2261,7 +2548,7 @@ function adaptCutsToHair(cuts, hairType, hairLength) {
     );
   }
 
-  // LARGO
+  // CABELLO LARGO
   else if (length.includes("largo")) {
     adapted.unshift(
       "Bro Flow",
@@ -2271,10 +2558,8 @@ function adaptCutsToHair(cuts, hairType, hairLength) {
     );
   }
 
-  // Eliminar duplicados y limitar resultados
   return [...new Set(adapted)].slice(0, 8);
 }
-
 /* =========================================
    32. GENERAR RECOMENDACIONES
 ========================================= */
@@ -2286,6 +2571,7 @@ function recommendCuts() {
   const hairLength = $("recommendLength")?.value || "";
   const style = $("style")?.value || "";
   const currentHair = $("hairCurrent")?.value || "";
+  const desiredCut = $("desiredCut")?.value.trim() || "";
 
   const container = $("recommendations");
   if (!container) return;
@@ -2299,73 +2585,69 @@ function recommendCuts() {
     return;
   }
 
-  // Obtener cortes según la forma facial
   let cuts = getCutsByFace(face);
 
-  // Adaptar según tipo y largo del cabello
   cuts = adaptCutsToHair(
     cuts,
     hairType,
     hairLength
   );
 
-  // Normalizar estilo para reconocer tildes
   const styleText = String(style)
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
   if (styleText.includes("clasico")) {
-    cuts = [
+    cuts.unshift(
       "Slick Back clásico",
       "Side Part",
       "Low Fade",
-      "Executive Contour",
-      ...cuts
-    ];
+      "Executive Contour"
+    );
   }
 
   if (styleText.includes("moderno")) {
-    cuts = [
+    cuts.unshift(
       "Textured Crop",
       "Mid Fade",
       "Quiff moderno",
-      "Taper Fade",
-      ...cuts
-    ];
+      "Taper Fade"
+    );
   }
 
   if (styleText.includes("juvenil")) {
-    cuts = [
+    cuts.unshift(
       "Mullet moderno",
       "French Crop",
       "Burst Fade",
-      "Textured Fringe",
-      ...cuts
-    ];
+      "Textured Fringe"
+    );
   }
 
   if (styleText.includes("formal")) {
-    cuts = [
+    cuts.unshift(
       "Classic Taper",
       "Side Part",
       "Slick Back",
-      "Low Fade",
-      ...cuts
-    ];
+      "Low Fade"
+    );
   }
 
   if (styleText.includes("atrevido")) {
-    cuts = [
+    cuts.unshift(
       "Mohicano moderno",
       "Burst Fade",
       "Mullet moderno",
-      "Diseño personalizado",
-      ...cuts
-    ];
+      "Diseño personalizado"
+    );
   }
 
-  // Eliminar duplicados y limitar resultados
+  // INCLUIR EL CORTE QUE DESEA EL CLIENTE
+  if (desiredCut) {
+    cuts.unshift(desiredCut);
+  }
+
   cuts = [...new Set(cuts)].slice(0, 8);
 
   const selectedFace = escapeHTML(face);
@@ -2374,6 +2656,9 @@ function recommendCuts() {
   const selectedLength = escapeHTML(hairLength || "No especificado");
   const selectedStyle = escapeHTML(style || "No especificado");
   const current = escapeHTML(currentHair || "No especificado");
+  const desired = escapeHTML(desiredCut || "Sin preferencia");
+
+  container.classList.remove("hidden");
 
   container.innerHTML = `
     <div class="metric">
@@ -2386,6 +2671,7 @@ function recommendCuts() {
       <p>Largo seleccionado: ${selectedLength}</p>
       <p>Estilo elegido: ${selectedStyle}</p>
       <p>Corte actual: ${current}</p>
+      <p>Corte deseado: ${desired}</p>
     </div>
 
     <h4>RECOMENDACIONES PERSONALIZADAS</h4>
@@ -2402,8 +2688,8 @@ function recommendCuts() {
 
     <p class="small">
       Recomendaciones orientativas de visagismo.
-      Se deben valorar también la densidad, implantación,
-      textura y preferencias del cliente.
+      Se valoran la densidad, implantación, textura,
+      largo y preferencias del cliente.
     </p>
   `;
 
@@ -2419,18 +2705,12 @@ function recommendCuts() {
 ========================================= */
 
 function setupRecommendationEvents() {
-  $("recommendBtn")?.addEventListener(
-    "click",
-    recommendCuts
-  );
 
-  $("profilePhoto")?.addEventListener("change", event => {
-    const file = event.target.files?.[0];
-
-    if (file) {
-      setTimeout(analyzeProfile, 300);
-    }
+  // BOTÓN DE RECOMENDACIONES DE CORTES
+  $("recommendBtn")?.addEventListener("click", () => {
+    recommendCuts();
   });
+
 }
   /* =========================================
    34. GUARDAR ASESORÍA
