@@ -497,11 +497,118 @@ body{
   background:linear-gradient(135deg,#25264d,#153b59)!important;
   border:1px solid #557bda!important;
 }
+/* =================================
+   DK AI - FONDO HOLOGRAFICO
+================================= */
 
+.dk-ai-background{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(0,180,255,.13),transparent 35%),
+    radial-gradient(circle at 80% 65%,rgba(110,50,255,.13),transparent 35%);
+}
+
+.dk-ai-grid{
+  position:absolute;
+  inset:0;
+  opacity:.12;
+  background-image:
+    linear-gradient(rgba(0,210,255,.25) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,210,255,.25) 1px,transparent 1px);
+  background-size:45px 45px;
+  mask-image:linear-gradient(to bottom,black,transparent);
+}
+
+.dk-ai-glow{
+  position:absolute;
+  width:280px;
+  height:280px;
+  top:15%;
+  left:50%;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:#087fff;
+  filter:blur(120px);
+  opacity:.18;
+}
+
+.dk-ai-hologram{
+  position:absolute;
+  width:190px;
+  height:190px;
+  top:18%;
+  left:50%;
+  transform:translateX(-50%);
+  border:1px solid rgba(0,220,255,.45);
+  border-radius:50%;
+  box-shadow:
+    0 0 25px rgba(0,200,255,.25),
+    inset 0 0 25px rgba(0,200,255,.15);
+  animation:dkPulse 4s ease-in-out infinite;
+}
+
+.dk-ai-hologram:before,
+.dk-ai-hologram:after{
+  content:"";
+  position:absolute;
+  inset:15px;
+  border:1px dashed rgba(0,220,255,.35);
+  border-radius:50%;
+}
+
+.dk-ai-hologram:after{
+  inset:35px;
+  border-color:rgba(150,80,255,.5);
+}
+
+.dk-ai-orbit{
+  position:absolute;
+  width:300px;
+  height:90px;
+  top:23%;
+  left:50%;
+  border:1px solid rgba(0,210,255,.25);
+  border-radius:50%;
+  transform:translateX(-50%) rotate(-25deg);
+}
+
+.orbit-two{
+  transform:translateX(-50%) rotate(25deg);
+  border-color:rgba(140,90,255,.3);
+}
+
+@keyframes dkPulse{
+  0%,100%{
+    opacity:.45;
+    scale:.95;
+  }
+  50%{
+    opacity:1;
+    scale:1.05;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .dk-ai-hologram{
+    animation:none;
+  }
+}
 </style>
 </head>
 
 <body>
+
+<div class="dk-ai-background" aria-hidden="true">
+  <div class="dk-ai-grid"></div>
+  <div class="dk-ai-glow"></div>
+  <div class="dk-ai-hologram"></div>
+  <div class="dk-ai-orbit orbit-one"></div>
+  <div class="dk-ai-orbit orbit-two"></div>
+</div>
 
 <header>
   <h1>DK VISAGISMO IA</h1>
