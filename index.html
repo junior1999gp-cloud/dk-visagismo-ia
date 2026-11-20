@@ -3674,7 +3674,10 @@ async function saveConsultation() {
 
   const faceShape = getValue("faceShape");
   const hairType = getValue("hairType");
-  const hairDesiredType = getValue("hairDesiredType");
+  const hairDesiredType =
+  getValue("hairDesired") !== "No especificado"
+    ? getValue("hairDesired")
+    : getValue("hairDesiredType");
   const hairDensity = getValue("hairDensity");
   const hairLength = getValue("hairLength");
   const stylePreference = getValue("stylePreference");
