@@ -1176,12 +1176,15 @@ body{
     top:5%;
     opacity:0;
   }
-  15%{
+
+  10%{
     opacity:1;
   }
-  85%{
+
+  90%{
     opacity:1;
   }
+
   100%{
     top:95%;
     opacity:0;
@@ -3114,24 +3117,28 @@ function setupFaceEvents() {
 
     if (button.disabled) return;
 
-    // ACTIVAR ESCANER
-    photoStage?.classList.add("scanning");
+    const startTime = Date.now();
 
-    // Dar tiempo al navegador para mostrar la animación
-    await new Promise(resolve => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
-      });
-    });
+    photoStage?.classList.add("scanning");
 
     try {
 
-      // EJECUTAR ANALISIS ORIGINAL
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve);
+        });
+      });
+
       await analyzeFace();
 
     } finally {
 
-      // DETENER EFECTO
+      // Mantener el escáner visible al menos 6 segundos
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 6000 - elapsed);
+
+      await new Promise(resolve => setTimeout(resolve, remaining));
+
       photoStage?.classList.remove("scanning");
 
     }
