@@ -3112,36 +3112,27 @@ function setupFaceEvents() {
 
   button?.addEventListener("click", async () => {
 
-    if (!photoStage) {
-      await analyzeFace();
-      return;
-    }
+    if (button.disabled) return;
 
-    // ACTIVAR ESCANEO HOLOGRAFICO
-    photoStage.classList.add("scanning");
+    // ACTIVAR ESCANER
+    photoStage?.classList.add("scanning");
 
-    if (button) {
-      button.disabled = true;
-      button.textContent = "ESCANEANDO ROSTRO...";
-    }
+    // Dar tiempo al navegador para mostrar la animación
+    await new Promise(resolve => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
 
     try {
 
+      // EJECUTAR ANALISIS ORIGINAL
       await analyzeFace();
-
-    } catch (error) {
-
-      console.error("Error en análisis facial:", error);
 
     } finally {
 
-      // DETENER ESCANEO
-      photoStage.classList.remove("scanning");
-
-      if (button) {
-        button.disabled = false;
-        button.textContent = "ANALIZAR ROSTRO";
-      }
+      // DETENER EFECTO
+      photoStage?.classList.remove("scanning");
 
     }
 
