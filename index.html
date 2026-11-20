@@ -3674,11 +3674,12 @@ async function saveConsultation() {
 
   const faceShape = getValue("faceShape");
   const hairType = getValue("hairType");
+  const hairDesiredType = getValue("hairDesiredType");
   const hairDensity = getValue("hairDensity");
   const hairLength = getValue("hairLength");
   const stylePreference = getValue("stylePreference");
   const hairCurrent = getValue("hairCurrent");
-  const desiredCut =
+      const desiredCut =
     getValue("selectedCut") !== "No especificado"
       ? getValue("selectedCut")
       : getValue("desiredCut");
@@ -3693,19 +3694,49 @@ async function saveConsultation() {
     ? detectedFace.explanation
     : "No se realizó análisis facial automático.";
 
-  const prompt = `
+  // IDENTIFICAR LA TRANSFORMACIÓN CAPILAR
+  let hairTransformation = "No especificada.";
+
+  if (hairDesiredType === "Mantener textura natural") {
+    hairTransformation = "Mantener la textura natural del cliente.";
+  } else if (
+    hairDesiredType !== "No especificado" &&
+    hairDesiredType !== hairType
+  ) {
+    hairTransformation =
+      `Transformar el cabello de ${hairType} a ${hairDesiredType}.`;
+  } else if (
+    hairDesiredType !== "No especificado" &&
+    hairDesiredType === hairType
+  ) {
+    hairTransformation = "Mantener la textura actual seleccionada.";
+  }
+    const prompt = `
 ASESORÍA PROFESIONAL DE BARBERÍA
 DK BARBER STUDIO - DK VISAGISMO IA
 
 CLIENTE: ${clientName}
 
 DATOS DEL CLIENTE:
+
 Forma del rostro: ${faceShape}
-Tipo de cabello: ${hairType}
+
+CABELLO Y TRANSFORMACIÓN CAPILAR:
+
+Tipo de cabello actual: ${hairType}
+
+Textura que desea conseguir: ${hairDesiredType}
+
+Transformación solicitada: ${hairTransformation}
+
 Densidad capilar: ${hairDensity}
+
 Largo actual: ${hairLength}
+
 Estilo preferido: ${stylePreference}
+
 Corte actual: ${hairCurrent}
+
 Corte deseado: ${desiredCut}
 
 ANÁLISIS FACIAL:
@@ -3716,6 +3747,8 @@ ${recommendations}
 
 OBSERVACIONES DEL BARBERO:
 ${observations}
+`;
+  const promptInstructions = `
 
 INSTRUCCIONES PARA LA SIMULACIÓN:
 
@@ -3723,21 +3756,41 @@ Voy a adjuntar una fotografía real del cliente.
 
 Analiza su rostro y utiliza toda la información anterior para realizar una simulación visual profesional del corte recomendado.
 
+TRANSFORMACIÓN DE TEXTURA:
+
+Es muy importante diferenciar el cabello que tiene actualmente el cliente de la textura que desea conseguir.
+
+Si el cabello actual es lacio y desea rizado, debes simularlo con textura rizada.
+
+Si desea ondulado, debes simular ondas naturales y definidas.
+
+Si desea semiondulado, debes mostrar ondas suaves y movimiento moderado.
+
+Si desea afro, debes representar una textura afro realista.
+
+No mantengas obligatoriamente la textura original cuando el cliente haya solicitado una transformación.
+
+Adapta el corte, volumen, forma y acabado a la nueva textura deseada.
+
 REQUISITOS:
+
 1. Conserva la identidad y los rasgos faciales originales.
 2. No cambies la forma de la cara, nariz, ojos, boca ni expresión.
-3. Aplica el corte recomendado respetando su tipo y densidad de cabello.
-4. Mantén un resultado masculino, moderno y realista.
-5. Respeta el color natural del cabello, salvo que se indique lo contrario.
-6. Muestra el resultado como una fotografía real, no como una ilustración.
-7. Si hay varios cortes recomendados, prioriza el más adecuado para su rostro.
+3. Aplica el corte recomendado considerando la transformación capilar solicitada.
+4. Respeta la densidad y el largo disponible del cabello.
+5. Mantén un resultado masculino, moderno y realista.
+6. Respeta el color natural del cabello, salvo que se indique lo contrario.
+7. Muestra el resultado como una fotografía real, no como una ilustración.
+8. Si hay varios cortes recomendados, prioriza el más adecuado para su rostro y nueva textura.
 
 OBJETIVO:
-Mostrar al cliente cómo podría verse con el corte recomendado antes de realizar el servicio en DK Barber Studio.
+
+Mostrar al cliente cómo podría verse con el corte recomendado y la textura capilar que desea conseguir antes de realizar el servicio en DK Barber Studio.
 `;
 
-  try {
-    await navigator.clipboard.writeText(prompt);
+  const finalPrompt = prompt + promptInstructions;
+      try {
+    await navigator.clipboard.writeText(finalPrompt);
 
     showMessage(
       "copyChatGPTMessage",
