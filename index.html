@@ -597,6 +597,353 @@ body{
     animation:none;
   }
 }
+  /* =================================
+   DK AI - ROBOT HOLOGRAFICO
+================================= */
+
+.dk-ai-assistant{
+  position:fixed;
+  top:42%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:280px;
+  height:350px;
+  z-index:0;
+  pointer-events:none;
+  opacity:.55;
+}
+
+.dk-ai-ring{
+  position:absolute;
+  width:250px;
+  height:250px;
+  top:15px;
+  left:15px;
+  border:2px solid rgba(0,210,255,.55);
+  border-radius:50%;
+  box-shadow:
+    0 0 20px rgba(0,190,255,.35),
+    inset 0 0 25px rgba(0,190,255,.15);
+  animation:dkRotate 12s linear infinite;
+}
+
+.dk-ai-face{
+  position:absolute;
+  width:155px;
+  height:190px;
+  top:42px;
+  left:62px;
+  border:2px solid rgba(70,220,255,.75);
+  border-radius:48% 48% 42% 42%;
+  background:linear-gradient(
+    145deg,
+    rgba(0,180,255,.13),
+    rgba(90,60,255,.12)
+  );
+  box-shadow:
+    0 0 25px rgba(0,190,255,.35),
+    inset 0 0 25px rgba(0,190,255,.18);
+}
+
+.dk-ai-eye{
+  position:absolute;
+  top:75px;
+  width:25px;
+  height:9px;
+  border-radius:50%;
+  background:#55edff;
+  box-shadow:
+    0 0 10px #00d9ff,
+    0 0 25px #00aaff;
+}
+
+.eye-left{
+  left:32px;
+}
+
+.eye-right{
+  right:32px;
+}
+
+.dk-ai-mouth{
+  position:absolute;
+  width:45px;
+  height:8px;
+  left:53px;
+  bottom:38px;
+  border-bottom:2px solid #55eaff;
+  border-radius:50%;
+  box-shadow:0 5px 12px rgba(0,210,255,.4);
+}
+
+.dk-ai-label{
+  position:absolute;
+  bottom:25px;
+  width:100%;
+  text-align:center;
+  font-size:9px;
+  letter-spacing:2px;
+  color:#66eaff;
+  text-shadow:0 0 10px #00cfff;
+}
+
+.dk-ai-label strong{
+  display:block;
+  margin-top:7px;
+  color:#a78bff;
+  font-size:11px;
+}
+
+.dk-ai-line{
+  position:absolute;
+  width:100%;
+  height:1px;
+  bottom:5px;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #00d9ff,
+    #9b65ff,
+    transparent
+  );
+}
+
+@keyframes dkRotate{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+
+@media(max-width:600px){
+  .dk-ai-assistant{
+    top:38%;
+    transform:translate(-50%,-50%) scale(.85);
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .dk-ai-ring{
+    animation:none;
+  }
+}
+  /* =================================
+   DK AI - INTEGRACION HOLOGRAFICA
+================================= */
+
+.dk-ai-assistant{
+  z-index:0;
+  opacity:.42;
+}
+
+/* FORMULARIO DELANTE DEL ASISTENTE */
+
+#login,
+#resetPassword{
+  position:relative;
+  z-index:2;
+  background:linear-gradient(
+    145deg,
+    rgba(7,22,43,.82),
+    rgba(12,12,35,.84)
+  )!important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+/* CONTROLES SIEMPRE VISIBLES */
+
+#login button,
+#resetPassword button,
+#login input,
+#resetPassword input{
+  position:relative;
+  z-index:3;
+}
+  /* =================================
+   DK AI - ESCANEO ELECTRICO
+================================= */
+
+.dk-ai-face::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:3px;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #00eaff,
+    #ffffff,
+    #00eaff,
+    transparent
+  );
+  box-shadow:0 0 15px #00d9ff;
+  animation:dkScan 3s ease-in-out infinite;
+}
+
+.dk-ai-face{
+  overflow:hidden;
+}
+
+@keyframes dkScan{
+  0%{
+    top:5%;
+    opacity:0;
+  }
+  15%{
+    opacity:1;
+  }
+  85%{
+    opacity:1;
+  }
+  100%{
+    top:95%;
+    opacity:0;
+  }
+}
+
+.dk-ai-eye{
+  animation:dkEyeGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes dkEyeGlow{
+  from{
+    box-shadow:0 0 8px #00d9ff;
+  }
+  to{
+    box-shadow:
+      0 0 15px #00d9ff,
+      0 0 30px #008cff;
+  }
+}
+/* =================================
+   DK AI - PANELES HOLOGRAFICOS
+================================= */
+
+.dk-ai-assistant::before,
+.dk-ai-assistant::after{
+  content:"";
+  position:absolute;
+  top:85px;
+  width:48px;
+  height:115px;
+  border:1px solid rgba(0,220,255,.55);
+  background:linear-gradient(
+    180deg,
+    rgba(0,190,255,.15),
+    rgba(100,50,255,.08)
+  );
+  box-shadow:
+    0 0 12px rgba(0,200,255,.25),
+    inset 0 0 12px rgba(0,200,255,.12);
+}
+
+.dk-ai-assistant::before{
+  left:-35px;
+  clip-path:polygon(0 0,100% 12%,100% 88%,0 100%);
+}
+
+.dk-ai-assistant::after{
+  right:-35px;
+  clip-path:polygon(0 12%,100% 0,100% 100%,0 88%);
+}
+
+@media(max-width:600px){
+  .dk-ai-assistant::before{
+    left:-10px;
+  }
+
+  .dk-ai-assistant::after{
+    right:-10px;
+  }
+}
+ /* =================================
+   DK AI - INDICADORES DIGITALES
+================================= */
+
+.dk-ai-assistant{
+  filter:drop-shadow(0 0 12px rgba(0,200,255,.25));
+}
+
+.dk-ai-ring::before,
+.dk-ai-ring::after{
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  border:1px dashed rgba(120,90,255,.65);
+}
+
+.dk-ai-ring::before{
+  inset:-15px;
+  animation:dkRotate 18s linear infinite reverse;
+}
+
+.dk-ai-ring::after{
+  inset:18px;
+  border-color:rgba(0,220,255,.45);
+}
+
+.dk-ai-label span{
+  animation:dkTextGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes dkTextGlow{
+  from{
+    opacity:.55;
+    text-shadow:0 0 5px #00cfff;
+  }
+  to{
+    opacity:1;
+    text-shadow:0 0 15px #00cfff;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .dk-ai-label span{
+    animation:none;
+  }
+}
+  /* =================================
+   DK AI - AJUSTE RESPONSIVE
+================================= */
+
+.dk-ai-assistant{
+  top:42%;
+  left:50%;
+  width:280px;
+  max-width:90vw;
+  pointer-events:none;
+}
+
+#login,
+#resetPassword{
+  width:calc(100% - 30px);
+  max-width:480px;
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing:border-box;
+}
+
+@media(max-width:600px){
+  .dk-ai-assistant{
+    top:35%;
+    transform:translate(-50%,-50%) scale(.75);
+  }
+
+  #login,
+  #resetPassword{
+    margin-top:25px;
+    padding:24px 18px;
+  }
+}
+
+@media(min-width:601px){
+  .dk-ai-assistant{
+    top:40%;
+    transform:translate(-50%,-50%) scale(1);
+  }
+}
+  
 </style>
 </head>
 
@@ -616,6 +963,26 @@ body{
 </header>
 
 <main>
+  <!-- ASISTENTE HOLOGRAFICO DK IA -->
+
+<div class="dk-ai-assistant" aria-hidden="true">
+
+  <div class="dk-ai-ring"></div>
+
+  <div class="dk-ai-face">
+    <div class="dk-ai-eye eye-left"></div>
+    <div class="dk-ai-eye eye-right"></div>
+    <div class="dk-ai-mouth"></div>
+  </div>
+
+  <div class="dk-ai-label">
+    <span>DK ARTIFICIAL INTELLIGENCE</span>
+    <strong>SYSTEM ONLINE</strong>
+  </div>
+
+  <div class="dk-ai-line"></div>
+
+</div>
 
 <!-- ACCESO -->
 
