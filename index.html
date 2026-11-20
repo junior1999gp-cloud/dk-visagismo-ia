@@ -943,7 +943,256 @@ body{
     transform:translate(-50%,-50%) scale(1);
   }
 }
-  
+  /* =================================
+   DK VISAGISMO IA - HEADER FUTURISTA
+================================= */
+
+.dk-header{
+  position:relative;
+  text-align:center;
+  padding:30px 15px 25px;
+  background:linear-gradient(
+    180deg,
+    rgba(3,15,35,.85),
+    rgba(5,10,28,.25)
+  );
+  border-bottom:1px solid rgba(0,210,255,.35);
+  box-shadow:0 8px 30px rgba(0,150,255,.10);
+}
+
+.dk-header h1{
+  margin:12px 0;
+  font-size:clamp(27px,5vw,42px);
+  font-weight:900;
+  letter-spacing:3px;
+  color:#e8faff;
+  text-shadow:
+    0 0 8px #00cfff,
+    0 0 20px rgba(0,180,255,.65);
+}
+
+.dk-title-glow{
+  color:#00eaff;
+  text-shadow:
+    0 0 10px #00eaff,
+    0 0 25px #008cff,
+    0 0 40px #0066ff;
+}
+
+.dk-header p{
+  margin:8px 0;
+  color:#a8dfff;
+  font-size:12px;
+  letter-spacing:2px;
+}
+
+.dk-system-status{
+  margin-top:15px;
+  color:#9e9cff;
+  font-size:9px;
+  letter-spacing:2px;
+}
+
+.dk-status-dot{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  margin-right:7px;
+  border-radius:50%;
+  background:#00f5ff;
+  box-shadow:0 0 12px #00eaff;
+  animation:dkStatusPulse 1.5s infinite alternate;
+}
+
+.dk-header-line{
+  width:min(280px,80%);
+  height:1px;
+  margin:10px auto;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #00d9ff,
+    #9b65ff,
+    transparent
+  );
+  box-shadow:0 0 10px rgba(0,210,255,.6);
+}
+
+@keyframes dkStatusPulse{
+  from{opacity:.4;}
+  to{opacity:1;}
+}
+  /* =====================================
+   DK VISAGISMO IA - ESCANER FACIAL
+===================================== */
+
+.photo-stage{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(0,220,255,.65)!important;
+  border-radius:18px!important;
+  background:
+    radial-gradient(circle,rgba(0,100,255,.15),transparent 70%),
+    #030916!important;
+  box-shadow:
+    0 0 18px rgba(0,190,255,.20),
+    inset 0 0 25px rgba(0,190,255,.10);
+}
+
+/* MARCO HOLOGRAFICO */
+
+.photo-stage::before{
+  content:"";
+  position:absolute;
+  inset:10px;
+  z-index:3;
+  border:1px solid rgba(0,225,255,.45);
+  border-radius:12px;
+  pointer-events:none;
+  box-shadow:inset 0 0 15px rgba(0,200,255,.12);
+}
+
+/* ESQUINAS DEL ESCANER */
+
+.photo-stage::after{
+  content:"";
+  position:absolute;
+  inset:5px;
+  z-index:4;
+  pointer-events:none;
+  background:
+    linear-gradient(#00eaff,#00eaff) left top/25px 2px no-repeat,
+    linear-gradient(#00eaff,#00eaff) left top/2px 25px no-repeat,
+    linear-gradient(#00eaff,#00eaff) right top/25px 2px no-repeat,
+    linear-gradient(#00eaff,#00eaff) right top/2px 25px no-repeat,
+    linear-gradient(#a879ff,#a879ff) left bottom/25px 2px no-repeat,
+    linear-gradient(#a879ff,#a879ff) left bottom/2px 25px no-repeat,
+    linear-gradient(#a879ff,#a879ff) right bottom/25px 2px no-repeat,
+    linear-gradient(#a879ff,#a879ff) right bottom/2px 25px no-repeat;
+}
+
+/* FOTOGRAFIA */
+
+#photoPreview{
+  position:relative;
+  z-index:1;
+  display:block;
+  max-width:100%;
+  margin:auto;
+  filter:contrast(1.05) saturate(.95);
+}
+
+/* LIENZO DE ANALISIS */
+
+#faceOverlay{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+  pointer-events:none;
+}
+
+/* MENSAJE INICIAL */
+
+.photo-empty{
+  color:#68dcff!important;
+  text-shadow:0 0 10px rgba(0,210,255,.6);
+}
+
+/* PANEL DE RESULTADOS */
+
+#faceResults{
+  border:1px solid rgba(0,220,255,.45);
+  background:linear-gradient(
+    135deg,
+    rgba(0,120,255,.12),
+    rgba(100,50,255,.12)
+  );
+  box-shadow:0 0 18px rgba(0,180,255,.12);
+}
+
+/* INDICADORES */
+
+.metric{
+  border:1px solid rgba(0,210,255,.35)!important;
+  background:rgba(4,20,42,.85)!important;
+  border-radius:12px;
+  box-shadow:inset 0 0 15px rgba(0,180,255,.08);
+}
+
+.metric strong{
+  color:#56dcff!important;
+}
+
+.metric span{
+  color:#ffffff!important;
+}
+  /* =====================================
+   DK AI - ANIMACION DE ESCANEO FACIAL
+===================================== */
+
+.photo-stage{
+  isolation:isolate;
+}
+
+.photo-stage .photo-scan-line{
+  display:none;
+}
+
+/* ACTIVAR ESCANEO AL ANALIZAR */
+
+.photo-stage.scanning .photo-scan-line{
+  display:block;
+  position:absolute;
+  z-index:5;
+  left:8px;
+  right:8px;
+  height:3px;
+  top:5%;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    #00d9ff,
+    #ffffff,
+    #00d9ff,
+    transparent
+  );
+  box-shadow:
+    0 0 10px #00d9ff,
+    0 0 25px #008cff;
+  animation:dkFaceScan 2.5s ease-in-out infinite;
+  pointer-events:none;
+}
+
+.photo-stage.scanning{
+  box-shadow:
+    0 0 20px rgba(0,220,255,.45),
+    inset 0 0 25px rgba(0,190,255,.15);
+}
+
+@keyframes dkFaceScan{
+  0%{
+    top:5%;
+    opacity:0;
+  }
+  15%{
+    opacity:1;
+  }
+  85%{
+    opacity:1;
+  }
+  100%{
+    top:95%;
+    opacity:0;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .photo-stage.scanning .photo-scan-line{
+    animation:none;
+  }
+}
 </style>
 </head>
 
@@ -957,9 +1206,24 @@ body{
   <div class="dk-ai-orbit orbit-two"></div>
 </div>
 
-<header>
-  <h1>DK VISAGISMO IA</h1>
+<header class="dk-header">
+
+  <div class="dk-header-line"></div>
+
+  <h1>
+    <span class="dk-title-glow">DK</span>
+    VISAGISMO IA
+  </h1>
+
   <p>BARBER STUDIO · ASESORÍA DE IMAGEN</p>
+
+  <div class="dk-system-status">
+    <span class="dk-status-dot"></span>
+    ARTIFICIAL INTELLIGENCE SYSTEM
+  </div>
+
+  <div class="dk-header-line"></div>
+
 </header>
 
 <main>
@@ -1145,15 +1409,21 @@ body{
     <label for="photo">Seleccionar fotografía frontal</label>
     <input id="photo" type="file" accept="image/*">
 
-    <div class="photo-stage">
-      <div id="photoEmpty" class="photo-empty">
-        Aquí aparecerá la fotografía del cliente.
-      </div>
+   <div class="photo-stage">
 
-      <img id="photoPreview" class="hidden" alt="Fotografía frontal">
+  <div id="photoEmpty" class="photo-empty">
+    Aquí aparecerá la fotografía del cliente.
+  </div>
 
-      <canvas id="faceOverlay"></canvas>
-    </div>
+  <img id="photoPreview" class="hidden" alt="Fotografía frontal">
+
+  <!-- LINEA DE ESCANEO HOLOGRAFICA -->
+  <div class="photo-scan-line"></div>
+
+  <!-- ANALISIS FACIAL -->
+  <canvas id="faceOverlay"></canvas>
+
+</div>
 
     <button id="clearPhoto" type="button" class="secondary">
       ELIMINAR FOTOGRAFÍA
@@ -2836,10 +3106,47 @@ async function analyzeFace() {
 ========================================= */
 
 function setupFaceEvents() {
-  $("analyzeFaceBtn")?.addEventListener(
-    "click",
-    analyzeFace
-  );
+
+  const button = $("analyzeFaceBtn");
+  const photoStage = document.querySelector(".photo-stage");
+
+  button?.addEventListener("click", async () => {
+
+    if (!photoStage) {
+      await analyzeFace();
+      return;
+    }
+
+    // ACTIVAR ESCANEO HOLOGRAFICO
+    photoStage.classList.add("scanning");
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = "ESCANEANDO ROSTRO...";
+    }
+
+    try {
+
+      await analyzeFace();
+
+    } catch (error) {
+
+      console.error("Error en análisis facial:", error);
+
+    } finally {
+
+      // DETENER ESCANEO
+      photoStage.classList.remove("scanning");
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = "ANALIZAR ROSTRO";
+      }
+
+    }
+
+  });
+
 }
   /* =========================================
    29. ANÁLISIS DE FOTOGRAFÍA DE PERFIL
