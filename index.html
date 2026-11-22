@@ -1473,69 +1473,138 @@ body{
 
   <!-- FOTOGRAFÍA DE PERFIL -->
 
-  <div class="card">
-    <h2>Análisis lateral del perfil</h2>
+ ```html
+<div class="card" id="profileAnalysisSection">
 
-    <p class="small">
-      Puedes agregar una fotografía lateral para observar
-      el perfil y la estructura craneal.
-    </p>
+  <h2>ANÁLISIS LATERAL DEL PERFIL</h2>
 
-    <label for="profilePhoto">Seleccionar fotografía lateral</label>
-    <input id="profilePhoto" type="file" accept="image/*">
+  <p class="small">
+    Evaluación visual de la estructura craneal y características
+    posteriores para personalizar el corte.
+  </p>
 
-    <div class="photo-stage">
-      <div id="profileEmpty" class="photo-empty">
-        Aquí aparecerá la fotografía lateral.
-      </div>
+  <label for="profilePhoto">Fotografía lateral del cliente</label>
+  <input id="profilePhoto" type="file" accept="image/*">
 
-      <div id="profileVisual" class="hidden">
-        <img id="profilePreview" alt="Fotografía de perfil">
-        <canvas id="profileOverlay"></canvas>
-      </div>
+  <div class="photo-stage">
+
+    <div id="profileEmpty" class="photo-empty">
+      Aquí aparecerá la fotografía lateral.
     </div>
 
-        <div class="profile-tools">
+    <div id="profileVisual" class="hidden">
+      <img id="profilePreview" alt="Fotografía de perfil">
+      <canvas id="profileOverlay"></canvas>
+    </div>
 
-  <button id="analyzeProfileBtn" type="button">
-    ANALIZAR PERFIL LATERAL
-  </button>
+  </div>
 
-  <button id="drawProfileBtn" type="button" class="secondary">
-    ✏️ ACTIVAR DIBUJO
-  </button>
+  <div class="profile-tools">
 
-  <button id="clearProfileDrawingBtn" type="button" class="secondary">
-    BORRAR TRAZOS
-  </button>
+    <button id="analyzeProfileBtn" type="button">
+      ANALIZAR PERFIL LATERAL
+    </button>
 
-  <button id="clearProfilePhoto" type="button" class="secondary">
-    ELIMINAR FOTOGRAFÍA DE PERFIL
-  </button>
+    <button id="drawProfileBtn" type="button" class="secondary">
+      ACTIVAR DIBUJO
+    </button>
 
-</div>
+    <button id="clearProfileDrawingBtn" type="button" class="secondary">
+      BORRAR TRAZOS
+    </button>
 
-<div id="profileResults" class="result hidden">
-  <h3>RESULTADO DEL ANÁLISIS LATERAL</h3>
-  <div id="profileDiagnosis"></div>
-</div>
+    <button id="clearProfilePhoto" type="button" class="secondary">
+      ELIMINAR FOTOGRAFÍA
+    </button>
 
-<p id="profileMessage" class="small"></p>
-
-    <p id="profileMessage" class="small"></p>
   </div>
 
   <div id="profileResults" class="result hidden">
-    <h3>REFERENCIAS DE PERFIL</h3>
+    <h3>REFERENCIAS DEL PERFIL</h3>
     <div id="profileDiagnosis"></div>
   </div>
 
+  <hr>
+
+  <h3> EVALUACIÓN ANATÓMICA DEL CRÁNEO </h3>
+
   <p class="small">
-    Las líneas son referencias visuales orientativas. No representan
-    una medición médica ni una detección exacta de los huesos del cráneo.
+    Selecciona las características observadas por el barbero
+    en la fotografía lateral.
   </p>
 
-  <hr>
+  <label for="occipitalShape">1. Proyección del occipital</label>
+  <select id="occipitalShape">
+    <option value="">Seleccionar</option>
+    <option value="Sobresalido">Sobresalido</option>
+    <option value="Normal">Normal</option>
+    <option value="Poco desarrollado">Poco desarrollado</option>
+    <option value="Plano">Plano</option>
+  </select>
+
+  <label for="napeShape">2. Forma de la nuca</label>
+  <select id="napeShape">
+    <option value="">Seleccionar</option>
+    <option value="Plana">Plana</option>
+    <option value="Redondeada">Redondeada</option>
+    <option value="Pronunciada">Pronunciada</option>
+    <option value="Hundida">Hundida</option>
+  </select>
+
+  <label for="skullShape">3. Forma del cráneo</label>
+  <select id="skullShape">
+    <option value="">Seleccionar</option>
+    <option value="Redondo">Redondo</option>
+    <option value="Alargado">Alargado</option>
+    <option value="Plano">Plano</option>
+    <option value="Ovalado">Ovalado</option>
+  </select>
+
+  <label for="parietalShape">4. Zona parietal</label>
+  <select id="parietalShape">
+    <option value="">Seleccionar</option>
+    <option value="Ancha">Ancha</option>
+    <option value="Estrecha">Estrecha</option>
+    <option value="Equilibrada">Equilibrada</option>
+  </select>
+
+  <label for="crownShape">5. Forma de la coronilla</label>
+  <select id="crownShape">
+    <option value="">Seleccionar</option>
+    <option value="Elevada">Elevada</option>
+    <option value="Normal">Normal</option>
+    <option value="Plana">Plana</option>
+    <option value="Hundida">Hundida</option>
+  </select>
+
+  <label for="posteriorProfile">6. Proyección del perfil posterior</label>
+  <select id="posteriorProfile">
+    <option value="">Seleccionar</option>
+    <option value="Recto">Recto</option>
+    <option value="Convexo">Convexo</option>
+    <option value="Cóncavo">Cóncavo</option>
+  </select>
+
+  <label for="profileObservations">
+    Observaciones anatómicas del barbero
+  </label>
+
+  <textarea
+    id="profileObservations"
+    rows="4"
+    placeholder="Describe detalles importantes de la estructura craneal..."
+  ></textarea>
+
+  <p class="small">
+    La evaluación anatómica es manual y orientativa.
+    Las características seleccionadas se utilizarán como apoyo
+    para personalizar las recomendaciones de corte.
+  </p>
+
+  <p id="profileMessage" class="small"></p>
+
+</div>
+```
 
     <!-- RECOMENDACIONES -->
 
@@ -3688,6 +3757,14 @@ async function saveConsultation() {
       : getValue("desiredCut");
 
   const observations = getValue("observations");
+      // EVALUACIÓN ANATÓMICA DEL PERFIL
+  const occipitalShape = getValue("occipitalShape");
+  const napeShape = getValue("napeShape");
+  const skullShape = getValue("skullShape");
+  const parietalShape = getValue("parietalShape");
+  const crownShape = getValue("crownShape");
+  const posteriorProfile = getValue("posteriorProfile");
+  const profileObservations = getValue("profileObservations");
 
   const recommendations =
     $("recommendations")?.innerText?.trim() ||
@@ -3742,6 +3819,21 @@ Corte actual: ${hairCurrent}
 
 Corte deseado: ${desiredCut}
 
+ANÁLISIS ANATÓMICO DEL PERFIL:
+
+Proyección del occipital: ${occipitalShape}
+
+Forma de la nuca: ${napeShape}
+
+Forma del cráneo: ${skullShape}
+
+Zona parietal: ${parietalShape}
+
+Forma de la coronilla: ${crownShape}
+
+Perfil posterior: ${posteriorProfile}
+
+Observaciones anatómicas: ${profileObservations}
 ANÁLISIS FACIAL:
 ${faceAnalysis}
 
@@ -3759,6 +3851,18 @@ Voy a adjuntar una fotografía real del cliente.
 
 Analiza su rostro y utiliza toda la información anterior para realizar una simulación visual profesional del corte recomendado.
 
+ANÁLISIS ANATÓMICO DEL CRÁNEO:
+
+Ten en cuenta las características anatómicas del perfil lateral seleccionadas por el barbero.
+
+1. Si el occipital es sobresalido, plano o poco desarrollado, adapta la distribución del volumen posterior.
+2. Considera la forma de la nuca para diseñar una terminación que favorezca el perfil.
+3. Adapta el corte a la forma general del cráneo.
+4. Considera la anchura de la zona parietal para equilibrar los laterales.
+5. Respeta la forma de la coronilla y la dirección natural del crecimiento.
+6. Utiliza el perfil posterior para equilibrar visualmente la silueta.
+
+No inventes características anatómicas que no estén indicadas.
 TRANSFORMACIÓN DE TEXTURA:
 
 Es muy importante diferenciar el cabello que tiene actualmente el cliente de la textura que desea conseguir.
