@@ -2815,9 +2815,11 @@ async function loadFaceModel() {
    23. MEDIR DISTANCIA ENTRE PUNTOS
 ========================================= */
 
-function landmarkDistance(a, b) {
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
+function landmarkDistance(a, b, imageWidth = 1, imageHeight = 1) {
+  if (!a || !b) return 0;
+
+  const dx = (a.x - b.x) * imageWidth;
+  const dy = (a.y - b.y) * imageHeight;
 
   return Math.sqrt(dx * dx + dy * dy);
 }
@@ -2966,7 +2968,8 @@ function drawFaceGuide(landmarks, image) {
    25. ANALIZAR FORMA DEL ROSTRO
 ========================================= */
 
-function classifyFace(landmarks) {
+function classifyFace(landmarks, imageWidth, imageHeight) {
+
   if (!landmarks || landmarks.length < 455) {
     return {
       shape: "No determinado",
@@ -2974,24 +2977,40 @@ function classifyFace(landmarks) {
     };
   }
 
+  if (!imageWidth || !imageHeight) {
+    return {
+      shape: "No determinado",
+      explanation: "No se pudieron obtener las dimensiones de la fotografía."
+    };
+  }
+
+  // MEDICIONES FACIALES REALES
   const foreheadWidth = landmarkDistance(
     landmarks[103],
-    landmarks[332]
+    landmarks[332],
+    imageWidth,
+    imageHeight
   );
 
   const cheekWidth = landmarkDistance(
     landmarks[234],
-    landmarks[454]
+    landmarks[454],
+    imageWidth,
+    imageHeight
   );
 
   const jawWidth = landmarkDistance(
     landmarks[172],
-    landmarks[397]
+    landmarks[397],
+    imageWidth,
+    imageHeight
   );
 
   const faceHeight = landmarkDistance(
     landmarks[10],
-    landmarks[152]
+    landmarks[152],
+    imageWidth,
+    imageHeight
   );
 
   if (
@@ -3006,66 +3025,86 @@ function classifyFace(landmarks) {
     };
   }
 
+  // PROPORCIONES
   const ratio = faceHeight / cheekWidth;
-  const jawRatio = jawWidth / cheekWidth;
   const foreheadRatio = foreheadWidth / cheekWidth;
+  const jawRatio = jawWidth / cheekWidth;
+
+  const widthDifference = Math.abs(
+    foreheadRatio - jawRatio
+  );
 
   let shape;
   let explanation;
 
-  if (ratio < 1.20) {
-    shape = "Redondo";
-    explanation =
-      "El rostro presenta una longitud y anchura relativamente equilibradas.";
-  }
-
-  else if (ratio > 1.48) {
+  // 1. ROSTRO ALARGADO
+  if (ratio >= 1.52) {
     shape = "Alargado";
     explanation =
-      "El rostro presenta una longitud vertical mayor respecto a su anchura.";
+      "La longitud vertical del rostro destaca respecto a la anchura de los pómulos.";
   }
 
+  // 2. ROSTRO TRIANGULAR
   else if (
-    jawRatio >= 0.88 &&
-    foreheadRatio >= 0.88
-  ) {
-    shape = "Cuadrado";
-    explanation =
-      "La frente y la mandíbula presentan anchuras relativamente similares.";
-  }
-
-  else if (
-    jawRatio > foreheadRatio + 0.10
+    jawRatio >= foreheadRatio + 0.12 &&
+    jawRatio >= 0.82
   ) {
     shape = "Triangular";
     explanation =
       "La mandíbula presenta mayor anchura relativa que la frente.";
   }
 
+  // 3. ROSTRO DIAMANTE
   else if (
-    foreheadRatio > jawRatio + 0.10 &&
-    jawRatio < 0.82
+    foreheadRatio <= 0.82 &&
+    jawRatio <= 0.82
   ) {
     shape = "Diamante";
     explanation =
-      "Los pómulos destacan respecto a la frente y la mandíbula.";
+      "Los pómulos destacan respecto a una frente y mandíbula más estrechas.";
   }
 
+  // 4. ROSTRO CUADRADO
+  else if (
+    ratio > 1.27 &&
+    ratio < 1.52 &&
+    jawRatio >= 0.88 &&
+    foreheadRatio >= 0.88 &&
+    widthDifference <= 0.12
+  ) {
+    shape = "Cuadrado";
+    explanation =
+      "La frente y la mandíbula presentan anchuras similares y una estructura facial marcada.";
+  }
+
+  // 5. ROSTRO REDONDO
+  else if (
+    ratio <= 1.27 &&
+    foreheadRatio >= 0.78 &&
+    jawRatio >= 0.78
+  ) {
+    shape = "Redondo";
+    explanation =
+      "La longitud y anchura del rostro son relativamente equilibradas.";
+  }
+
+  // 6. ROSTRO OVALADO
   else {
     shape = "Ovalado";
     explanation =
-      "Las proporciones generales se aproximan a una forma ovalada.";
+      "Las proporciones muestran una longitud moderada y una transición gradual entre frente, pómulos y mandíbula.";
   }
 
   return {
     shape,
     explanation,
-    ratio,
-    jawRatio,
-    foreheadRatio
+    ratio: Number(ratio.toFixed(3)),
+    foreheadRatio: Number(foreheadRatio.toFixed(3)),
+    jawRatio: Number(jawRatio.toFixed(3)),
+    cheekWidth: Number(cheekWidth.toFixed(2)),
+    faceHeight: Number(faceHeight.toFixed(2))
   };
 }
-
 /* =========================================
    26. MOSTRAR RESULTADOS FACIALES
 ========================================= */
@@ -3209,7 +3248,11 @@ async function analyzeFace() {
 
     const landmarks = result.faceLandmarks[0];
 
-    detectedFace = classifyFace(landmarks);
+    detectedFace = classifyFace(
+  landmarks,
+  image.naturalWidth,
+  image.naturalHeight
+);
 
     if (!detectedFace) {
       throw new Error("No se pudo clasificar el rostro.");
