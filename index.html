@@ -2970,6 +2970,10 @@ function drawFaceGuide(landmarks, image) {
 
 function classifyFace(landmarks, imageWidth, imageHeight) {
 
+  // =====================================
+  // 1. VALIDAR DATOS
+  // =====================================
+
   if (!landmarks || landmarks.length < 455) {
     return {
       shape: "No determinado",
@@ -2983,6 +2987,10 @@ function classifyFace(landmarks, imageWidth, imageHeight) {
       explanation: "No se pudieron obtener las dimensiones de la fotografía."
     };
   }
+
+  // =====================================
+  // 2. MEDIDAS FACIALES
+  // =====================================
 
   const foreheadWidth = landmarkDistance(
     landmarks[103],
@@ -3012,84 +3020,180 @@ function classifyFace(landmarks, imageWidth, imageHeight) {
     imageHeight
   );
 
-  if (!foreheadWidth || !cheekWidth || !jawWidth || !faceHeight) {
+  if (
+    !foreheadWidth ||
+    !cheekWidth ||
+    !jawWidth ||
+    !faceHeight
+  ) {
     return {
       shape: "No determinado",
       explanation: "No se pudieron calcular las proporciones faciales."
     };
   }
 
+  // =====================================
+  // 3. CALCULAR PROPORCIONES
+  // =====================================
+
   const ratio = faceHeight / cheekWidth;
+
   const foreheadRatio = foreheadWidth / cheekWidth;
+
   const jawRatio = jawWidth / cheekWidth;
 
   const widthDifference = Math.abs(
     jawRatio - foreheadRatio
   );
 
-  let shape;
-  let explanation;
+  // Diferencia entre mandíbula y frente.
+  // Positivo: mandíbula más ancha.
+  // Negativo: frente más ancha.
 
-  // 1. ALARGADO
-  if (ratio >= 1.52) {
-    shape = "Alargado";
+  const jawForeheadDifference =
+    jawRatio - foreheadRatio;
+
+  // =====================================
+  // 4. CLASIFICACIÓN FACIAL
+  // =====================================
+
+  let shape = "No determinado";
+  let explanation = "";
+
+  // -------------------------------------
+  // A. ROSTRO REDONDO
+  // -------------------------------------
+
+  if (
+    ratio <= 1.14 &&
+    jawRatio >= 0.76
+  ) {
+
+    shape = "Redondo";
+
     explanation =
-      "El rostro presenta una longitud vertical notablemente mayor que su anchura.";
+      "El rostro presenta una proporción vertical compacta, con anchura facial equilibrada y contornos suaves.";
 
-  // 2. CUADRADO
-  } else if (
-    ratio <= 1.35 &&
-    jawRatio >= 0.80 &&
-    foreheadRatio >= 0.65 &&
+  }
+
+  // -------------------------------------
+  // B. ROSTRO TRIANGULAR
+  // -------------------------------------
+
+  else if (
+    jawRatio >= 0.82 &&
+    jawForeheadDifference >= 0.16
+  ) {
+
+    shape = "Triangular";
+
+    explanation =
+      "La mandíbula presenta una anchura notablemente superior a la frente.";
+
+  }
+
+  // -------------------------------------
+  // C. ROSTRO CUADRADO
+  // -------------------------------------
+
+  else if (
+    ratio > 1.14 &&
+    ratio <= 1.205 &&
+    jawRatio >= 0.82 &&
     widthDifference <= 0.18
   ) {
+
     shape = "Cuadrado";
-    explanation =
-      "El rostro presenta una estructura relativamente ancha, con frente y mandíbula de proporciones cercanas.";
 
-  // 3. TRIANGULAR
-  } else if (
-    jawRatio >= 0.82 &&
-    jawRatio > foreheadRatio + 0.18
+    explanation =
+      "El rostro presenta proporciones relativamente compactas, mandíbula marcada y anchuras similares entre frente y mandíbula.";
+
+  }
+
+  // -------------------------------------
+  // D. ROSTRO ALARGADO
+  // -------------------------------------
+
+  else if (
+    ratio > 1.205 &&
+    ratio < 1.255
   ) {
-    shape = "Triangular";
-    explanation =
-      "La mandíbula presenta una anchura claramente superior a la frente.";
 
-  // 4. DIAMANTE
-  } else if (
+    shape = "Alargado";
+
+    explanation =
+      "El rostro presenta una proporción vertical relativamente elevada respecto a su anchura.";
+
+  }
+
+  // -------------------------------------
+  // E. ROSTRO DIAMANTE
+  // -------------------------------------
+
+  else if (
     foreheadRatio < 0.78 &&
     jawRatio < 0.78
   ) {
+
     shape = "Diamante";
+
     explanation =
       "Los pómulos destacan respecto a una frente y mandíbula más estrechas.";
 
-  // 5. REDONDO
-  } else if (
-    ratio <= 1.27 &&
-    jawRatio >= 0.78 &&
-    foreheadRatio >= 0.78
-  ) {
-    shape = "Redondo";
-    explanation =
-      "El rostro presenta una longitud y anchura relativamente equilibradas.";
-
-  // 6. OVALADO
-  } else {
-    shape = "Ovalado";
-    explanation =
-      "El rostro presenta proporciones intermedias y una transición gradual entre frente, pómulos y mandíbula.";
   }
 
+  // -------------------------------------
+  // F. ROSTRO OVALADO
+  // -------------------------------------
+
+  else if (
+    ratio >= 1.255
+  ) {
+
+    shape = "Ovalado";
+
+    explanation =
+      "El rostro presenta una proporción vertical equilibrada y una transición gradual entre frente, pómulos y mandíbula.";
+
+  }
+
+  // -------------------------------------
+  // G. CASOS INTERMEDIOS
+  // -------------------------------------
+
+  else {
+
+    shape = "Ovalado";
+
+    explanation =
+      "El rostro presenta características intermedias. Se recomienda complementar el análisis con la observación visual del barbero.";
+
+  }
+
+  // =====================================
+  // 5. DEVOLVER RESULTADOS
+  // =====================================
+
   return {
+
     shape,
+
     explanation,
+
     ratio: Number(ratio.toFixed(3)),
+
     jawRatio: Number(jawRatio.toFixed(3)),
+
     foreheadRatio: Number(foreheadRatio.toFixed(3)),
-    widthDifference: Number(widthDifference.toFixed(3))
+
+    widthDifference: Number(widthDifference.toFixed(3)),
+
+    jawForeheadDifference: Number(
+      jawForeheadDifference.toFixed(3)
+    )
+
   };
+
 }
 /* =========================================
    26. MOSTRAR RESULTADOS FACIALES
