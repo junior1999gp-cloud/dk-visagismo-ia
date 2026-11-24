@@ -3458,6 +3458,7 @@ function setupFaceEvents() {
    29. ANÁLISIS DE FOTOGRAFÍA DE PERFIL
 ========================================= */
 
+```javascript
 async function analyzeProfile() {
   const image = $("profilePreview");
   const visual = $("profileVisual");
@@ -3475,19 +3476,61 @@ async function analyzeProfile() {
     return;
   }
 
-  // Activar escáner azul
   visual?.classList.add("scanning");
 
   showMessage(
     "profileMessage",
-    "Analizando fotografía lateral..."
+    "Preparando evaluación anatómica lateral..."
   );
 
-  // Duración de la animación
   await new Promise(resolve => setTimeout(resolve, 2500));
 
-  // Detener escáner
   visual?.classList.remove("scanning");
+
+  // Leer las características seleccionadas
+  const skull = $("skullShape")?.value || "";
+  const nape = $("napeShape")?.value || "";
+  const crown = $("crownShape")?.value || "";
+
+  // Explicaciones de la forma posterior del cráneo
+  const skullInfo = {
+    "Redondeada": "La parte posterior presenta una curvatura redondeada. Se puede trabajar una transición suave y conservar una conexión armoniosa entre los laterales y la zona posterior.",
+    "Alargada": "La parte posterior presenta una apariencia alargada. Conviene observar la distribución del volumen para mantener una silueta equilibrada.",
+    "Plana": "La parte posterior presenta una apariencia más plana. Se recomienda considerar la distribución del volumen en esta zona para conseguir una silueta visualmente equilibrada."
+  };
+
+  // Explicaciones de la nuca
+  const napeInfo = {
+    "Plana": "La nuca presenta una terminación visual más recta. Se puede adaptar el acabado posterior y la altura del degradado a esta característica.",
+    "Redondeada": "La nuca presenta una curvatura redondeada. Se puede aprovechar esta forma para realizar una transición posterior suave.",
+    "Hundida": "La nuca presenta una ligera depresión. Conviene adaptar la altura del degradado y la distribución del cabello para conseguir una conexión más equilibrada."
+  };
+
+  // Explicaciones de la coronilla
+  const crownInfo = {
+    "Elevada": "La coronilla presenta una apariencia elevada. Se debe considerar cómo distribuir el volumen superior para mantener proporciones armoniosas.",
+    "Normal": "La coronilla presenta una apariencia equilibrada. Permite trabajar diferentes estilos teniendo en cuenta la dirección y el crecimiento del cabello.",
+    "Plana": "La coronilla presenta una apariencia más plana. Se puede valorar una distribución de volumen que aporte mayor dimensión visual.",
+    "Hundida": "La coronilla presenta una ligera depresión visual. Conviene considerar el largo y la distribución del cabello para mejorar la apariencia de esta zona."
+  };
+
+  function createSection(title, value, information) {
+    if (!value) {
+      return `
+        <div class="metric">
+          <strong>${title}</strong>
+          <p>No evaluado por el barbero.</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="metric">
+        <strong>${title}: ${value.toUpperCase()}</strong>
+        <p>${information[value]}</p>
+      </div>
+    `;
+  }
 
   const container = $("profileResults");
 
@@ -3496,36 +3539,49 @@ async function analyzeProfile() {
   container.classList.remove("hidden");
 
   container.innerHTML = `
-    <h3>REFERENCIAS DEL PERFIL</h3>
-
-    <div class="metric">
-      <strong>FOTOGRAFÍA DE PERFIL</strong>
-      <p>
-        Fotografía cargada correctamente.
-        Comprueba que la frente, nariz, labios y mentón
-        sean visibles.
-      </p>
-    </div>
-
-    <div id="profileDiagnosis">
-      <p>
-        Vista de perfil disponible para evaluación profesional.
-      </p>
-    </div>
+    <h3>INFORME ANATÓMICO LATERAL</h3>
 
     <p class="small">
-      Esta evaluación es orientativa y complementa
-      el análisis frontal. La fotografía lateral no
-      determina por sí sola la estructura del cráneo.
+      Evaluación orientativa basada en las características
+      seleccionadas por el profesional.
     </p>
+
+    ${createSection(
+      "FORMA POSTERIOR DEL CRÁNEO",
+      skull,
+      skullInfo
+    )}
+
+    ${createSection(
+      "FORMA DE LA NUCA",
+      nape,
+      napeInfo
+    )}
+
+    ${createSection(
+      "FORMA DE LA CORONILLA",
+      crown,
+      crownInfo
+    )}
+
+    <div class="metric">
+      <strong>CRITERIO PROFESIONAL</strong>
+      <p>
+        Estas características permiten orientar la elección
+        del degradado, la conexión posterior y la distribución
+        del volumen. La evaluación depende de la observación
+        del barbero y no constituye una medición anatómica automática.
+      </p>
+    </div>
   `;
 
   showMessage(
     "profileMessage",
-    "Escaneo visual completado correctamente.",
+    "Informe anatómico lateral generado correctamente.",
     true
   );
 }
+```
 
 /* =========================================
    30. RECOMENDACIONES SEGÚN FORMA FACIAL
