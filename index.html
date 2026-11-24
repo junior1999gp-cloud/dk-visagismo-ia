@@ -1526,85 +1526,81 @@ body{
 
   <hr>
 
-  <h3> EVALUACIÓN ANATÓMICA DEL CRÁNEO </h3>
+  <h3>EVALUACIÓN ANATÓMICA DEL CRÁNEO</h3>
 
-  <p class="small">
-    Selecciona las características observadas por el barbero
-    en la fotografía lateral.
-  </p>
+<p class="small">
+  Observa la fotografía lateral y selecciona las características
+  anatómicas que puedas identificar fácilmente.
+</p>
 
-  <label for="occipitalShape">1. Proyección del occipital</label>
-  <select id="occipitalShape">
-    <option value="">Seleccionar</option>
-    <option value="Sobresalido">Sobresalido</option>
-    <option value="Normal">Normal</option>
-    <option value="Poco desarrollado">Poco desarrollado</option>
-    <option value="Plano">Plano</option>
-  </select>
+<!-- 1. FORMA POSTERIOR DEL CRÁNEO -->
 
-  <label for="napeShape">2. Forma de la nuca</label>
-  <select id="napeShape">
-    <option value="">Seleccionar</option>
-    <option value="Plana">Plana</option>
-    <option value="Redondeada">Redondeada</option>
-    <option value="Pronunciada">Pronunciada</option>
-    <option value="Hundida">Hundida</option>
-  </select>
+<label for="skullShape">1. Forma posterior del cráneo</label>
 
-  <label for="skullShape">3. Forma del cráneo</label>
-  <select id="skullShape">
-    <option value="">Seleccionar</option>
-    <option value="Redondo">Redondo</option>
-    <option value="Alargado">Alargado</option>
-    <option value="Plano">Plano</option>
-    <option value="Ovalado">Ovalado</option>
-  </select>
+<select id="skullShape">
+  <option value="">Seleccionar</option>
+  <option value="Redondeada">Redondeada</option>
+  <option value="Alargada">Alargada</option>
+  <option value="Plana">Plana</option>
+</select>
 
-  <label for="parietalShape">4. Zona parietal</label>
-  <select id="parietalShape">
-    <option value="">Seleccionar</option>
-    <option value="Ancha">Ancha</option>
-    <option value="Estrecha">Estrecha</option>
-    <option value="Equilibrada">Equilibrada</option>
-  </select>
+<!-- 2. FORMA DE LA NUCA -->
 
-  <label for="crownShape">5. Forma de la coronilla</label>
-  <select id="crownShape">
-    <option value="">Seleccionar</option>
-    <option value="Elevada">Elevada</option>
-    <option value="Normal">Normal</option>
-    <option value="Plana">Plana</option>
-    <option value="Hundida">Hundida</option>
-  </select>
+<label for="napeShape">2. Forma de la nuca</label>
 
-  <label for="posteriorProfile">6. Proyección del perfil posterior</label>
-  <select id="posteriorProfile">
-    <option value="">Seleccionar</option>
-    <option value="Recto">Recto</option>
-    <option value="Convexo">Convexo</option>
-    <option value="Cóncavo">Cóncavo</option>
-  </select>
+<select id="napeShape">
+  <option value="">Seleccionar</option>
+  <option value="Plana">Plana</option>
+  <option value="Redondeada">Redondeada</option>
+  <option value="Hundida">Hundida</option>
+</select>
 
-  <label for="profileObservations">
-    Observaciones anatómicas del barbero
-  </label>
+<!-- 3. FORMA DE LA CORONILLA -->
 
-  <textarea
-    id="profileObservations"
-    rows="4"
-    placeholder="Describe detalles importantes de la estructura craneal..."
-  ></textarea>
+<label for="crownShape">3. Forma de la coronilla</label>
 
-  <p class="small">
-    La evaluación anatómica es manual y orientativa.
-    Las características seleccionadas se utilizarán como apoyo
-    para personalizar las recomendaciones de corte.
-  </p>
+<select id="crownShape">
+  <option value="">Seleccionar</option>
+  <option value="Elevada">Elevada</option>
+  <option value="Normal">Normal</option>
+  <option value="Plana">Plana</option>
+  <option value="Hundida">Hundida</option>
+</select>
 
-  <p id="profileMessage" class="small"></p>
+<!-- CAMPOS ANTIGUOS: SE CONSERVAN PARA COMPATIBILIDAD -->
+
+<select id="occipitalShape" style="display:none">
+  <option value="">No evaluado</option>
+</select>
+
+<select id="parietalShape" style="display:none">
+  <option value="">No evaluado</option>
+</select>
+
+<select id="posteriorProfile" style="display:none">
+  <option value="">No evaluado</option>
+</select>
+
+<!-- OBSERVACIONES -->
+
+<label for="profileObservations">
+  Observaciones anatómicas del barbero
+</label>
+
+<textarea
+  id="profileObservations"
+  rows="3"
+  placeholder="Detalles adicionales de la estructura craneal..."
+></textarea>
+
+<p class="small">
+  Evaluación manual orientativa. Los datos ayudarán a adaptar
+  el degradado, la conexión posterior y la distribución del volumen.
+</p>
+
+<p id="profileMessage" class="small"></p>
 
 </div>
-```
 
     <!-- RECOMENDACIONES -->
 
@@ -3438,30 +3434,39 @@ async function analyzeProfile() {
 
   const container = $("profileResults");
 
-  if (!container) return;
+  if (!container) {
+    console.error("No se encontró profileResults");
+    return;
+  }
 
+  // Mostrar el recuadro de resultados
+  container.classList.remove("hidden");
+
+  // Crear el informe lateral
   container.innerHTML = `
+    <h3>REFERENCIAS DEL PERFIL</h3>
+
     <div class="metric">
       <strong>FOTOGRAFÍA DE PERFIL</strong>
       <p>
-        Fotografía cargada correctamente. Comprueba que
-        la frente, nariz, labios y mentón sean visibles.
+        Fotografía cargada correctamente.
+        Comprueba que la frente, nariz, labios y mentón
+        sean visibles.
+      </p>
+    </div>
+
+    <div id="profileDiagnosis">
+      <p>
+        Vista de perfil disponible para evaluación profesional.
       </p>
     </div>
 
     <p class="small">
-      Utiliza esta vista para complementar la evaluación
-      visual del profesional. La fotografía de perfil no
-      determina por sí sola la forma del rostro.
+      Esta evaluación es orientativa y complementa
+      el análisis frontal. La fotografía lateral no
+      determina por sí sola la estructura del cráneo.
     </p>
   `;
-
-  const diagnosis = $("profileDiagnosis");
-
-  if (diagnosis) {
-    diagnosis.textContent =
-      "Vista de perfil disponible para evaluación profesional.";
-  }
 
   showMessage(
     "profileMessage",
