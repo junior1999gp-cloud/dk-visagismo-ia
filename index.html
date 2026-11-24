@@ -1575,71 +1575,64 @@ body{
   anatómicas que puedas identificar fácilmente.
 </p>
 
-<!-- 1. FORMA POSTERIOR DEL CRÁNEO -->
+<!-- 1. OCCIPITAL -->
 
-<label for="skullShape">1. Forma posterior del cráneo</label>
+<label for="occipitalShape">
+  1. Prominencia del occipital
+</label>
+
+<select id="occipitalShape">
+  <option value="">Seleccionar</option>
+  <option value="Plano">Plano</option>
+  <option value="Normal">Normal</option>
+  <option value="Sobresalido">Sobresalido</option>
+  <option value="Muy sobresalido">Muy sobresalido</option>
+</select>
+
+<!-- 2. CORONILLA -->
+
+<label for="crownShape">
+  2. Forma de la coronilla
+</label>
+
+<select id="crownShape">
+  <option value="">Seleccionar</option>
+  <option value="Plana">Plana</option>
+  <option value="Normal">Normal</option>
+  <option value="Redondeada">Redondeada</option>
+  <option value="Sobresalida">Sobresalida</option>
+</select>
+
+<!-- 3. FORMA POSTERIOR DEL CRÁNEO -->
+
+<label for="skullShape">
+  3. Forma posterior del cráneo
+</label>
 
 <select id="skullShape">
   <option value="">Seleccionar</option>
   <option value="Redondeada">Redondeada</option>
+  <option value="Ovalada">Ovalada</option>
   <option value="Alargada">Alargada</option>
   <option value="Plana">Plana</option>
-</select>
-
-<!-- 2. FORMA DE LA NUCA -->
-
-<label for="napeShape">2. Forma de la nuca</label>
-
-<select id="napeShape">
-  <option value="">Seleccionar</option>
-  <option value="Plana">Plana</option>
-  <option value="Redondeada">Redondeada</option>
-  <option value="Hundida">Hundida</option>
-</select>
-
-<!-- 3. FORMA DE LA CORONILLA -->
-
-<label for="crownShape">3. Forma de la coronilla</label>
-
-<select id="crownShape">
-  <option value="">Seleccionar</option>
-  <option value="Elevada">Elevada</option>
-  <option value="Normal">Normal</option>
-  <option value="Plana">Plana</option>
-  <option value="Hundida">Hundida</option>
-</select>
-
-<!-- CAMPOS ANTIGUOS: SE CONSERVAN PARA COMPATIBILIDAD -->
-
-<select id="occipitalShape" style="display:none">
-  <option value="">No evaluado</option>
-</select>
-
-<select id="parietalShape" style="display:none">
-  <option value="">No evaluado</option>
-</select>
-
-<select id="posteriorProfile" style="display:none">
-  <option value="">No evaluado</option>
 </select>
 
 <!-- OBSERVACIONES -->
 
 <label for="profileObservations">
-  Observaciones anatómicas del barbero
+  Observaciones del barbero
 </label>
 
 <textarea
   id="profileObservations"
   rows="3"
-  placeholder="Detalles adicionales de la estructura craneal..."
+  placeholder="Observaciones adicionales..."
 ></textarea>
 
 <p class="small">
-  Evaluación manual orientativa. Los datos ayudarán a adaptar
-  el degradado, la conexión posterior y la distribución del volumen.
+  Evaluación orientativa para adaptar el degradado,
+  la conexión posterior y la distribución del volumen.
 </p>
-
 <p id="profileMessage" class="small"></p>
 
 </div>
