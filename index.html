@@ -1196,6 +1196,48 @@ body{
     animation:none;
   }
 }
+  /* ESCÁNER VISUAL DEL PERFIL LATERAL */
+
+#profileVisual {
+  position: relative;
+  overflow: hidden;
+}
+
+#profileVisual.scanning::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  background: #35c8ff;
+  box-shadow:
+    0 0 8px #35c8ff,
+    0 0 18px #168cff;
+  pointer-events: none;
+  animation: profileScan 2.5s linear infinite;
+  z-index: 5;
+}
+
+@keyframes profileScan {
+  0% {
+    top: 0;
+    opacity: 0.3;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    top: calc(100% - 3px);
+    opacity: 0.3;
+  }
+}
 </style>
 </head>
 
@@ -3418,6 +3460,7 @@ function setupFaceEvents() {
 
 async function analyzeProfile() {
   const image = $("profilePreview");
+  const visual = $("profileVisual");
 
   if (
     !image ||
@@ -3432,17 +3475,26 @@ async function analyzeProfile() {
     return;
   }
 
+  // Activar escáner azul
+  visual?.classList.add("scanning");
+
+  showMessage(
+    "profileMessage",
+    "Analizando fotografía lateral..."
+  );
+
+  // Duración de la animación
+  await new Promise(resolve => setTimeout(resolve, 2500));
+
+  // Detener escáner
+  visual?.classList.remove("scanning");
+
   const container = $("profileResults");
 
-  if (!container) {
-    console.error("No se encontró profileResults");
-    return;
-  }
+  if (!container) return;
 
-  // Mostrar el recuadro de resultados
   container.classList.remove("hidden");
 
-  // Crear el informe lateral
   container.innerHTML = `
     <h3>REFERENCIAS DEL PERFIL</h3>
 
@@ -3470,7 +3522,7 @@ async function analyzeProfile() {
 
   showMessage(
     "profileMessage",
-    "Vista de perfil preparada correctamente.",
+    "Escaneo visual completado correctamente.",
     true
   );
 }
