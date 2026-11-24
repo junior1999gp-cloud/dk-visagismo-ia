@@ -3476,68 +3476,71 @@ async function analyzeProfile() {
     return;
   }
 
-  if (!container) {
-    console.error("No existe profileResults");
-    return;
-  }
+  if (!container) return;
 
   try {
     visual?.classList.add("scanning");
 
     showMessage(
       "profileMessage",
-      "Analizando fotografía lateral..."
+      "Analizando perfil lateral..."
     );
 
     await new Promise(resolve =>
       setTimeout(resolve, 2500)
     );
 
-    const skull = $("skullShape")?.value || "";
-    const nape = $("napeShape")?.value || "";
+    // Leer los tres indicadores
+    const occipital = $("occipitalShape")?.value || "";
     const crown = $("crownShape")?.value || "";
+    const skull = $("skullShape")?.value || "";
 
-    const descriptions = {
-      skull: {
-        "Redondeada":
-          "La zona posterior presenta una curvatura redondeada. Se pueden trabajar transiciones suaves y una conexión armoniosa.",
-        "Alargada":
-          "La zona posterior presenta una apariencia alargada. Conviene observar la distribución del volumen para equilibrar la silueta.",
-        "Plana":
-          "La zona posterior presenta una apariencia plana. Se recomienda considerar la distribución del volumen para conseguir una silueta equilibrada."
-      },
-
-      nape: {
-        "Plana":
-          "La nuca presenta una terminación visual más recta. Se puede adaptar el acabado posterior a esta característica.",
-        "Redondeada":
-          "La nuca presenta una curvatura redondeada. Se puede trabajar una transición posterior suave.",
-        "Hundida":
-          "La nuca presenta una depresión visual. Conviene adaptar la altura del degradado y la distribución del cabello."
-      },
-
-      crown: {
-        "Elevada":
-          "La coronilla presenta una apariencia elevada. Se debe considerar la distribución del volumen superior.",
-        "Normal":
-          "La coronilla presenta una apariencia equilibrada. Permite trabajar diferentes estilos según el crecimiento del cabello.",
-        "Plana":
-          "La coronilla presenta una apariencia plana. Se puede valorar una distribución de volumen que aporte dimensión.",
-        "Hundida":
-          "La coronilla presenta una depresión visual. Conviene considerar el largo y la distribución del cabello."
-      }
+    // INFORMACIÓN DEL OCCIPITAL
+    const occipitalInfo = {
+      "Plano":
+        "El occipital presenta una apariencia plana. Conviene considerar esta característica al distribuir el volumen y diseñar la conexión posterior.",
+      "Normal":
+        "El occipital presenta una prominencia moderada. Permite adaptar diferentes conexiones posteriores según el corte elegido.",
+      "Sobresalido":
+        "El occipital presenta una prominencia marcada. Se recomienda prestar atención a la transición del degradado en la zona posterior.",
+      "Muy sobresalido":
+        "El occipital presenta una prominencia pronunciada. Conviene adaptar cuidadosamente la conexión posterior para conseguir una silueta equilibrada."
     };
 
-    function section(title, value, data) {
-      const description = data[value];
+    // INFORMACIÓN DE LA CORONILLA
+    const crownInfo = {
+      "Plana":
+        "La coronilla presenta una apariencia plana. Conviene considerar la dirección de crecimiento y el volumen del cabello para facilitar el peinado.",
+      "Normal":
+        "La coronilla presenta una forma equilibrada. Se pueden trabajar diferentes estilos teniendo en cuenta el crecimiento natural del cabello.",
+      "Redondeada":
+        "La coronilla presenta una curvatura redondeada. Se debe considerar cómo distribuir el volumen para mantener una buena silueta.",
+      "Sobresalida":
+        "La coronilla presenta una prominencia visible. Conviene adaptar el largo y la distribución del cabello para conseguir un acabado armonioso."
+    };
 
+    // INFORMACIÓN DE LA FORMA POSTERIOR
+    const skullInfo = {
+      "Redondeada":
+        "La parte posterior del cráneo presenta una forma redondeada. Se pueden trabajar transiciones suaves para conservar su silueta natural.",
+      "Ovalada":
+        "La parte posterior presenta una apariencia ovalada. Se recomienda mantener una conexión equilibrada entre los laterales y la zona posterior.",
+      "Alargada":
+        "La parte posterior presenta una apariencia alargada. Conviene observar la distribución del volumen para equilibrar visualmente el corte.",
+      "Plana":
+        "La parte posterior presenta una apariencia plana. Se puede adaptar el largo y la conexión posterior para mejorar la silueta del corte."
+    };
+
+    function createSection(title, value, information) {
       return `
         <div class="metric">
           <strong>${title}</strong>
           <p>
-            ${value
-              ? value + ": " + (description || "Sin descripción disponible.")
-              : "No evaluado por el barbero."}
+            ${
+              value
+                ? value + ". " + information[value]
+                : "No evaluado por el barbero."
+            }
           </p>
         </div>
       `;
@@ -3547,34 +3550,34 @@ async function analyzeProfile() {
       <h3>INFORME ANATÓMICO LATERAL</h3>
 
       <p class="small">
-        Evaluación orientativa basada en las características
-        seleccionadas por el profesional.
+        Evaluación orientativa basada en la observación
+        y selección del profesional.
       </p>
 
-      ${section(
+      ${createSection(
+        "OCCIPITAL",
+        occipital,
+        occipitalInfo
+      )}
+
+      ${createSection(
+        "CORONILLA",
+        crown,
+        crownInfo
+      )}
+
+      ${createSection(
         "FORMA POSTERIOR DEL CRÁNEO",
         skull,
-        descriptions.skull
-      )}
-
-      ${section(
-        "FORMA DE LA NUCA",
-        nape,
-        descriptions.nape
-      )}
-
-      ${section(
-        "FORMA DE LA CORONILLA",
-        crown,
-        descriptions.crown
+        skullInfo
       )}
 
       <div class="metric">
         <strong>RECOMENDACIÓN PROFESIONAL</strong>
         <p>
-          Estas características ayudan a adaptar el degradado,
-          la conexión posterior y la distribución del volumen.
-          La evaluación es manual y orientativa.
+          Estas características ayudan a adaptar el
+          degradado, la conexión posterior y la distribución
+          del volumen para conseguir un corte equilibrado.
         </p>
       </div>
     `;
@@ -3592,7 +3595,7 @@ async function analyzeProfile() {
 
     showMessage(
       "profileMessage",
-      "No se pudo generar el informe. Revisa las selecciones."
+      "No se pudo generar el informe lateral."
     );
 
   } finally {
