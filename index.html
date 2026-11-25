@@ -1666,6 +1666,67 @@ body{
       <option value="atrevido">Atrevido</option>
     </select>
 
+        <!-- COLOR Y RAYITOS -->
+
+    <hr>
+
+    <p class="section-kicker">6. COLOR Y TRANSFORMACIÓN</p>
+
+    <h3>¿QUÉ CAMBIO DE COLOR DESEA EL CLIENTE?</h3>
+
+    <label for="colorService">Tipo de servicio de color</label>
+    <select id="colorService">
+      <option value="">Seleccionar</option>
+      <option value="Sin cambio de color">No desea cambio de color</option>
+      <option value="Color global">Color global</option>
+      <option value="Rayitos o mechas">Rayitos o mechas</option>
+      <option value="Platinado completo">Platinado completo</option>
+      <option value="Color fantasía">Color fantasía</option>
+      <option value="Otro">Otro</option>
+    </select>
+
+    <div id="highlightsFields" style="display:none;">
+
+      <h3>DETALLES DE RAYITOS O MECHAS</h3>
+
+      <label for="highlightColor">Color deseado</label>
+      <select id="highlightColor">
+        <option value="">Seleccionar</option>
+        <option>Platinado</option>
+        <option>Blanco</option>
+        <option>Cenizo</option>
+        <option>Caramelo</option>
+        <option>Cobrizo</option>
+        <option>Otro</option>
+      </select>
+
+      <label for="highlightAmount">Cantidad de rayitos</label>
+      <select id="highlightAmount">
+        <option value="">Seleccionar</option>
+        <option>Pocos</option>
+        <option>Moderados</option>
+        <option>Abundantes</option>
+      </select>
+
+      <label for="highlightDistribution">Distribución</label>
+      <select id="highlightDistribution">
+        <option value="">Seleccionar</option>
+        <option>Frontal</option>
+        <option>Parte superior</option>
+        <option>Laterales</option>
+        <option>Toda la cabeza</option>
+      </select>
+
+      <label for="highlightThickness">Grosor de los rayitos</label>
+      <select id="highlightThickness">
+        <option value="">Seleccionar</option>
+        <option>Finos</option>
+        <option>Medios</option>
+        <option>Gruesos</option>
+      </select>
+
+    </div>
+
     <hr>
 
     <h3>SELECCIÓN DE CORTE SEGÚN EL LARGO</h3>
@@ -2311,50 +2372,97 @@ async function selectClient(client) {
 ========================================= */
 
 function resetConsultation() {
+
+  // CAMPOS DE LA ASESORÍA
   const fields = [
+    // ANÁLISIS FACIAL
     "faceShape",
+
+    // CABELLO ACTUAL
     "hairType",
     "hairDensity",
     "hairLength",
+    "hairCurrent",
+
+    // TRANSFORMACIÓN Y ESTILO
+    "hairDesired",
+    "hairDesiredType",
     "style",
     "stylePreference",
-    "hairCurrent",
-    "hairDesired",
-    "desiredCut",
     "recommendLength",
+    "desiredCut",
     "selectedCut",
+
+    // PERFIL ANATÓMICO
+    "occipitalShape",
+    "skullShape",
+    "crownShape",
+    "profileObservations",
+
+    // COLOR Y RAYITOS
+    "colorService",
+    "highlightColor",
+    "highlightAmount",
+    "highlightDistribution",
+    "highlightThickness",
+
+    // OBSERVACIONES
     "observations"
   ];
 
+  // LIMPIAR CAMPOS
   fields.forEach(id => {
+
     const element = $(id);
 
     if (element) {
+
       if (element.tagName === "SELECT") {
         element.selectedIndex = 0;
       } else {
         element.value = "";
       }
+
     }
+
   });
 
+  // OCULTAR LOS CAMPOS DE RAYITOS
+  const highlightsFields = $("highlightsFields");
+
+  if (highlightsFields) {
+    highlightsFields.style.display = "none";
+  }
+
+  // LIMPIAR RESULTADOS VISUALES
   [
     "faceResults",
     "profileResults",
     "recommendations",
     "history"
   ].forEach(id => {
+
     const element = $(id);
-    if (element) element.innerHTML = "";
+
+    if (element) {
+      element.innerHTML = "";
+    }
+
   });
 
-  // Limpiar fotografías del cliente anterior
+  // REINICIAR RESULTADO DEL ANÁLISIS FACIAL
+  detectedFace = null;
+
+  // LIMPIAR FOTOGRAFÍAS DEL CLIENTE ANTERIOR
   clearPhoto();
   clearProfilePhoto();
 
+  // LIMPIAR MENSAJES
   showMessage("analysisMessage", "");
   showMessage("profileMessage", "");
   showMessage("consultMessage", "");
+  showMessage("copyChatGPTMessage", "");
+
 }
 /* =========================================
    16. EVENTOS DE CLIENTES
@@ -3695,8 +3803,10 @@ function adaptCutsToHair(cuts, hairType, hairLength, hairDensity = "") {
 
   let adapted = [...cuts];
 
-  // CABELLO AFRO
+  // IDENTIFICAR TEXTURA CAPILAR
+
   if (type.includes("afro")) {
+
     adapted.unshift(
       "Afro Taper Fade",
       "Low Fade Afro",
@@ -3704,120 +3814,159 @@ function adaptCutsToHair(cuts, hairType, hairLength, hairDensity = "") {
       "Afro corto definido",
       "Shape Up"
     );
-  }
 
-  // CABELLO RIZADO
-  else if (type.includes("rizado") || type.includes("crespo")) {
+  } else if (type.includes("rizado") || type.includes("crespo")) {
+
     adapted.unshift(
       "Curly Top con degradado",
       "Taper Fade para cabello rizado",
       "Curly Fringe",
       "Curly Crop"
     );
-  }
 
-  // CABELLO ONDULADO
-  else if (type.includes("ondulado")) {
+  } else if (type.includes("ondulado")) {
+
     adapted.unshift(
       "Quiff ondulado",
-      "Bro Flow texturizado",
       "Wavy Fringe",
       "Taper Fade ondulado",
-      "Mullet ondulado"
+      "Mullet ondulado",
+      "Bro Flow texturizado"
     );
-  }
 
-  // CABELLO LACIO
-  else if (type.includes("lacio") || type.includes("liso")) {
+  } else if (type.includes("lacio") || type.includes("liso")) {
+
     adapted.unshift(
-      "Slick Back",
       "French Crop",
       "Side Part",
       "Textured Crop",
-      "Executive Contour"
+      "Executive Contour",
+      "Slick Back"
     );
+
   }
 
-  // DENSIDAD BAJA
-  if (density === "baja") {
+  // ADAPTACIÓN SEGÚN DENSIDAD
+
+  if (density.includes("baja")) {
+
     adapted.unshift(
-      "Crop texturizado para cabello fino",
+      "French Crop para cabello fino",
       "Quiff ligero",
-      "Taper Fade suave"
+      "Taper Fade suave",
+      "Side Part con volumen"
     );
-  }
 
-  // DENSIDAD MEDIA
-  else if (density === "media") {
+  } else if (density.includes("media")) {
+
     adapted.unshift(
       "Textured Crop",
-      "Quiff natural"
+      "Quiff natural",
+      "Mid Fade texturizado"
     );
-  }
 
-  // DENSIDAD ALTA
-  else if (density === "alta") {
+  } else if (density.includes("alta")) {
+
     adapted.unshift(
       "Textured Quiff",
       "Mid Fade con volumen",
-      "Layered Crop"
+      "Layered Crop",
+      "Taper Fade con textura"
     );
+
   }
 
-  // CABELLO CORTO
+  // ADAPTACIÓN SEGÚN LARGO DESEADO
+
   if (length.includes("corto")) {
+
     adapted = adapted.filter(cut => {
+
       const name = normalize(cut);
 
       return !name.includes("bro flow") &&
              !name.includes("mullet largo") &&
-             !name.includes("slick back largo");
+             !name.includes("slick back largo") &&
+             !name.includes("capas largas");
+
     });
 
     adapted.unshift(
       "Buzz Cut",
       "French Crop",
-      "Crew Cut"
+      "Crew Cut",
+      "Caesar Cut",
+      "Crop texturizado"
     );
-  }
 
-  // CABELLO MEDIO
-  else if (length.includes("medio")) {
+  } else if (length.includes("medio")) {
+
+    adapted = adapted.filter(cut => {
+
+      const name = normalize(cut);
+
+      return !name.includes("mullet largo") &&
+             !name.includes("slick back largo") &&
+             !name.includes("bro flow largo");
+
+    });
+
     adapted.unshift(
       "Quiff texturizado",
       "Side Part",
-      "Mid Fade con volumen"
+      "Mid Fade con volumen",
+      "Taper Fade",
+      "French Crop texturizado"
     );
-  }
 
-  // CABELLO LARGO
-  else if (length.includes("largo")) {
+  } else if (length.includes("largo")) {
+
     adapted.unshift(
       "Bro Flow",
       "Slick Back largo",
       "Mullet moderno",
-      "Capas texturizadas"
+      "Capas texturizadas",
+      "Flow Hair"
     );
+
   }
 
+  // ELIMINAR REPETICIONES
+
   return [...new Set(adapted)].slice(0, 8);
+
 }
 /* =========================================
    32. GENERAR RECOMENDACIONES
 ========================================= */
 
 function recommendCuts() {
+
+  // DATOS DEL CLIENTE
   const face = $("faceShape")?.value || "";
   const hairType = $("hairType")?.value || "";
   const hairDensity = $("hairDensity")?.value || "";
-  const hairLength = $("recommendLength")?.value || "";
+
+  // LARGO ACTUAL Y LARGO DESEADO
+  const currentLength = $("hairLength")?.value || "";
+  const desiredLength = $("recommendLength")?.value || "";
+
+  // TEXTURA Y ESTILO
+  const desiredTexture = $("hairDesired")?.value || "";
   const style = $("style")?.value || "";
+
   const currentHair = $("hairCurrent")?.value || "";
-  const desiredCut = $("desiredCut")?.value.trim() || "";
+
+  const desiredCut =
+    $("selectedCut")?.value?.trim() ||
+    $("desiredCut")?.value?.trim() ||
+    "";
 
   const container = $("recommendations");
+
   if (!container) return;
 
+  // VALIDAR FORMA DEL ROSTRO
   if (!face) {
     container.innerHTML = `
       <p class="small">
@@ -3827,19 +3976,16 @@ function recommendCuts() {
     return;
   }
 
-  let cuts = getCutsByFace(face);
+  // OBTENER CORTES SEGÚN EL ROSTRO
+  let cuts = getCutsByFace(face) || [];
 
-  cuts = adaptCutsToHair(
-    cuts,
-    hairType,
-    hairLength
-  );
-
+  // NORMALIZAR ESTILO
   const styleText = String(style)
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
+  // ADAPTAR SEGÚN ESTILO PREFERIDO
   if (styleText.includes("clasico")) {
     cuts.unshift(
       "Slick Back clásico",
@@ -3885,35 +4031,74 @@ function recommendCuts() {
     );
   }
 
-  // INCLUIR EL CORTE QUE DESEA EL CLIENTE
+  // ADAPTAR POR TIPO, LARGO Y DENSIDAD CAPILAR
+  // Se aplica después del estilo para evitar recomendaciones incompatibles.
+  cuts = adaptCutsToHair(
+    cuts,
+    hairType,
+    desiredLength,
+    hairDensity
+  );
+
+  // EL CORTE SOLICITADO POR EL CLIENTE TIENE PRIORIDAD
   if (desiredCut) {
     cuts.unshift(desiredCut);
   }
 
+  // ELIMINAR REPETICIONES
   cuts = [...new Set(cuts)].slice(0, 8);
 
+  // PREPARAR DATOS PARA MOSTRAR
   const selectedFace = escapeHTML(face);
   const selectedHair = escapeHTML(hairType || "No especificado");
   const selectedDensity = escapeHTML(hairDensity || "No especificada");
-  const selectedLength = escapeHTML(hairLength || "No especificado");
-  const selectedStyle = escapeHTML(style || "No especificado");
-  const current = escapeHTML(currentHair || "No especificado");
-  const desired = escapeHTML(desiredCut || "Sin preferencia");
 
+  const selectedCurrentLength =
+    escapeHTML(currentLength || "No especificado");
+
+  const selectedDesiredLength =
+    escapeHTML(desiredLength || "No especificado");
+
+  const selectedTexture =
+    escapeHTML(desiredTexture || "No especificada");
+
+  const selectedStyle =
+    escapeHTML(style || "No especificado");
+
+  const current =
+    escapeHTML(currentHair || "No especificado");
+
+  const desired =
+    escapeHTML(desiredCut || "Sin preferencia");
+
+  // MOSTRAR RESULTADOS
   container.classList.remove("hidden");
 
   container.innerHTML = `
     <div class="metric">
+
       <strong>ASESORÍA DK VISAGISMO IA</strong>
+
       <h3>Cortes recomendados</h3>
 
       <p>Forma facial: ${selectedFace}</p>
-      <p>Tipo de cabello: ${selectedHair}</p>
+
+      <p>Tipo de cabello actual: ${selectedHair}</p>
+
+      <p>Textura deseada: ${selectedTexture}</p>
+
       <p>Densidad capilar: ${selectedDensity}</p>
-      <p>Largo seleccionado: ${selectedLength}</p>
+
+      <p>Largo actual: ${selectedCurrentLength}</p>
+
+      <p>Largo que desea conseguir: ${selectedDesiredLength}</p>
+
       <p>Estilo elegido: ${selectedStyle}</p>
+
       <p>Corte actual: ${current}</p>
-      <p>Corte deseado: ${desired}</p>
+
+      <p>Corte solicitado: ${desired}</p>
+
     </div>
 
     <h4>RECOMENDACIONES PERSONALIZADAS</h4>
@@ -3929,9 +4114,10 @@ function recommendCuts() {
     }
 
     <p class="small">
-      Recomendaciones orientativas de visagismo.
-      Se valoran la densidad, implantación, textura,
-      largo y preferencias del cliente.
+      Las recomendaciones consideran la forma facial,
+      tipo de cabello, densidad, largo deseado y estilo.
+      La elección final debe valorar también la implantación,
+      crecimiento y características reales del cabello.
     </p>
   `;
 
@@ -3940,8 +4126,8 @@ function recommendCuts() {
     "Recomendaciones generadas correctamente.",
     true
   );
-}
 
+}
 /* =========================================
    33. EVENTOS DE PERFIL Y RECOMENDACIONES
 ========================================= */
@@ -3953,12 +4139,39 @@ function setupRecommendationEvents() {
     recommendCuts();
   });
 
+  // MOSTRAR U OCULTAR CAMPOS DE RAYITOS
+  const colorService = $("colorService");
+  const highlightsFields = $("highlightsFields");
+
+  function toggleHighlightsFields() {
+
+    if (!colorService || !highlightsFields) return;
+
+    const wantsHighlights = colorService.value === "Rayitos o mechas";
+
+    highlightsFields.style.display = wantsHighlights ? "block" : "none";
+
+    // Si no desea rayitos, limpiar sus campos
+    if (!wantsHighlights) {
+      $("highlightColor").value = "";
+      $("highlightAmount").value = "";
+      $("highlightDistribution").value = "";
+      $("highlightThickness").value = "";
+    }
+  }
+
+  colorService?.addEventListener("change", toggleHighlightsFields);
+
+  // Estado inicial
+  toggleHighlightsFields();
+
 }
   /* =========================================
    34. GUARDAR ASESORÍA
 ========================================= */
 
 async function saveConsultation() {
+
   if (!currentUser) {
     showMessage("consultMessage", "Debes iniciar sesión.");
     return;
@@ -3969,46 +4182,112 @@ async function saveConsultation() {
     return;
   }
 
-  const faceShape = $("faceShape")?.value || "";
-  const hairType = $("hairType")?.value || "";
-  const hairDensity = $("hairDensity")?.value || "";
-  const hairLength = $("hairLength")?.value || "";
-  const stylePreference = $("stylePreference")?.value || "";
-  const hairCurrent = $("hairCurrent")?.value || "";
+  const getValue = id =>
+    $(id)?.value?.trim() || "";
+
+  // DATOS FACIALES
+  const faceShape = getValue("faceShape");
+
+  // DATOS CAPILARES
+  const hairType = getValue("hairType");
+  const hairDesired = getValue("hairDesired");
+  const hairDensity = getValue("hairDensity");
+  const hairLength = getValue("hairLength");
+  const recommendLength = getValue("recommendLength");
+  const stylePreference = getValue("stylePreference");
+  const style = getValue("style");
+  const hairCurrent = getValue("hairCurrent");
+  const hairDesiredType = hairDesired || getValue("hairDesiredType");
 
   const desiredCut =
-    $("selectedCut")?.value ||
-    $("desiredCut")?.value ||
-    "";
+    getValue("selectedCut") ||
+    getValue("desiredCut");
 
-  const observations =
-    $("observations")?.value.trim() || "";
+  // ANÁLISIS LATERAL
+  const occipitalShape = getValue("occipitalShape");
+  const skullShape = getValue("skullShape");
+  const crownShape = getValue("crownShape");
+  const profileObservations = getValue("profileObservations");
+
+  // COLOR Y RAYITOS
+  const colorService = getValue("colorService");
+
+  let colorDetails = [];
+
+  if (colorService) {
+    colorDetails.push("Servicio de color: " + colorService);
+  }
+
+  if (colorService === "Rayitos o mechas") {
+
+    const highlightColor = getValue("highlightColor");
+    const highlightAmount = getValue("highlightAmount");
+    const highlightDistribution = getValue("highlightDistribution");
+    const highlightThickness = getValue("highlightThickness");
+
+    if (highlightColor)
+      colorDetails.push("Color de rayitos: " + highlightColor);
+
+    if (highlightAmount)
+      colorDetails.push("Cantidad: " + highlightAmount);
+
+    if (highlightDistribution)
+      colorDetails.push("Distribución: " + highlightDistribution);
+
+    if (highlightThickness)
+      colorDetails.push("Grosor: " + highlightThickness);
+  }
+
+  // OBSERVACIONES Y RECOMENDACIONES
+  const observations = getValue("observations");
 
   const recommendationsText =
-    $("recommendations")?.innerText || "";
+    $("recommendations")?.innerText?.trim() || "";
 
-  const notes = [
+  const faceAnalysis =
+    detectedFace?.explanation ||
+    "No se realizó análisis automático.";
+
+  // CONSTRUIR HISTORIAL
+  const sections = [];
+
+  sections.push(
     "ASESORÍA DK VISAGISMO IA",
     "========================",
     "",
     "DATOS DEL ANÁLISIS",
-    "Forma del rostro: " + faceShape,
-    "Tipo de cabello: " + hairType,
-    "Densidad capilar: " + hairDensity,
-    "Largo actual: " + hairLength,
-    "Estilo preferido: " + stylePreference,
-    "Corte actual: " + hairCurrent,
-    "Corte deseado: " + desiredCut,
+    "Forma del rostro: " + (faceShape || "No especificado"),
+    "Tipo de cabello actual: " + (hairType || "No especificado"),
+    "Textura deseada: " + (hairDesiredType || "No especificada"),
+    "Densidad capilar: " + (hairDensity || "No especificada"),
+    "Largo actual: " + (hairLength || "No especificado"),
+    "Largo deseado: " + (recommendLength || "No especificado"),
+    "Estilo preferido: " + (stylePreference || style || "No especificado"),
+    "Corte actual: " + (hairCurrent || "No especificado"),
+    "Corte deseado: " + (desiredCut || "No especificado"),
+    "",
+    "ANÁLISIS ANATÓMICO DEL PERFIL",
+    "Proyección del occipital: " + (occipitalShape || "No especificada"),
+    "Forma del cráneo: " + (skullShape || "No especificada"),
+    "Forma de la coronilla: " + (crownShape || "No especificada"),
+    "Observaciones del perfil: " + (profileObservations || "Ninguna"),
+    "",
+    "COLOR Y TRANSFORMACIÓN",
+    colorDetails.length
+      ? colorDetails.join("\n")
+      : "No se especificó un servicio de color.",
     "",
     "ANÁLISIS FACIAL",
-    detectedFace?.explanation || "No se realizó análisis automático.",
+    faceAnalysis,
     "",
     "RECOMENDACIONES DK",
-    recommendationsText,
+    recommendationsText || "Sin recomendaciones registradas.",
     "",
     "OBSERVACIONES DEL BARBERO",
-    observations
-  ].join("\n");
+    observations || "Sin observaciones."
+  );
+
+  const notes = sections.join("\n");
 
   const button = $("saveConsultationBtn");
 
@@ -4018,6 +4297,7 @@ async function saveConsultation() {
   }
 
   try {
+
     const { error } = await db
       .from("client_services")
       .insert([{
@@ -4031,13 +4311,14 @@ async function saveConsultation() {
 
     showMessage(
       "consultMessage",
-      "Asesoría guardada correctamente.",
+      "Asesoría guardada correctamente con todos sus datos.",
       true
     );
 
     await loadHistory();
 
   } catch (error) {
+
     console.error("Error al guardar asesoría:", error);
 
     showMessage(
@@ -4046,13 +4327,16 @@ async function saveConsultation() {
     );
 
   } finally {
+
     if (button) {
       button.disabled = false;
       button.textContent = "GUARDAR ASESORÍA";
     }
+
   }
 }
   async function copyInformationForChatGPT() {
+
   if (!selectedClientId) {
     showMessage(
       "copyChatGPTMessage",
@@ -4067,31 +4351,66 @@ async function saveConsultation() {
   const clientName =
     $("selectedClient")?.innerText?.trim() || "Cliente";
 
+  // DATOS FACIALES
   const faceShape = getValue("faceShape");
+
+  // DATOS CAPILARES
   const hairType = getValue("hairType");
+
   const hairDesiredType =
-  getValue("hairDesired") !== "No especificado"
-    ? getValue("hairDesired")
-    : getValue("hairDesiredType");
+    getValue("hairDesired") !== "No especificado"
+      ? getValue("hairDesired")
+      : getValue("hairDesiredType");
+
   const hairDensity = getValue("hairDensity");
   const hairLength = getValue("hairLength");
   const stylePreference = getValue("stylePreference");
   const hairCurrent = getValue("hairCurrent");
-      const desiredCut =
+
+  const desiredCut =
     getValue("selectedCut") !== "No especificado"
       ? getValue("selectedCut")
       : getValue("desiredCut");
 
   const observations = getValue("observations");
-      // EVALUACIÓN ANATÓMICA DEL PERFIL
+
+  // ANÁLISIS ANATÓMICO DEL PERFIL
   const occipitalShape = getValue("occipitalShape");
-  const napeShape = getValue("napeShape");
   const skullShape = getValue("skullShape");
-  const parietalShape = getValue("parietalShape");
   const crownShape = getValue("crownShape");
-  const posteriorProfile = getValue("posteriorProfile");
   const profileObservations = getValue("profileObservations");
 
+  // SERVICIO DE COLOR
+  const colorService = $("colorService")?.value || "";
+
+  const highlightColor = $("highlightColor")?.value || "";
+  const highlightAmount = $("highlightAmount")?.value || "";
+  const highlightDistribution = $("highlightDistribution")?.value || "";
+  const highlightThickness = $("highlightThickness")?.value || "";
+
+  let colorDetails = "";
+
+  if (colorService) {
+
+    colorDetails = `Servicio solicitado: ${colorService}`;
+
+    if (colorService === "Rayitos o mechas") {
+
+      colorDetails += `
+Color de rayitos: ${highlightColor || "No especificado"}
+Cantidad: ${highlightAmount || "No especificada"}
+Distribución: ${highlightDistribution || "No especificada"}
+Grosor: ${highlightThickness || "No especificado"}`;
+
+    }
+
+  } else {
+
+    colorDetails = "Servicio de color no especificado.";
+
+  }
+
+  // RECOMENDACIONES
   const recommendations =
     $("recommendations")?.innerText?.trim() ||
     "Todavía no hay recomendaciones.";
@@ -4100,32 +4419,45 @@ async function saveConsultation() {
     ? detectedFace.explanation
     : "No se realizó análisis facial automático.";
 
-  // IDENTIFICAR LA TRANSFORMACIÓN CAPILAR
+  // IDENTIFICAR TRANSFORMACIÓN CAPILAR
   let hairTransformation = "No especificada.";
 
   if (hairDesiredType === "Mantener textura natural") {
-    hairTransformation = "Mantener la textura natural del cliente.";
+
+    hairTransformation =
+      "Mantener la textura natural del cliente.";
+
   } else if (
     hairDesiredType !== "No especificado" &&
     hairDesiredType !== hairType
   ) {
+
     hairTransformation =
       `Transformar el cabello de ${hairType} a ${hairDesiredType}.`;
+
   } else if (
     hairDesiredType !== "No especificado" &&
     hairDesiredType === hairType
   ) {
-    hairTransformation = "Mantener la textura actual seleccionada.";
+
+    hairTransformation =
+      "Mantener la textura actual seleccionada.";
+
   }
-    const prompt = `
+
+  // INFORMACIÓN COMPLETA DEL CLIENTE
+  const prompt = `
 ASESORÍA PROFESIONAL DE BARBERÍA
 DK BARBER STUDIO - DK VISAGISMO IA
 
 CLIENTE: ${clientName}
 
-DATOS DEL CLIENTE:
+DATOS FACIALES:
 
 Forma del rostro: ${faceShape}
+
+Análisis facial:
+${faceAnalysis}
 
 CABELLO Y TRANSFORMACIÓN CAPILAR:
 
@@ -4149,96 +4481,121 @@ ANÁLISIS ANATÓMICO DEL PERFIL:
 
 Proyección del occipital: ${occipitalShape}
 
-Forma de la nuca: ${napeShape}
-
 Forma del cráneo: ${skullShape}
-
-Zona parietal: ${parietalShape}
 
 Forma de la coronilla: ${crownShape}
 
-Perfil posterior: ${posteriorProfile}
+Observaciones anatómicas:
+${profileObservations}
 
-Observaciones anatómicas: ${profileObservations}
-ANÁLISIS FACIAL:
-${faceAnalysis}
+SERVICIO DE COLOR Y RAYITOS:
+
+${colorDetails}
 
 RECOMENDACIONES DE DK VISAGISMO IA:
+
 ${recommendations}
 
 OBSERVACIONES DEL BARBERO:
+
 ${observations}
 `;
+
+  // INSTRUCCIONES PARA CHATGPT
   const promptInstructions = `
 
-INSTRUCCIONES PARA LA SIMULACIÓN:
+INSTRUCCIONES PARA LA SIMULACIÓN PROFESIONAL:
 
 Voy a adjuntar una fotografía real del cliente.
 
-Analiza su rostro y utiliza toda la información anterior para realizar una simulación visual profesional del corte recomendado.
+Utiliza la fotografía original y toda la información proporcionada para crear una comparación visual ANTES Y DESPUÉS.
+
+COMPARACIÓN ANTES Y DESPUÉS:
+
+1. Presenta dos imágenes del mismo cliente, una al lado de la otra.
+2. La primera debe mostrar su apariencia original y llevar el título ANTES.
+3. La segunda debe mostrar el cambio de look solicitado y llevar el título DESPUÉS.
+4. Conserva la identidad, el rostro y los rasgos originales.
+5. Mantén el mismo ángulo de cámara, iluminación y fondo para facilitar la comparación.
 
 ANÁLISIS ANATÓMICO DEL CRÁNEO:
 
-Ten en cuenta las características anatómicas del perfil lateral seleccionadas por el barbero.
+Ten en cuenta las características anatómicas seleccionadas por el barbero.
 
-1. Si el occipital es sobresalido, plano o poco desarrollado, adapta la distribución del volumen posterior.
-2. Considera la forma de la nuca para diseñar una terminación que favorezca el perfil.
-3. Adapta el corte a la forma general del cráneo.
-4. Considera la anchura de la zona parietal para equilibrar los laterales.
-5. Respeta la forma de la coronilla y la dirección natural del crecimiento.
-6. Utiliza el perfil posterior para equilibrar visualmente la silueta.
+1. Adapta la distribución del volumen posterior según la proyección del occipital.
+2. Considera la forma del cráneo.
+3. Respeta la forma de la coronilla y la dirección natural del crecimiento.
+4. Utiliza las observaciones del barbero para equilibrar la silueta.
 
 No inventes características anatómicas que no estén indicadas.
+
 TRANSFORMACIÓN DE TEXTURA:
 
-Es muy importante diferenciar el cabello que tiene actualmente el cliente de la textura que desea conseguir.
+Diferencia el cabello actual de la textura que desea conseguir el cliente.
 
-Si el cabello actual es lacio y desea rizado, debes simularlo con textura rizada.
+Si solicita cabello ondulado, representa ondas naturales.
 
-Si desea ondulado, debes simular ondas naturales y definidas.
+Si solicita cabello rizado, representa rizos definidos.
 
-Si desea semiondulado, debes mostrar ondas suaves y movimiento moderado.
+Si solicita cabello crespo, representa textura crespa realista.
 
-Si desea afro, debes representar una textura afro realista.
+Si solicita cabello lacio o alisado, representa un acabado liso.
+
+Si solicita más volumen, textura o definición, adapta el acabado a esa petición.
 
 No mantengas obligatoriamente la textura original cuando el cliente haya solicitado una transformación.
 
-Adapta el corte, volumen, forma y acabado a la nueva textura deseada.
+COLOR Y RAYITOS:
 
-REQUISITOS:
+Respeta exactamente el servicio de color seleccionado.
+
+1. Si no desea cambio de color, conserva el color actual del cabello.
+2. Si solicita color global, aplica el color correspondiente.
+3. Si solicita rayitos o mechas, respeta el color, cantidad, distribución y grosor indicados.
+4. No agregues rayitos cuando el cliente no los haya solicitado.
+5. No inventes colores ni técnicas adicionales.
+6. Si algún detalle de color no está especificado, no lo inventes.
+
+REQUISITOS PROFESIONALES:
 
 1. Conserva la identidad y los rasgos faciales originales.
-2. No cambies la forma de la cara, nariz, ojos, boca ni expresión.
-3. Aplica el corte recomendado considerando la transformación capilar solicitada.
-4. Respeta la densidad y el largo disponible del cabello.
+2. No cambies la forma de la cara, nariz, ojos ni boca.
+3. Aplica el corte recomendado según el rostro y las características capilares.
+4. Respeta la densidad y el largo disponible.
 5. Mantén un resultado masculino, moderno y realista.
-6. Respeta el color natural del cabello, salvo que se indique lo contrario.
-7. Muestra el resultado como una fotografía real, no como una ilustración.
-8. Si hay varios cortes recomendados, prioriza el más adecuado para su rostro y nueva textura.
+6. Respeta las preferencias del cliente.
+7. No realices transformaciones que no hayan sido solicitadas.
 
 OBJETIVO:
 
-Mostrar al cliente cómo podría verse con el corte recomendado y la textura capilar que desea conseguir antes de realizar el servicio en DK Barber Studio.
+Mostrar al cliente una propuesta profesional de cambio de imagen ANTES Y DESPUÉS, para que pueda visualizar cómo podría verse con el corte, textura y color solicitados en DK Barber Studio.
+
+La simulación es una propuesta visual y no garantiza que el resultado físico sea idéntico.
 `;
 
   const finalPrompt = prompt + promptInstructions;
-      try {
+
+  try {
+
     await navigator.clipboard.writeText(finalPrompt);
 
     showMessage(
       "copyChatGPTMessage",
-      "¡Información copiada! Ahora pégala en ChatGPT y adjunta la fotografía del cliente.",
+      "¡Información completa copiada! Ahora pégala en ChatGPT y adjunta la fotografía original del cliente.",
       true
     );
 
   } catch (error) {
+
     console.error("Error al copiar:", error);
 
     showMessage(
       "copyChatGPTMessage",
       "No se pudo copiar automáticamente. Verifica los permisos del navegador."
     );
+
   }
+
 }
 /* =========================================
    35. CARGAR HISTORIAL DEL CLIENTE
@@ -4291,6 +4648,7 @@ async function loadHistory() {
 ========================================= */
 
 function renderHistory(records) {
+
   const container = $("history");
 
   if (!container) return;
@@ -4304,23 +4662,63 @@ function renderHistory(records) {
     return;
   }
 
-  container.innerHTML = records.map(record => {
+  container.innerHTML = records.map((record, index) => {
+
     const date = record.created_at
       ? new Date(record.created_at).toLocaleString("es-PE")
       : "Fecha no disponible";
 
+    const notes = record.notes || "Sin observaciones";
+
+    const preview = notes
+      .split("\n")
+      .filter(line =>
+        line.includes("Forma del rostro:") ||
+        line.includes("Tipo de cabello actual:") ||
+        line.includes("Corte deseado:") ||
+        line.includes("Servicio de color:")
+      )
+      .map(line => escapeHTML(line))
+      .join("<br>");
+
     return `
-      <article class="metric" style="margin-bottom:12px;">
-        <strong>
-          ${escapeHTML(record.service_name || "Asesoría")}
-        </strong>
+      <article class="metric" style="margin-bottom:14px;">
 
-        <p class="small">
-          ${escapeHTML(date)}
-        </p>
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+          flex-wrap:wrap;
+        ">
 
-        <details>
-          <summary>Ver detalles de la asesoría</summary>
+          <strong style="color:#d8b54a;">
+            ASESORÍA ${records.length - index}
+          </strong>
+
+          <span class="small">
+            ${escapeHTML(date)}
+          </span>
+
+        </div>
+
+        <h3 style="margin-top:12px;">
+          ${escapeHTML(record.service_name || "Asesoría DK")}
+        </h3>
+
+        <div class="small" style="margin:10px 0;">
+          ${preview || "Consulta los detalles de esta asesoría."}
+        </div>
+
+        <details style="margin-top:12px;">
+
+          <summary style="
+            cursor:pointer;
+            color:#d8b54a;
+            font-weight:bold;
+          ">
+            VER INFORME COMPLETO
+          </summary>
 
           <pre style="
             white-space:pre-wrap;
@@ -4328,11 +4726,17 @@ function renderHistory(records) {
             font-family:inherit;
             color:#ddd;
             font-size:13px;
-          ">${escapeHTML(record.notes || "Sin observaciones")}</pre>
+            line-height:1.6;
+            margin-top:12px;
+          ">${escapeHTML(notes)}</pre>
+
         </details>
+
       </article>
     `;
+
   }).join("");
+
 }
 
 /* =========================================
