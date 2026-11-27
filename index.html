@@ -1639,32 +1639,32 @@ body{
 
     <!-- RECOMENDACIONES -->
 
-    <p class="section-kicker">5. OBJETIVO Y RECOMENDACIONES</p>
+<p class="section-kicker">5. OBJETIVO Y RECOMENDACIONES</p>
 
-    <h3>¿QUÉ ESTILO DESEA EL CLIENTE?</h3>
+<h3>¿QUÉ TRANSFORMACIÓN DESEA EL CLIENTE?</h3>
 
-    <label for="hairDesired">Tipo de cabello o acabado deseado</label>
-    <select id="hairDesired">
-      <option value="">Seleccionar</option>
-      <option>Lacio</option>
-      <option>Ondulado</option>
-      <option>Rizado</option>
-      <option>Crespo</option>
-      <option>Con más volumen</option>
-      <option>Más textura</option>
-      <option>Más definido</option>
-      <option>Alisado</option>
-    </select>
+<label for="hairDesired">Textura o acabado que desea conseguir</label>
+<select id="hairDesired">
+  <option value="">Seleccionar</option>
+  <option>Lacio</option>
+  <option>Ondulado</option>
+  <option>Rizado</option>
+  <option>Crespo</option>
+  <option>Con más volumen</option>
+  <option>Más textura</option>
+  <option>Más definido</option>
+  <option>Alisado</option>
+</select>
 
-    <label for="style">Estilo que busca</label>
-    <select id="style">
-      <option value="">Seleccionar</option>
-      <option value="moderno">Moderno</option>
-      <option value="clasico">Clásico</option>
-      <option value="juvenil">Juvenil</option>
-      <option value="formal">Formal</option>
-      <option value="atrevido">Atrevido</option>
-    </select>
+<label for="style">Estilo que busca</label>
+<select id="style">
+  <option value="">Seleccionar</option>
+  <option value="moderno">Moderno</option>
+  <option value="clasico">Clásico</option>
+  <option value="juvenil">Juvenil</option>
+  <option value="formal">Formal</option>
+  <option value="atrevido">Atrevido</option>
+</select>
 
         <!-- COLOR Y RAYITOS -->
 
@@ -1729,30 +1729,32 @@ body{
 
     <hr>
 
-    <h3>SELECCIÓN DE CORTE SEGÚN EL LARGO</h3>
+    <h3>SELECCIÓN DE CORTE SEGÚN EL LARGO DESEADO</h3>
 
-<label for="recommendLength">¿Qué largo tiene el cabello?</label>
+<label for="recommendLength">¿Qué largo desea conseguir el cliente?</label>
 <select id="recommendLength">
-  <option value="">Seleccionar largo</option>
-  <option value="largo">Cabello largo</option>
-  <option value="corto">Cabello corto</option>
+  <option value="">Seleccionar largo deseado</option>
+  <option value="corto">Corto</option>
+  <option value="medio">Medio</option>
+  <option value="largo">Largo</option>
 </select>
 
-    <div id="cutChoices" class="result">
-      <p class="small">
-        Primero selecciona si el cabello es largo o corto.
-      </p>
-    </div>
+<div id="cutChoices" class="result">
+  <p class="small">
+    Selecciona el largo que desea conseguir el cliente para adaptar las recomendaciones de corte.
+  </p>
+</div>
 
-    <label for="selectedCut">Corte seleccionado o deseado</label>
+<label for="selectedCut">Corte seleccionado o deseado</label>
 <input
   id="selectedCut"
   type="text"
   placeholder="Selecciona un corte o escríbelo"
 >
-    <button id="recommendBtn" type="button">
-      GENERAR RECOMENDACIONES DE CORTE
-    </button>
+
+<button id="recommendBtn" type="button">
+  GENERAR RECOMENDACIONES DE CORTE
+</button>
 
     <div id="recommendations" class="result hidden"></div>
 
